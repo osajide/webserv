@@ -14,7 +14,7 @@
 class client
 {
     public:
-        client(int client_sock);
+        client(int client_sock, int conf_index);
 
         int         get_fd();
         void        read_request(int config_index, fd_sets& , int& location_index);
@@ -26,6 +26,8 @@ class client
 
         request     _request;
         response    _response;
+
+        int         _config_index;
 
     private:
         client();

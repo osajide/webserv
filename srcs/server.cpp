@@ -13,7 +13,29 @@ std::vector<std::pair<std::string, std::string> >	server::_bound_addresses;
 server::server()
 {}
 
-// void	server::close_connection(int client_index, fd_set & read_fds, fd_set & write_fds)
+int	server::match_server_name(int server_conf_index, std::string server_name_to_match)
+{
+	// std::vector<std::string> server_names;
+
+	// for (size_t i = 0; i < server::_config.size(); i++)
+	// {
+	// 	if (server::_config[server_conf_index].fetch_directive_value("listen") == server::_config[i].fetch_directive_value("listen"))
+	// 	{
+	// 		server_names = server::_config[i].fetch_directive_value("server_name");
+	// 		if (!server_names.empty())
+	// 		{
+	// 			for (size_t j = 0; j < server_names.size(); j++)
+	// 			{
+	// 				if (server_name_to_match == server_names[j])
+	// 					return (i);
+	// 			}
+	// 			server_names.clear();
+	// 		}
+	// 	}
+	// }
+	// return (-1);
+}
+
 void	server::close_connection(int client_index, fd_sets & set_fd)
 {
 	std::cout << "closing fd " << this->_clients[client_index].get_fd() << std::endl;

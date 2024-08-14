@@ -10,7 +10,7 @@
 client::client()
 {}
 
-client::client(int client_sock) : _fd(client_sock), _ready_for_receiving(false)
+client::client(int client_sock, int conf_index) : _config_index(conf_index), _fd(client_sock), _ready_for_receiving(false)
 {}
 
 int client::get_fd()
@@ -80,9 +80,13 @@ void    client::read_request(int conf_index, fd_sets & set_fd, int & location_in
 		{
 			this->fill_request_object();
 
+			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
+
 			this->_request.is_well_formed(server::_config[conf_index]);
+			
 			location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request.get_target());
-            // std::cout << "location index ===>> " << location_index << std::endl;
+            
+			// std::cout << "location index ===>> " << location_index << std::endl;
             // server::_config[conf_index].does_location_has_redirection(location_index);
 
 			// std::string	transfer_encoding = this->_request.retrieve_header_value("Transfer-Encoding");
@@ -92,8 +96,6 @@ void    client::read_request(int conf_index, fd_sets & set_fd, int & location_in
 			// }
 			// else
 			// {
-			
-				// FD_SET(this->_fd, &write_fds);
 				FD_SET(this->_fd, &set_fd.write_fds);
 			// }
 		}

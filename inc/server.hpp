@@ -15,6 +15,7 @@ class server
     public:
         static  void	parse_config(char* PathToConfig);
 		static	int		if_ip_port_already_bound(std::string ip, std::string port);
+		static	int		match_server_name(int server_conf_index, std::string server_name_to_match);
 
         static std::vector<config>									_config;
         static std::vector<std::pair<std::string, std::string> >	_bound_addresses;

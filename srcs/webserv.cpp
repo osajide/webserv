@@ -90,7 +90,7 @@ void    webserv::launch_server()
 				{
 					std::cout << "Connection accepted !!!\nClient number " << client_sock << std::endl;
 
-					servers[i]._clients.push_back(client(client_sock));
+					servers[i]._clients.push_back(client(client_sock, servers[i].get_config_index()));
 
 					if (fcntl(servers[i]._clients.back().get_fd(), F_SETFL, O_NONBLOCK) == -1)
 					{

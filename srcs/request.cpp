@@ -106,6 +106,14 @@ int	request::does_uri_match_location(std::vector<LocationPair> locations, std::s
 	return (-1); // we will return -1 to use the default (root)
 }
 
+std::string	request::fetch_header_value(std::string key)
+{
+	if (this->_headers.find(key) != this->_headers.end())
+		return (this->_headers[key]);
+	
+	return ("");
+}
+
 void	request::clear_request()
 {
 	this->_rawRequest.clear();
