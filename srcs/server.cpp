@@ -257,6 +257,11 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 		{
 			if (this->_clients[client_index]._request.get_target().back() == '/')
 			{
+				if (this->_clients[client_index]._request.get_method() == "DELETE")
+				{
+					this->_clients[client_index].handle_delete_request(path);
+				}
+
 				if (this->_clients[client_index].dir_has_index_files(path)) // method takes reference to path to change it in case of not finding an index
 				{
 					if (this->_clients[client_index].if_cgi_directive_exists())
@@ -295,6 +300,9 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 			}
 			else
 			{
+				if (this->_clients[client_index]._request.get_method() == "DELETE")
+					throw 409; // Conflict
+
 				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target());
 			}
 		}
@@ -307,11 +315,19 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 			}
 			else
 			{
-				if (this->_clients[client_index]._request.get_method() == "POST")
+				std::string	method = this->_clients[client_index]._request.get_method();
+				if (method == "POST")
 					throw 403; // Forbidden
 
-				this->_clients[client_index].set_ready_for_receiving_value(true);
-				this->_clients[client_index]._response._path_to_serve = path;
+				else if (method == "DELETE")
+				{
+					this->_clients[client_index]._response.remove_uri(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target(), REG_FILE);
+				}
+				else
+				{
+					this->_clients[client_index].set_ready_for_receiving_value(true);
+					this->_clients[client_index]._response._path_to_serve = path;
+				}
 
 			}
 		}

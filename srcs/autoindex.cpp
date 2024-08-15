@@ -1,4 +1,5 @@
 #include "../inc/autoindex.hpp"
+#include <cstring>
 #include <sstream>
 #include <string>
 
@@ -90,6 +91,8 @@ std::string	 AutoIndex::serve_autoindex(const std::string& uri, const std::strin
         // Read each entry in the directory
         while ((entry = readdir(directory)) != NULL)
         {
+            if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+                continue;
             directories_names.push_back(entry->d_name);
             directories_dates.push_back(getModificationDate(full_path + entry->d_name));
             directories_sizes.push_back(getFileSize(full_path + entry->d_name));

@@ -30,6 +30,7 @@ class client
 
         int         if_cgi_directive_exists();
         int         dir_has_index_files(std::string & path);
+        void        handle_delete_request(std::string & path);
 
     private:
         client();

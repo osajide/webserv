@@ -30,6 +30,7 @@ class response
         void            return_index_file(std::string path);
         void            autoindex(int fd, std::string uri);
         void            redirect(int fd, std::string    uri);
+        void            remove_uri(int fd, std::string uri, int path_type);
 
         /*=============== ATTRIBUTES ===============*/
 

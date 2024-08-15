@@ -1,9 +1,11 @@
 #include "../inc/response.hpp"
+#include <dirent.h>
 #include <fstream>
 #include <sstream>
 // #include <sys/_types/_fd_def.h>
 #include <cstring>
 #include <unistd.h>
+#include "../inc/server.hpp"
 
 response::response() : _bytes_sent(0), _status_line(""), _content_length(0), _content_type(""), _location(""), _body(""), _headers(""),
 						_chunk(""), _bytes_written(0), _unsent_part("")
@@ -99,7 +101,13 @@ void	response::send_reply(int target_fd)
 
 void	response::return_error(int status, int target_fd)
 {
-	if (status == 404)
+	if (status == 403)
+	{
+		this->_status_line = "HTTP/1.1 403 Forbidden";
+		this->_body = "<h1>403 Forbidden</h1>";
+		this->_content_length = this->_body.length();
+	}
+	else if (status == 404)
 	{
 		this->_status_line = "HTTP/1.1 404 Not Found";
 		this->_body = "<h1>404 Not found</h1>";
@@ -197,4 +205,50 @@ void	response::redirect(int fd, std::string uri)
 	this->_location = uri + '/';
 
 	this->send_reply(fd);
+}
+
+void	response::remove_uri(int fd, std::string uri, int path_type)
+{
+	if (path_type == DIRECTORY)
+	{
+		DIR*			directory;
+		struct dirent*	entry;
+
+		directory = opendir(uri.c_str());
+
+		while ((entry = readdir(directory)) != NULL)
+		{
+			struct stat entry_type;
+
+			stat(uri.c_str(), &entry_type);
+
+			if (S_ISREG(entry_type.st_mode))
+			{
+				if (std::remove(uri.c_str()) != 0)
+				{
+					this->return_error(403, fd);
+				}
+			}
+			if (S_ISDIR(entry_type.st_mode))
+			{
+				this->remove_uri(fd, entry->d_name, DIRECTORY);
+			}
+		}
+
+	}
+	else
+	{
+		if (std::remove(uri.c_str()) != 0)
+		{
+			this->return_error(403, fd);
+		}
+		else
+		{
+			this->_status_line = "HTTP/1.1 204 No Content";
+			this->_body = "<h1>204 No Content</h1>";
+			this->_content_length = this->_body.length();
+
+			this->send_reply(fd);
+		}
+	}
 }

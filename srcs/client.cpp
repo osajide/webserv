@@ -183,6 +183,23 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 	// }
 }
 
+void	client::handle_delete_request(std::string & path)
+{
+	if (this->if_cgi_directive_exists())
+	{
+		if (this->dir_has_index_files(path))
+		{
+			// run cgi on requested file with DELETE REQUESTED_METHOD
+		}
+		else
+			this->_response.return_error(403, this->_fd);
+	}
+	else
+	{
+		this->_response.remove_uri(this->_fd, this->_request.get_target(), DIRECTORY);
+	}
+}
+
 void    client::set_ready_for_receiving_value(bool value)
 {
     this->_ready_for_receiving = value;
