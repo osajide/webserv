@@ -3,6 +3,7 @@
 #include "config.hpp"
 #include <fstream>
 #include <string>
+#include "autoindex.hpp"
 #include <iostream>
 
 class response
@@ -17,24 +18,18 @@ class response
         void            set_location(std::string);
         void            set_body(std::string);
 
-        // std::string get_status_line();
-        // std::string get_content_type();
-        long long       get_content_length();
-        // std::string get_location();
-        // std::string get_body();
         std::string     get_chunk(std::ifstream&);
 
-        void            send_headers(int target_fd);
+        void            send_reply(int target_fd);
 
         void            return_error(int status, int target_fd);
         void            clear_response();
 
 
-        void            set_path_to_serve(std::string path);
-        std::string     get_path_to_serve();
-
         void            send_response(int fd, config serverConf);
         void            return_index_file(std::string path);
+        void            autoindex(int fd, std::string uri);
+        void            redirect(int fd, std::string    uri);
 
         /*=============== ATTRIBUTES ===============*/
 

@@ -272,32 +272,30 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 							throw 403; // Forbidden
 						}
 
-						this->_clients[client_index]._response.set_path_to_serve(path);
 						this->_clients[client_index].set_ready_for_receiving_value(true);
 					}
 				}
-				// else
-				// {
-				// 	if (this->_clients[client_index]->get_request().get_method() == "POST")
-				// 	{
-				// 		std::cout << "before throw 403**" << std::endl;
-				// 		throw 403; // Forbidden
-				// 	}
-					
-				// 	int	autoindex_check = this->_config.fetch_autoindex_value(location_index);
-				// 	if (autoindex_check == ON)
-				// 	{
-				// 		this->return_requested_directory(200, client_index, location_index, path, ON);
-				// 		std::cout << "autoindex served !!" << std::endl;
-				// 	}
-				// }
+				else
+				{
+					int autoindex_check = server::_config[this->_clients[client_index]._config_index].fetch_autoindex_value(location_index);
+
+					if (this->_clients[client_index]._request.get_method() == "POST" || autoindex_check != ON)
+					{
+						std::cout << "before throw 403**" << std::endl;
+						throw 403; // Forbidden
+					}
+					else
+					{
+						this->_clients[client_index]._response._path_to_serve = path;
+
+						this->_clients[client_index]._response.autoindex(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target());
+						std::cout << "autoindex served !!" << std::endl;
+					}
+				}
 			}
 			else
 			{
-				// std::cout << "redirection!!!!!!!!!!!!!" << std::endl;
-				// std::cout << "path sent to the function = '" << path << "'" << std::endl;
-				// this->return_requested_directory(301, client_index, location_index, path, OFF);
-				// this->_clients[client_index]._response.redirect();
+				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target());
 			}
 		}
 		else if (path_check == REG_FILE)

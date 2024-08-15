@@ -192,3 +192,24 @@ std::string config::fetch_mime_type_value(std::string path)
 	}
 	return ("text/html");
 }
+
+int	config::fetch_autoindex_value(int location_index)
+{
+	if (location_index == -1)
+	{
+		if (this->directive_exists("autoindex"))
+		{
+			if (this->fetch_directive_value("autoindex").front() == "on")
+				return (ON);
+		}
+	}
+	else
+	{
+		if (this->directive_inside_location_exists(location_index, "autoindex"))
+		{
+			if (this->fetch_location_directive_value(location_index, "autoindex").front() == "on")
+				return (ON);
+		}
+	}
+	return (OFF);
+}

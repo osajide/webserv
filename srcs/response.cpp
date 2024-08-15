@@ -61,11 +61,6 @@ void    response::set_content_length(std::ifstream& requested_file)
 	requested_file.seekg(0, std::ios::beg);
 }
 
-long long	response::get_content_length()
-{
-	return (this->_content_length);
-}
-
 std::string	response::get_chunk(std::ifstream& requested_file)
 {
 	std::string	chunk;
@@ -80,7 +75,7 @@ std::string	response::get_chunk(std::ifstream& requested_file)
 	return (chunk);
 }
 
-void	response::send_headers(int target_fd)
+void	response::send_reply(int target_fd)
 {
 	this->_headers += this->_status_line + "\r\n";
 
@@ -117,7 +112,7 @@ void	response::return_error(int status, int target_fd)
 		this->_content_length = this->_body.length();
 	}
 
-	this->send_headers(target_fd);
+	this->send_reply(target_fd);
 	this->clear_response();
 }
 
@@ -135,16 +130,6 @@ void	response::clear_response()
 	this->_bytes_written = 0;
 }
 
-void    response::set_path_to_serve(std::string path)
-{
-    this->_path_to_serve = path;
-}
-
-std::string response::get_path_to_serve()
-{
-    return (this->_path_to_serve);
-}
-
 void	response::send_response(int fd, config serverConf)
 {
 	std::cout << "*************** fd = " << fd << std::endl;
@@ -155,7 +140,8 @@ void	response::send_response(int fd, config serverConf)
 		this->_requested_file.open(this->_path_to_serve);
 		this->set_content_length(this->_requested_file);
 		this->_content_type = serverConf.fetch_mime_type_value(this->_path_to_serve);
-		this->send_headers(fd);
+
+		this->send_reply(fd);
 	}
 	else if (this->_requested_file.is_open())
 	{
@@ -164,12 +150,8 @@ void	response::send_response(int fd, config serverConf)
 			if (this->_bytes_written == 0)
 			{
 				this->_chunk = this->get_chunk(this->_requested_file);
+
 				this->_bytes_written = write(fd, this->_chunk.c_str(), this->_chunk.length());
-				// if (this->_bytes_written == -1)
-				// {
-				// 	std::cout << "throooooow -1" << std::endl;
-				// 	throw -1;
-				// }
 
 				this->_bytes_sent += this->_bytes_written;
 			}
@@ -182,12 +164,6 @@ void	response::send_response(int fd, config serverConf)
 				this->_unsent_part = this->_chunk.substr(this->_bytes_written);
 
 				local_write = write(fd, this->_unsent_part.c_str(), this->_unsent_part.length());
-
-				// if (local_write == -1)
-				// {
-				// 	std::cout << "unsent part throw -1" << std::endl;
-				// 	throw -1;
-				// }
 
 				this->_bytes_sent += local_write;
 				this->_bytes_written += local_write;
@@ -203,4 +179,22 @@ void	response::send_response(int fd, config serverConf)
 
 		}
 	}
+}
+
+void	response::autoindex(int fd, std::string uri)
+{
+	this->_status_line = "HTTP/1.1 200 OK";
+	this->_body = AutoIndex::serve_autoindex(uri, this->_path_to_serve);
+	this->_content_length = this->_body.length();
+
+	this->send_reply(fd);
+}
+
+void	response::redirect(int fd, std::string uri)
+{
+	this->_status_line = "HTTP/1.1 301 Moved Permanently";
+	this->_content_length = 0;
+	this->_location = uri + '/';
+
+	this->send_reply(fd);
 }

@@ -21,8 +21,6 @@ class client
         void        fill_request_object();
         void	    set_ready_for_receiving_value(bool value);
 		bool	    get_ready_for_receiving_value();
-        // void        set_path_to_serve(std::string path);
-        // std::string get_path_to_serve();
 
         request     _request;
         response    _response;

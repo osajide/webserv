@@ -13,6 +13,8 @@ typedef std::pair<std::string, DirectiveMap> LocationPair;
 class config
 {
     public:
+		static void					parse_mime_types(const char* path_to_mime_types);
+
         config(std::fstream& file);
 		std::vector<std::string>	fetch_directive_value(std::string key);
         int	                        directive_exists(std::string key);
@@ -21,11 +23,17 @@ class config
 		LocationPair				get_location_block(int location_index);
 		std::vector<std::string>	fetch_location_directive_value(int location_index, std::string key);
 		std::string					fetch_mime_type_value(std::string path);
-		static void					parse_mime_types(const char* path_to_mime_types);
+        int                         fetch_autoindex_value(int location_index);
 
     private:
         DirectiveMap                			                    _directives;
         std::vector<LocationPair>   			                    _locations;
         std::vector<std::string>                                    _allowed_directives;
         static std::vector<std::pair<std::string, std::string> >    _mime_types;
+};
+
+enum autoindx
+{
+    ON = 1,
+    OFF
 };
