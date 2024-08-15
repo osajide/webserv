@@ -15,25 +15,28 @@ server::server()
 
 int	server::match_server_name(int server_conf_index, std::string server_name_to_match)
 {
-	// std::vector<std::string> server_names;
+	std::vector<std::string> server_names;
+	std::string				 listen_directive;
 
-	// for (size_t i = 0; i < server::_config.size(); i++)
-	// {
-	// 	if (server::_config[server_conf_index].fetch_directive_value("listen") == server::_config[i].fetch_directive_value("listen"))
-	// 	{
-	// 		server_names = server::_config[i].fetch_directive_value("server_name");
-	// 		if (!server_names.empty())
-	// 		{
-	// 			for (size_t j = 0; j < server_names.size(); j++)
-	// 			{
-	// 				if (server_name_to_match == server_names[j])
-	// 					return (i);
-	// 			}
-	// 			server_names.clear();
-	// 		}
-	// 	}
-	// }
-	// return (-1);
+	listen_directive = server::_config[server_conf_index].fetch_directive_value("listen").front();
+
+	for (size_t i = 0; i < server::_config.size(); i++)
+	{
+		if (listen_directive == server::_config[i].fetch_directive_value("listen").front())
+		{
+			server_names = server::_config[i].fetch_directive_value("server_name");
+			if (!server_names.empty())
+			{
+				for (size_t j = 0; j < server_names.size(); j++)
+				{
+					if (server_name_to_match == server_names[j])
+						return (i);
+				}
+				server_names.clear();
+			}
+		}
+	}
+	return (server_conf_index); // if no server name matched just return the server conf index
 }
 
 void	server::close_connection(int client_index, fd_sets & set_fd)
@@ -231,7 +234,6 @@ int	server::check_resource_type(std::string path)
 	return (-1); // In case of symbolic link or other types
 }
 
-// void    server::handle_request(int client_index, fd_set& write_fds, int location_index)
 void    server::handle_request(int client_index, fd_sets& set_fd, int location_index)
 {
 	std::string	path;
@@ -255,26 +257,25 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 		{
 			if (this->_clients[client_index]._request.get_target().back() == '/')
 			{
-				// if (this->dir_has_index_files(location_index, path)) // method takes reference to path to change it in case of not finding an index
-			// 	{
-			// 		if (this->cgi_directive_exists(location_index))
-			// 		{
-			// 			// if method == GET , run cgi on requested file with GET REQUEST_METHOD
-			// 			// if method == POST , run cgi on requested file with POST REQUEST_METHOD
-			// 		}
-			// 		else
-			// 		{
-			// 			if (this->_clients[client_index]->get_request().get_method() == "POST")
-			// 			{
-			// 				std::cout << "before throw 403" << std::endl;
-			// 				throw 403; // Forbidden
-			// 			}
-						
-			// 			std::cout << "Path before been served =====> '" << path << "'" << std::endl;
-			// 			this->return_requested_directory(200, client_index, location_index, path, OFF);// return requested file
-			// 			std::cout << "Served !!" << std::endl;
-					// }
-				// }
+				if (this->_clients[client_index].dir_has_index_files(path)) // method takes reference to path to change it in case of not finding an index
+				{
+					if (this->_clients[client_index].if_cgi_directive_exists())
+					{
+						// if method == GET , run cgi on requested file with GET REQUEST_METHOD
+						// if method == POST , run cgi on requested file with POST REQUEST_METHOD
+					}
+					else
+					{
+						if (this->_clients[client_index]._request.get_method() == "POST")
+						{
+							std::cout << "before throw 403" << std::endl;
+							throw 403; // Forbidden
+						}
+
+						this->_clients[client_index]._response.set_path_to_serve(path);
+						this->_clients[client_index].set_ready_for_receiving_value(true);
+					}
+				}
 				// else
 				// {
 				// 	if (this->_clients[client_index]->get_request().get_method() == "POST")
@@ -290,31 +291,31 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				// 		std::cout << "autoindex served !!" << std::endl;
 				// 	}
 				// }
-			// }
-			// else
-			// {
+			}
+			else
+			{
 				// std::cout << "redirection!!!!!!!!!!!!!" << std::endl;
 				// std::cout << "path sent to the function = '" << path << "'" << std::endl;
 				// this->return_requested_directory(301, client_index, location_index, path, OFF);
+				// this->_clients[client_index]._response.redirect();
 			}
 		}
 		else if (path_check == REG_FILE)
 		{
-			// if (this->cgi_directive_exists(location_index))
-			// {
-			// 	// if method == GET , run cgi on requested file with GET REQUEST_METHOD
-			// 	// if method == POST , run cgi on requested file with POST REQUEST_METHOD
-			// }
-			// else
-			// {
-				// if (this->_clients[client_index]->get_request().get_method() == "POST")
-				// 	throw 403; // Forbidden
+			if (this->_clients[client_index].if_cgi_directive_exists())
+			{
+				// if method == GET , run cgi on requested file with GET REQUEST_METHOD
+				// if method == POST , run cgi on requested file with POST REQUEST_METHOD
+			}
+			else
+			{
+				if (this->_clients[client_index]._request.get_method() == "POST")
+					throw 403; // Forbidden
 
 				this->_clients[client_index].set_ready_for_receiving_value(true);
-				// std::cout << "path to serve before setting it in the client : " << path << std::endl;
 				this->_clients[client_index]._response._path_to_serve = path;
 
-			// }
+			}
 		}
 	}
 }

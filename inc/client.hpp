@@ -17,7 +17,7 @@ class client
         client(int client_sock, int conf_index);
 
         int         get_fd();
-        void        read_request(int config_index, fd_sets& , int& location_index);
+        void        read_request(int config_index, fd_sets&);
         void        fill_request_object();
         void	    set_ready_for_receiving_value(bool value);
 		bool	    get_ready_for_receiving_value();
@@ -28,6 +28,10 @@ class client
         response    _response;
 
         int         _config_index;
+        int         _location_index;
+
+        int         if_cgi_directive_exists();
+        int         dir_has_index_files(std::string & path);
 
     private:
         client();

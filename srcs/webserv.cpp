@@ -20,7 +20,6 @@ void    webserv::launch_server()
 	struct sockaddr_in									client_addr;
 	int													client_sock;
 	// struct timeval										connection_time;
-	int													location_index = 0;
 	fd_sets												set_fd;
 
 	config::parse_mime_types("conf/mime.types");
@@ -115,7 +114,7 @@ void    webserv::launch_server()
 				{
 					try
 					{
-						servers[index]._clients[j].read_request(servers[index].get_config_index(), set_fd, location_index);
+						servers[index]._clients[j].read_request(servers[index].get_config_index(), set_fd);
 					}
 					catch (int status)
 					{
@@ -143,7 +142,7 @@ void    webserv::launch_server()
 						{
 							std::cout << "handling request of client fd " << servers[index]._clients[j].get_fd() << std::endl;
 							// servers[index].handle_request(j, write_fds, location_index);
-							servers[index].handle_request(j, set_fd, location_index);
+							servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index);
 						}
 
 						if (servers[index]._clients[j].get_ready_for_receiving_value() == true)

@@ -34,6 +34,7 @@ class response
         std::string     get_path_to_serve();
 
         void            send_response(int fd, config serverConf);
+        void            return_index_file(std::string path);
 
         /*=============== ATTRIBUTES ===============*/
 

@@ -124,6 +124,23 @@ config::config(std::fstream& file)
 	// std::cout << "----------------" << std::endl;
 }
 
+int	config::directive_exists(std::string key)
+{
+	if (this->_directives.find(key) != this->_directives.end())
+		return (1);
+	return (0);
+}
+
+int	config::directive_inside_location_exists(int location_index, std::string key)
+{
+	LocationPair	location;
+
+	location = this->get_location_block(location_index);
+	if (location.second.find(key) != location.second.end())
+		return (1);
+	return (0);
+}
+
 std::vector<std::string>	config::fetch_directive_value(std::string key)
 {
 	// std::cout << "value = '" << this->_directives[key].front() << "'" << std::endl;

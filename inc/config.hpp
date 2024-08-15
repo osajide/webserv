@@ -15,6 +15,8 @@ class config
     public:
         config(std::fstream& file);
 		std::vector<std::string>	fetch_directive_value(std::string key);
+        int	                        directive_exists(std::string key);
+        int                         directive_inside_location_exists(int location_index, std::string key);
 		std::vector<LocationPair>   get_locations();
 		LocationPair				get_location_block(int location_index);
 		std::vector<std::string>	fetch_location_directive_value(int location_index, std::string key);
