@@ -119,6 +119,12 @@ void	response::return_error(int status, int target_fd)
 		this->_body = "<h1>405 Method Not Allowed</h1>";
 		this->_content_length = this->_body.length();
 	}
+	else if (status == 500)
+	{
+		this->_status_line = "HTTP/1.1 500 Internal Server Error";
+		this->_body = "<h1>500 Internal Server Error</h1>";
+		this->_content_length = this->_body.length();	
+	}
 
 	this->send_reply(target_fd);
 	this->clear_response();
@@ -213,28 +219,48 @@ void	response::remove_uri(int fd, std::string uri, int path_type)
 	{
 		DIR*			directory;
 		struct dirent*	entry;
+		std::string		str_entry;
+		struct stat 	entry_type;
 
 		directory = opendir(uri.c_str());
 
-		while ((entry = readdir(directory)) != NULL)
+		if (directory != NULL)
 		{
-			struct stat entry_type;
-
-			stat(uri.c_str(), &entry_type);
-
-			if (S_ISREG(entry_type.st_mode))
+			while ((entry = readdir(directory)) != NULL)
 			{
-				if (std::remove(uri.c_str()) != 0)
+				if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+					continue;
+
+				str_entry = uri;
+				str_entry += entry->d_name;
+
+				stat(str_entry.c_str(), &entry_type);
+
+				if (S_ISREG(entry_type.st_mode))
 				{
-					this->return_error(403, fd);
+					if (std::remove(str_entry.c_str()) != 0)
+					{
+						if (access(str_entry.c_str(), R_OK) == 0)
+						{
+							this->return_error(500, fd);
+						}
+						else
+							this->return_error(403, fd);
+
+						return ;
+					}
+				}
+				if (S_ISDIR(entry_type.st_mode))
+				{
+					this->remove_uri(fd, str_entry, DIRECTORY);
 				}
 			}
-			if (S_ISDIR(entry_type.st_mode))
-			{
-				this->remove_uri(fd, entry->d_name, DIRECTORY);
-			}
+			if (std::remove(uri.c_str()) != 0)
+				this->return_error(403, fd);
+			closedir(directory);
 		}
-
+		else
+			this->return_error(403, fd);	
 	}
 	else
 	{

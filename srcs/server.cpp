@@ -170,7 +170,7 @@ std::string server::check_availability_of_requested_resource(int client_index, i
 	}
 
 	full_path += this->_clients[client_index]._request.get_target();
-	// std::cout << "full path =====----> '" << full_path << "'" << std::endl;
+	std::cout << "full path =====----> '" << full_path << "'" << std::endl;
 
 	if (access(full_path.c_str(), F_OK) == -1)
 		return ("");
@@ -310,8 +310,10 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 		{
 			if (this->_clients[client_index].if_cgi_directive_exists())
 			{
+				//cgi(request); to extract method and env variables
 				// if method == GET , run cgi on requested file with GET REQUEST_METHOD
 				// if method == POST , run cgi on requested file with POST REQUEST_METHOD
+				// if method == DELETE , run cgi on requested file with DELETE REQUEST_METHOD
 			}
 			else
 			{
@@ -322,6 +324,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				else if (method == "DELETE")
 				{
 					this->_clients[client_index]._response.remove_uri(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target(), REG_FILE);
+					FD_CLR(this->_fd, &set_fd.write_fds);
 				}
 				else
 				{
