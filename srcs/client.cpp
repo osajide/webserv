@@ -213,8 +213,7 @@ void	client::handle_delete_directory_request(fd_sets& set_fd)
 		this->_response.remove_requested_directory(this->_fd, this->_response._path_to_serve);
 	}
 
-	this->_request.clear_request();
-	this->_response.clear_response();
+	this->clear_client();
 	FD_CLR(this->_fd, &set_fd.write_fds);
 }
 
@@ -226,4 +225,14 @@ void    client::set_ready_for_receiving_value(bool value)
 bool    client::get_ready_for_receiving_value()
 {
     return (this->_ready_for_receiving);
+}
+
+void	client::clear_client()
+{
+	this->_ready_for_receiving = false;
+	this->_location_index = -2;
+	this->_config_index = -1;
+
+	this->_request.clear_request();
+	this->_response.clear_response();
 }

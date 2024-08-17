@@ -39,7 +39,7 @@ std::string	request::get_http_version()
 {
 	return (this->_http_version);
 }
-
+#include <unistd.h>
 void	request::is_well_formed()
 {
 	if (this->_headers.find("Transfer-Encoding") != this->_headers.end()
@@ -56,6 +56,23 @@ void	request::is_well_formed()
 	{
 		throw 414; // Request Uri Too Long
 	}
+	// connection or host fields empty and check http version
+	if (this->_headers.find("Connection") == this->_headers.end()
+			|| (this->_headers["Connection"] != "keep-alive" && this->_headers["Connection"] != "closed"))
+	{
+		throw 400;
+	}
+	if (this->_headers.find("Host") == this->_headers.end() || this->_headers["Host"].empty())
+	{
+		throw 400;
+	}
+	if (this->_http_version == "undefined")
+		sleep(5);
+	if (this->_http_version != "HTTP/1.1")
+	{
+		throw 505; //HTTP Version Not Supported
+	}
+
 }
 
 std::string remove_last_dir_from_path(std::string  path)

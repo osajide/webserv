@@ -33,6 +33,8 @@ class client
         void        handle_delete_directory_request(fd_sets&);
         void        does_location_has_redirection();
 
+
+        void        clear_client();
     private:
         client();
 

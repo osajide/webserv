@@ -52,6 +52,8 @@ void    webserv::launch_server()
 
 	while (true)
 	{
+		std::cout << servers[0]._clients.size() << " clients available !!!!" << std::endl;
+
 		for (size_t i = 0; i < servers[0]._clients.size(); i++)
 		{
 			if (FD_ISSET(servers[0]._clients[i].get_fd(), &set_fd.write_fds))
@@ -114,18 +116,11 @@ void    webserv::launch_server()
 					{
 						std::cout << "status catched from read function = " << status << std::endl;
 
-						// if (status != -1) // i throw -1 when read returns 0
-						// 	servers[index].return_error(status, j, location_index);
-
-						// if (!(status >= 300 && status <= 308))
-							// servers[index].close_connection(j, read_fds, write_fds);
-
 						if (status == -1)
 							servers[index].close_connection(j, set_fd);
 
 						else if (status >= 300 && status <= 308)
 							servers[index]._clients[j]._response.redirect(servers[index]._clients[j].get_fd(), status, servers[index]._clients[j]._response._redirection_path);
-						
 
 						continue;
 					}
@@ -138,7 +133,6 @@ void    webserv::launch_server()
 						if (servers[index]._clients[j].get_ready_for_receiving_value() == false)
 						{
 							std::cout << "handling request of client fd " << servers[index]._clients[j].get_fd() << std::endl;
-							// servers[index].handle_request(j, write_fds, location_index);
 							servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index);
 						}
 
@@ -151,10 +145,7 @@ void    webserv::launch_server()
 							if (servers[index]._clients[j]._response._bytes_sent >= servers[index]._clients[j]._response._content_length)
 							{
 								std::cout << "all chunks are sent" << std::endl;
-								servers[index]._clients[j]._response._requested_file.close();
-								servers[index]._clients[j]._response.clear_response();
-								servers[index]._clients[j]._request.clear_request();
-								servers[index]._clients[j].set_ready_for_receiving_value(false);
+								servers[index]._clients[j].clear_client();
 								FD_CLR(servers[index]._clients[j].get_fd(), &set_fd.write_fds);
 							}
 						}

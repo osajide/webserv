@@ -13,7 +13,7 @@ response::response() : _bytes_sent(0), _status_line(""), _content_length(0), _co
 
 response::response(response const & rhs)
 {
-	std::cout << "dkhel l copy constructor dyal response class" << std::endl;
+	// std::cout << "dkhel l copy constructor dyal response class" << std::endl;
 	(void)rhs;
 
 	this->_body = "";
@@ -26,8 +26,8 @@ response::response(response const & rhs)
 	this->_headers = "";
 	this->_location = "";
 	this->_status_line = "";
-	std::cout << "rhs.bytes sent = " << rhs._bytes_sent << std::endl;
-	std::cout << "this.bytes sent = " << this->_bytes_sent << std::endl;
+	// std::cout << "rhs.bytes sent = " << rhs._bytes_sent << std::endl;
+	// std::cout << "this.bytes sent = " << this->_bytes_sent << std::endl;
 }
 
 response &	response::operator=(response const & rhs)
@@ -124,25 +124,17 @@ void	response::return_error(int status, int target_fd)
 	{
 		this->_status_line = "HTTP/1.1 500 Internal Server Error";
 		this->_body = "<h1>500 Internal Server Error</h1>";
-		this->_content_length = this->_body.length();	
+		this->_content_length = this->_body.length();
+	}
+	else if (status == 505)
+	{
+		this->_status_line = "HTTP/1.1 505 HTTP Version Not Supported";
+		this->_body = "<h1>HTTP Version Not Supported</h1>";
+		this->_content_length = this->_body.length();
 	}
 
 	this->send_reply(target_fd);
 	this->clear_response();
-}
-
-void	response::clear_response()
-{
-	this->_status_line.clear();
-	this->_content_type.clear();
-	this->_content_length = 0;
-	this->_location.clear();
-	this->_body.clear();
-	this->_headers.clear();
-	this->_bytes_sent = 0;
-	this->_unsent_part.clear();
-	this->_chunk.clear();
-	this->_bytes_written = 0;
 }
 
 void	response::send_response(int fd, config serverConf)
@@ -213,11 +205,7 @@ void	response::redirect(int fd, int status, std::string uri)
 	ss >> str_status;
 	this->_status_line = "HTTP/1.1 " + str_status + " Moved Permanently";
 	this->_content_length = 0;
-
-	if (status == 301)
-		this->_location = uri + '/';
-	else
-		this->_location = uri;
+	this->_location = uri;
 
 	this->send_reply(fd);
 }
@@ -309,4 +297,23 @@ void	response::remove_requested_file(int fd)
 
 		this->send_reply(fd);
 	}
+}
+
+void	response::clear_response()
+{
+	this->_status_line.clear();
+	this->_content_type.clear();
+	this->_content_length = 0;
+	this->_location.clear();
+	this->_body.clear();
+	this->_headers.clear();
+	this->_bytes_sent = 0;
+	this->_unsent_part.clear();
+	this->_chunk.clear();
+	this->_bytes_written = 0;
+	this->_path_to_serve.clear();
+	this->_redirection_path.clear();
+
+	if (this->_requested_file.is_open())
+		this->_requested_file.close();
 }
