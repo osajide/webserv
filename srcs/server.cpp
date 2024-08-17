@@ -236,34 +236,32 @@ int	server::check_resource_type(std::string path)
 
 void    server::handle_request(int client_index, fd_sets& set_fd, int location_index)
 {
-	std::string	path;
-
 	this->check_if_method_allowed_in_location(client_index, location_index);
 	
-	path = this->check_availability_of_requested_resource(client_index, location_index);
+	this->_clients[client_index]._response._path_to_serve = this->check_availability_of_requested_resource(client_index, location_index);
 	
-	if (path.empty()) // in the previous function if the path doesn't exist i return an empty string
+	if (this->_clients[client_index]._response._path_to_serve.empty()) // in the previous function if the path doesn't exist i return an empty string
 	{
 		this->_clients[client_index]._response.return_error(404, this->_clients[client_index].get_fd());
 		std::cout << "404 SERVED!!!" << std::endl;
 		std::cout << "clearing fd " << this->_clients[client_index].get_fd() << " from write_fds" << std::endl;
-		// FD_CLR(this->_clients[client_index].get_fd(), &write_fds);
 		FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 	}
 	else
 	{
-		int path_check = this->check_resource_type(path);
+		// int path_check = this->check_resource_type(path);
+		int path_check = this->check_resource_type(this->_clients[client_index]._response._path_to_serve);
 		if (path_check == DIRECTORY)
 		{
 			if (this->_clients[client_index]._request.get_target().back() == '/')
 			{
 				if (this->_clients[client_index]._request.get_method() == "DELETE")
 				{
-					this->_clients[client_index].handle_delete_request(path);
+					this->_clients[client_index].handle_delete_request();
 					return ;
 				}
 
-				if (this->_clients[client_index].dir_has_index_files(path)) // method takes reference to path to change it in case of not finding an index
+				if (this->_clients[client_index].dir_has_index_files()) // method takes reference to path to change it in case of not finding an index
 				{
 					if (this->_clients[client_index].if_cgi_directive_exists())
 					{
@@ -292,7 +290,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					}
 					else
 					{
-						this->_clients[client_index]._response._path_to_serve = path;
+						// this->_clients[client_index]._response._path_to_serve = path;
 
 						this->_clients[client_index]._response.autoindex(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target());
 						std::cout << "autoindex served !!" << std::endl;
@@ -319,19 +317,20 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 			else
 			{
 				std::string	method = this->_clients[client_index]._request.get_method();
+
 				if (method == "POST")
 					throw 403; // Forbidden
 
 				else if (method == "DELETE")
 				{
-					this->_clients[client_index]._response.remove_requested_file(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target());
-					// this->_clients[client_index]._response.remove_uri(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target(), REG_FILE);
-					FD_CLR(this->_fd, &set_fd.write_fds);
+					this->_clients[client_index]._response.remove_requested_file(this->_clients[client_index].get_fd());
+					this->_clients[client_index]._response.clear_response();
+					this->_clients[client_index]._request.clear_request();
+					FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 				}
 				else
 				{
 					this->_clients[client_index].set_ready_for_receiving_value(true);
-					this->_clients[client_index]._response._path_to_serve = path;
 				}
 
 			}

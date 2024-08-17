@@ -21,6 +21,7 @@ void    webserv::launch_server()
 	int													client_sock;
 	// struct timeval										connection_time;
 	fd_sets												set_fd;
+	int													nfds;
 
 	config::parse_mime_types("conf/mime.types");
 
@@ -35,16 +36,9 @@ void    webserv::launch_server()
     	}
 	}
 
-	// fd_set	read_fds, write_fds, write_fds_tmp, read_fds_tmp;
-
 	set_fd.clear_sets();
 
-	// FD_ZERO(&read_fds);
-	// FD_ZERO(&write_fds);
-	// FD_ZERO(&write_fds_tmp);
-	// FD_ZERO(&read_fds_tmp);
-
-	int	nfds = 0;
+	nfds = 0;
 
 	for (size_t i = 0; i < servers.size(); i++)
 	{
@@ -158,7 +152,6 @@ void    webserv::launch_server()
 								servers[index]._clients[j]._response.clear_response();
 								servers[index]._clients[j]._request.clear_request();
 								servers[index]._clients[j].set_ready_for_receiving_value(false);
-								// FD_CLR(servers[index]._clients[j].get_fd(), &write_fds);
 								FD_CLR(servers[index]._clients[j].get_fd(), &set_fd.write_fds);
 							}
 						}

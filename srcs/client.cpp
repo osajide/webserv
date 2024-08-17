@@ -63,7 +63,7 @@ int	client::if_cgi_directive_exists()
 	return (0);
 }
 
-int	client::dir_has_index_files(std::string & path)
+int	client::dir_has_index_files()
 {
 	std::vector<std::string>	index_files;
 	std::string					access_path;
@@ -87,10 +87,10 @@ int	client::dir_has_index_files(std::string & path)
 
 	for (size_t i = 0; i < index_files.size(); i++)
 	{
-		access_path = path + index_files[i];
+		access_path = this->_response._path_to_serve + index_files[i];
 		if (access(access_path.c_str(), F_OK) == 0) // Default index
 		{
-			path = access_path;
+			this->_response._path_to_serve = access_path;
 			return (1);
 		}
 		access_path.clear();
@@ -131,9 +131,9 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 		{
 			this->fill_request_object();
 
-			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
-
 			this->_request.is_well_formed(server::_config[conf_index]);
+
+			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
 			
 			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request.get_target());
             
@@ -183,11 +183,11 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 	// }
 }
 
-void	client::handle_delete_request(std::string & path)
+void	client::handle_delete_request()
 {
 	if (this->if_cgi_directive_exists())
 	{
-		if (this->dir_has_index_files(path))
+		if (this->dir_has_index_files())
 		{
 			// run cgi on requested file with DELETE REQUESTED_METHOD
 		}

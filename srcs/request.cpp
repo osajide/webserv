@@ -47,6 +47,18 @@ std::string	request::get_http_version()
 void	request::is_well_formed(config& serverConf)
 {
 	(void)serverConf;
+
+
+
+
+
+
+
+
+
+
+
+	
 }
 
 std::string remove_last_dir_from_path(std::string  path)

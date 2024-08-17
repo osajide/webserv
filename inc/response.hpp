@@ -31,7 +31,7 @@ class response
         void            autoindex(int fd, std::string uri);
         void            redirect(int fd, std::string    uri);
         int             remove_requested_directory(int fd, std::string uri);
-        void            remove_requested_file(int fd, std::string uri);
+        void            remove_requested_file(int fd);
 
         /*=============== ATTRIBUTES ===============*/
 

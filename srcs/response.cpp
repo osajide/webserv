@@ -79,6 +79,7 @@ std::string	response::get_chunk(std::ifstream& requested_file)
 
 void	response::send_reply(int target_fd)
 {
+
 	this->_headers += this->_status_line + "\r\n";
 
 	this->_headers += "Content-Type: " + this->_content_type + "\r\n";
@@ -268,16 +269,22 @@ int	response::remove_requested_directory(int fd, std::string uri)
 	return (0);
 }
 
-void	response::remove_requested_file(int fd, std::string uri)
+void	response::remove_requested_file(int fd)
 {
-	if (std::remove(uri.c_str()) != 0)
+	std::cout << "uri.c_str() = '" << this->_path_to_serve.c_str() << "'" << std::endl;
+
+	if (std::remove(this->_path_to_serve.c_str()) != 0)
 	{
-		if (access(uri.c_str(), R_OK) == 0)
+		if (access(this->_path_to_serve.c_str(), R_OK) == 0)
 		{
+			std::cout << "File not removed due to internal error" << std::endl;
 			this->return_error(500, fd);
 		}
 		else
+		{
+			std::cout << "Doesn't have write permission" << std::endl;
 			this->return_error(403, fd);
+		}
 	}
 	else
 	{
