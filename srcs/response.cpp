@@ -266,6 +266,13 @@ int	response::remove_requested_directory(int fd, std::string uri)
 
 	std::remove(uri.c_str());
 	closedir(directory);
+
+	this->_status_line = "HTTP/1.1 204 No Content";
+	this->_body = "<h1>204 No Content</h1>";
+	this->_content_length = this->_body.length();
+
+	this->send_reply(fd);
+
 	return (0);
 }
 

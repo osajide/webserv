@@ -30,7 +30,7 @@ class client
 
         int         if_cgi_directive_exists();
         int         dir_has_index_files();
-        void        handle_delete_directory_request();
+        void        handle_delete_directory_request(fd_sets&);
 
     private:
         client();

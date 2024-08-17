@@ -257,7 +257,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 			{
 				if (this->_clients[client_index]._request.get_method() == "DELETE")
 				{
-					this->_clients[client_index].handle_delete_directory_request();
+					this->_clients[client_index].handle_delete_directory_request(set_fd);
 					return ;
 				}
 

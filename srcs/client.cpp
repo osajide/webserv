@@ -183,7 +183,7 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 	// }
 }
 
-void	client::handle_delete_directory_request()
+void	client::handle_delete_directory_request(fd_sets& set_fd)
 {
 	if (this->if_cgi_directive_exists())
 	{
@@ -196,11 +196,12 @@ void	client::handle_delete_directory_request()
 	}
 	else
 	{
-		this->_response.remove_requested_directory(this->_fd, this->_request.get_target());
+		this->_response.remove_requested_directory(this->_fd, this->_response._path_to_serve);
 	}
 
-	// this->_request.clear_request();
-	// this->_response.clear_response();
+	this->_request.clear_request();
+	this->_response.clear_response();
+	FD_CLR(this->_fd, &set_fd.write_fds);
 }
 
 void    client::set_ready_for_receiving_value(bool value)
