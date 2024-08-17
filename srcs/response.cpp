@@ -213,68 +213,78 @@ void	response::redirect(int fd, std::string uri)
 	this->send_reply(fd);
 }
 
-void	response::remove_uri(int fd, std::string uri, int path_type)
+int	response::remove_requested_directory(int fd, std::string uri)
 {
-	if (path_type == DIRECTORY)
+
+	DIR*			directory;
+	struct dirent*	entry;
+	std::string		str_entry;
+	struct stat 	entry_type;
+
+
+	directory = opendir(uri.c_str());
+	if (directory == NULL)
 	{
-		DIR*			directory;
-		struct dirent*	entry;
-		std::string		str_entry;
-		struct stat 	entry_type;
+		this->return_error(403, fd);
+		return (-1);
+	}
 
-		directory = opendir(uri.c_str());
+	while ((entry = readdir(directory)) != NULL)
+	{
+		if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+			continue;
 
-		if (directory != NULL)
+		str_entry = uri;
+		str_entry += entry->d_name;
+
+		stat(str_entry.c_str(), &entry_type);
+
+		if (S_ISREG(entry_type.st_mode))
 		{
-			while ((entry = readdir(directory)) != NULL)
+			if (std::remove(str_entry.c_str()) != 0)
 			{
-				if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
-					continue;
-
-				str_entry = uri;
-				str_entry += entry->d_name;
-
-				stat(str_entry.c_str(), &entry_type);
-
-				if (S_ISREG(entry_type.st_mode))
+				if (access(str_entry.c_str(), R_OK) == 0)
 				{
-					if (std::remove(str_entry.c_str()) != 0)
-					{
-						if (access(str_entry.c_str(), R_OK) == 0)
-						{
-							this->return_error(500, fd);
-						}
-						else
-							this->return_error(403, fd);
+					this->return_error(500, fd);
+				}
+				else
+					this->return_error(403, fd);
 
-						return ;
-					}
-				}
-				if (S_ISDIR(entry_type.st_mode))
-				{
-					this->remove_uri(fd, str_entry, DIRECTORY);
-				}
+				closedir(directory);
+				return (-1);
 			}
-			if (std::remove(uri.c_str()) != 0)
-				this->return_error(403, fd);
-			closedir(directory);
+		}
+		if (S_ISDIR(entry_type.st_mode))
+		{
+			if (this->remove_requested_directory(fd, str_entry) == -1)
+			{
+				return (-1);
+			}
+		}
+	}
+
+	std::remove(uri.c_str());
+	closedir(directory);
+	return (0);
+}
+
+void	response::remove_requested_file(int fd, std::string uri)
+{
+	if (std::remove(uri.c_str()) != 0)
+	{
+		if (access(uri.c_str(), R_OK) == 0)
+		{
+			this->return_error(500, fd);
 		}
 		else
-			this->return_error(403, fd);	
+			this->return_error(403, fd);
 	}
 	else
 	{
-		if (std::remove(uri.c_str()) != 0)
-		{
-			this->return_error(403, fd);
-		}
-		else
-		{
-			this->_status_line = "HTTP/1.1 204 No Content";
-			this->_body = "<h1>204 No Content</h1>";
-			this->_content_length = this->_body.length();
+		this->_status_line = "HTTP/1.1 204 No Content";
+		this->_body = "<h1>204 No Content</h1>";
+		this->_content_length = this->_body.length();
 
-			this->send_reply(fd);
-		}
+		this->send_reply(fd);
 	}
 }

@@ -196,8 +196,11 @@ void	client::handle_delete_request(std::string & path)
 	}
 	else
 	{
-		this->_response.remove_uri(this->_fd, this->_request.get_target(), DIRECTORY);
+		this->_response.remove_requested_directory(this->_fd, this->_request.get_target());
 	}
+
+	// this->_request.clear_request();
+	// this->_response.clear_response();
 }
 
 void    client::set_ready_for_receiving_value(bool value)
