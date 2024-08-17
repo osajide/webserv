@@ -183,7 +183,7 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 	// }
 }
 
-void	client::handle_delete_request()
+void	client::handle_delete_directory_request()
 {
 	if (this->if_cgi_directive_exists())
 	{
