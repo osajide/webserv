@@ -231,7 +231,6 @@ void	client::clear_client()
 {
 	this->_ready_for_receiving = false;
 	this->_location_index = -2;
-	this->_config_index = -1;
 
 	this->_request.clear_request();
 	this->_response.clear_response();
