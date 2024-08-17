@@ -8,7 +8,7 @@
 #include "../inc/server.hpp"
 
 response::response() : _bytes_sent(0), _status_line(""), _content_length(0), _content_type(""), _location(""), _body(""), _headers(""),
-						_chunk(""), _bytes_written(0), _unsent_part("")
+						_chunk(""), _bytes_written(0), _unsent_part(""), _redirection_path("")
 {}
 
 response::response(response const & rhs)
@@ -205,11 +205,19 @@ void	response::autoindex(int fd, std::string uri)
 	this->send_reply(fd);
 }
 
-void	response::redirect(int fd, std::string uri)
+void	response::redirect(int fd, int status, std::string uri)
 {
-	this->_status_line = "HTTP/1.1 301 Moved Permanently";
+	std::stringstream	ss(status);
+	std::string			str_status;
+
+	ss >> str_status;
+	this->_status_line = "HTTP/1.1 " + str_status + " Moved Permanently";
 	this->_content_length = 0;
-	this->_location = uri + '/';
+
+	if (status == 301)
+		this->_location = uri + '/';
+	else
+		this->_location = uri;
 
 	this->send_reply(fd);
 }

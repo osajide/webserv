@@ -99,9 +99,27 @@ int	client::dir_has_index_files()
 	return (0);
 }
 
+void	client::does_location_has_redirection()
+{
+	if (this->_location_index == -1)
+	{
+		return ;
+	}
+	else
+	{
+		std::vector<std::string> return_directive;
+
+		return_directive = server::_config[this->_config_index].fetch_location_directive_value(this->_location_index, "return");
+		if (!return_directive.empty())
+		{
+			this->_response._redirection_path = return_directive.back();
+			throw atoi(return_directive.front().c_str());
+		}
+	}
+}
+
 void    client::read_request(int conf_index, fd_sets & set_fd)
 {
-    // int			max_body_size;
 	size_t		pos;
 	int			valread = 0;
 	char		buffer[BUFFER_SIZE + 1];
@@ -130,17 +148,13 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 		if (pos != this->_request.get_rawRequest().npos)
 		{
 			this->fill_request_object();
-
-			this->_request.is_well_formed(server::_config[conf_index]);
+			this->_request.is_well_formed();
 
 			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
-			
 			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request.get_target());
             
-			// std::cout << "location index ===>> " << location_index << std::endl;
-            // server::_config[conf_index].does_location_has_redirection(location_index);
+        	this->does_location_has_redirection();
 
-			// std::string	transfer_encoding = this->_request.retrieve_header_value("Transfer-Encoding");
 			// if (!this->_request.retrieve_header_value("Transfer-Encoding").empty())
 			// {
 			// 	read_body = 1;

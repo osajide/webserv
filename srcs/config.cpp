@@ -1,6 +1,7 @@
 #include "../inc/config.hpp"
 #include <sstream>
 #include <cstring>
+#include "../inc/client.hpp"
 
 std::vector<std::pair<std::string, std::string> >    config::_mime_types;
 

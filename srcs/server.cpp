@@ -302,7 +302,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				if (this->_clients[client_index]._request.get_method() == "DELETE")
 					throw 409; // Conflict
 
-				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target());
+				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), 301, this->_clients[client_index]._request.get_target());
 			}
 		}
 		else if (path_check == REG_FILE)

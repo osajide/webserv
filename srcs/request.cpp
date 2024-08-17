@@ -18,10 +18,6 @@ void    request::set_request_line(std::string request_line)
     ss >> this->_method;
     ss >> this->_target;
     ss >> this->_http_version;
-
-    // std::cout << "method = '" << this->_method << "'" << std::endl;
-    // std::cout << "target = '" << this->_target << "'" << std::endl;
-    // std::cout << "http version = '" << this->_http_version << "'" << std::endl;
 }
 
 void    request::set_header(std::string key, std::string value)
@@ -44,21 +40,22 @@ std::string	request::get_http_version()
 	return (this->_http_version);
 }
 
-void	request::is_well_formed(config& serverConf)
+void	request::is_well_formed()
 {
-	(void)serverConf;
-
-
-
-
-
-
-
-
-
-
-
-	
+	if (this->_headers.find("Transfer-Encoding") != this->_headers.end()
+		&&	this->_headers["Transfer-Encoding"] != "chunked")
+	{
+		throw 501; // Not Implemented
+	}
+	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") == this->_headers.end()
+				&& this->_headers.find("Content-Length") == this->_headers.end())
+	{
+		throw 400; // Bad Request
+	}
+	if (this->_target.length() > 2048)
+	{
+		throw 414; // Request Uri Too Long
+	}
 }
 
 std::string remove_last_dir_from_path(std::string  path)
@@ -80,16 +77,15 @@ std::string remove_last_dir_from_path(std::string  path)
 		i--;
 	}
 	new_path = path.substr(0, i);
+
     if (new_path.empty() && path[0] == '/')
 	    new_path = path.substr(0, i + 1);
-	// std::cout << "****path = '" << path << "'" << std::endl;
-	// std::cout << "new path = '" << new_path << "'" << std::endl;
+
     return (new_path);
 }
 
 int	request::does_uri_match_location(std::vector<LocationPair> locations, std::string uri_target)
 {
-	// std::cout << "location.size() = " << locations.size() << std::endl;
 	if (!locations.empty())
     {
         if (uri_target.size() > 1 && uri_target.back() == '/') // check the size in case of request line like this "GET / HTTP/1.1"
@@ -97,22 +93,16 @@ int	request::does_uri_match_location(std::vector<LocationPair> locations, std::s
             uri_target.erase(uri_target.size() - 1, 1);
         }
 
-	    // std::cout << "uri = '" << uri_target << "'" << std::endl;
 	    while (!uri_target.empty())
 	    {
 	    	for (size_t i = 0; i < locations.size(); i++)
 	    	{
-	            // std::cout << "location[i] = '" << locations[i].first << "'" << std::endl;
 	    		if (uri_target == locations[i].first)
 	    		{
-                    // std::cout << "matched location = (" << locations[i].first << ")" << std::endl;
-                    // std::cout << "MATCHEEED!!!!" << std::endl;
-                    // std::cout << "i before returning = " << i << std::endl;
 	    			return (i);
 	    		}
 	    	}
 	    	uri_target = remove_last_dir_from_path(uri_target);
-	    	// std::cout << "new uri_target = '" << uri_target << "'" << std::endl;
 	    }
     }
 	return (-1); // we will return -1 to use the default (root)

@@ -18,7 +18,7 @@ class request
 		std::string get_method();
         std::string get_target();
         std::string get_http_version();
-		void		is_well_formed(config &);
+		void		is_well_formed();
 		int			does_uri_match_location(std::vector<LocationPair> locations, std::string uri_target);
         std::string fetch_header_value(std::string key);
 

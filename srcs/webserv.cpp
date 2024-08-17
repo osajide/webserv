@@ -121,8 +121,11 @@ void    webserv::launch_server()
 							// servers[index].close_connection(j, read_fds, write_fds);
 
 						if (status == -1)
-							// servers[index].close_connection(j, read_fds, write_fds);
 							servers[index].close_connection(j, set_fd);
+
+						else if (status >= 300 && status <= 308)
+							servers[index]._clients[j]._response.redirect(servers[index]._clients[j].get_fd(), status, servers[index]._clients[j]._response._redirection_path);
+						
 
 						continue;
 					}
