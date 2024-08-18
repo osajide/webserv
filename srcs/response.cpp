@@ -102,7 +102,19 @@ void	response::send_reply(int target_fd)
 
 void	response::return_error(int status, int target_fd)
 {
-	if (status == 403)
+	if (status == 400)
+	{
+		this->_status_line = "HTTP/1.1 400 Bad Request";
+		this->_body = "<h1>400 Bad Request</h1>";
+		this->_content_length = this->_body.length();
+	}
+	else if (status == 414)
+	{
+		this->_status_line = "HTTP/1.1 414 Request Uri Too Long";
+		this->_body = "<h1>414 Request Uri Too Long</h1>";
+		this->_content_length = this->_body.length();
+	}
+	else if (status == 403)
 	{
 		this->_status_line = "HTTP/1.1 403 Forbidden";
 		this->_body = "<h1>403 Forbidden</h1>";
@@ -124,6 +136,12 @@ void	response::return_error(int status, int target_fd)
 	{
 		this->_status_line = "HTTP/1.1 500 Internal Server Error";
 		this->_body = "<h1>500 Internal Server Error</h1>";
+		this->_content_length = this->_body.length();
+	}
+	else if (status == 501)
+	{
+		this->_status_line = "HTTP/1.1 501 Not Implemented";
+		this->_body = "<h1>501 Not Implemented</h1>";
 		this->_content_length = this->_body.length();
 	}
 	else if (status == 505)
@@ -199,9 +217,10 @@ void	response::autoindex(int fd, std::string uri)
 
 void	response::redirect(int fd, int status, std::string uri)
 {
-	std::stringstream	ss(status);
+	std::stringstream	ss;
 	std::string			str_status;
 
+	ss << status;
 	ss >> str_status;
 	this->_status_line = "HTTP/1.1 " + str_status + " Moved Permanently";
 	this->_content_length = 0;

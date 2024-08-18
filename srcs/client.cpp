@@ -26,6 +26,11 @@ void    client::fill_request_object()
 	std::string			value;
 	size_t				pos;
 
+	// need to exctract the first line before entering the loop
+	// and check the first word if is it different from
+	// GET, POST and DELETE
+	// getline(ss, reader);
+	// this->_request.set_request_line(reader);
 
 	while (getline(ss, reader))
 	{

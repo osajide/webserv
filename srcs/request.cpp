@@ -52,6 +52,11 @@ void	request::is_well_formed()
 	{
 		throw 400; // Bad Request
 	}
+	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") != this->_headers.end()
+				&& this->_headers.find("Content-Length") != this->_headers.end())
+	{
+		throw 400;
+	}
 	if (this->_target.length() > 2048)
 	{
 		throw 414; // Request Uri Too Long
@@ -129,9 +134,63 @@ std::string	request::fetch_header_value(std::string key)
 {
 	if (this->_headers.find(key) != this->_headers.end())
 		return (this->_headers[key]);
-	
 	return ("");
 }
+/*
+// int             Request::hexToInt(const std::string& hexStr) 
+int             hexToInt(const std::string& hexStr) 
+{
+    return std::stoi(hexStr, nullptr, 16);
+}
+
+// std::string     Request::convertChars(const std::string& path)
+std::string     convertChars(const std::string& path)
+{
+    std::string str = "";
+    std::string allowed_chars;
+    std::string nums = "0123456789";
+    std::string num = "";
+
+    allowed_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+    for (int i = 0; i < path.size() ; i++)
+    {
+        num.clear();
+        if (path[i] != '%' && allowed_chars.find(path[i]) != std::string::npos)
+            str += path[i];
+        else
+        {
+            if (path[++i])
+            {
+                while (path[i] && nums.find(path[i]) != std::string::npos)
+                    num += path[i++];
+                
+                if (!num.empty())
+                {
+                    num = hexToInt(num); 
+                    str += num;
+                }
+            }
+        }
+    }
+    return (str);
+}
+
+// int      Request::notAllowedChar(const std::string& path)
+int      notAllowedChar(const std::string& path)
+{
+    std::string allowed_chars;
+    std::string converted_str;
+
+    allowed_chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-._~:/?#[]@!$&'()*+,;=%";
+    
+    converted_str = convertChars(path);
+    for(int i = 0; i < converted_str.size(); i++)
+    {
+        if (allowed_chars.find(converted_str[i]) == std::string::npos)
+            return (1);
+    }
+    return (0);
+}*/
 
 void	request::clear_request()
 {

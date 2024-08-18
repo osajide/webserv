@@ -244,12 +244,11 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 	{
 		this->_clients[client_index]._response.return_error(404, this->_clients[client_index].get_fd());
 		std::cout << "404 SERVED!!!" << std::endl;
-		std::cout << "clearing fd " << this->_clients[client_index].get_fd() << " from write_fds" << std::endl;
+		this->_clients[client_index].clear_client();
 		FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 	}
 	else
 	{
-		// int path_check = this->check_resource_type(path);
 		int path_check = this->check_resource_type(this->_clients[client_index]._response._path_to_serve);
 		if (path_check == DIRECTORY)
 		{
