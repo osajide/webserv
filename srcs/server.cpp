@@ -218,17 +218,12 @@ int	server::check_resource_type(std::string path)
 
 	stat(path.c_str(), &path_stat);
 
-	if (S_ISREG(path_stat.st_mode))
-	{
-		// std::cout << "----------> The path is a regular file" << std::endl;
-		return (REG_FILE);
-	}
 	if (S_ISDIR(path_stat.st_mode))
 	{
 		// std::cout << "==========> The path is a directory" << std::endl;
 		return (DIRECTORY);
 	}
-	return (-1); // In case of symbolic link or other types
+	return (REG_FILE);
 }
 
 void    server::handle_request(int client_index, fd_sets& set_fd, int location_index)
@@ -248,8 +243,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 	}
 	else
 	{
-		int path_check = this->check_resource_type(this->_clients[client_index]._response._path_to_serve);
-		if (path_check == DIRECTORY)
+		if (this->check_resource_type(this->_clients[client_index]._response._path_to_serve) == DIRECTORY)
 		{
 			if (this->_clients[client_index]._request.get_target().back() == '/')
 			{
@@ -259,7 +253,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					return ;
 				}
 
-				if (this->_clients[client_index].dir_has_index_files()) // method takes reference to path to change it in case of not finding an index
+				if (this->_clients[client_index].dir_has_index_files()) // this method modifies on path_to_serve attribute
 				{
 					if (this->_clients[client_index].if_cgi_directive_exists())
 					{
@@ -303,7 +297,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), 301, this->_clients[client_index]._request.get_target() + '/');
 			}
 		}
-		else if (path_check == REG_FILE)
+		else
 		{
 			if (this->_clients[client_index].if_cgi_directive_exists())
 			{
