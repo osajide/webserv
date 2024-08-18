@@ -288,8 +288,6 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					}
 					else
 					{
-						// this->_clients[client_index]._response._path_to_serve = path;
-
 						this->_clients[client_index]._response.autoindex(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target());
 						this->_clients[client_index].clear_client();
 						FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
