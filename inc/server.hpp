@@ -26,13 +26,11 @@ class server
 		void		init_socket();
 		int			get_fd();
 		int			get_config_index();
-		// void		handle_request(int client_index, fd_set& write_fds, int location_index);
 		void		handle_request(int client_index, fd_sets &, int location_index);
-		// void		send_response(int client_index, fd_set& write_fds);
-		void		check_if_method_allowed_in_location(int client_index, int location_index);
+		// void		check_if_method_allowed_in_location(int client_index, int location_index);
+		std::string	check_if_method_allowed_in_location(int client_index, int location_index);
 		std::string	check_availability_of_requested_resource(int client_index, int location_index);
 		int         check_resource_type(std::string path);
-		// void		close_connection(int client_index, fd_set & read_fds, fd_set & write_fds);
 		void		close_connection(int client_index, fd_sets &);
 
 		myList				_clients;

@@ -24,7 +24,7 @@ int	server::match_server_name(int server_conf_index, std::string server_name_to_
 	{
 		if (listen_directive == server::_config[i].fetch_directive_value("listen").front())
 		{
-			server_names = server::_config[i].fetch_directive_value("server_name");
+			server_names = server::_config[i].fetch_directive_value("server_names");
 			if (!server_names.empty())
 			{
 				for (size_t j = 0; j < server_names.size(); j++)
@@ -43,12 +43,12 @@ void	server::close_connection(int client_index, fd_sets & set_fd)
 {
 	std::cout << "closing fd " << this->_clients[client_index].get_fd() << std::endl;
 
-	// FD_CLR(this->_clients[client_index].get_fd(), &read_fds);
 	FD_CLR(this->_clients[client_index].get_fd(), &set_fd.read_fds);
 
-	// if (FD_ISSET(this->_clients[client_index].get_fd(), &write_fds))
 	if (FD_ISSET(this->_clients[client_index].get_fd(), &set_fd.write_fds))
+	{
 		FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
+	}
 
 	close(this->_clients[client_index].get_fd());
 	this->_clients.remove_from_begin(client_index);
@@ -178,13 +178,11 @@ std::string server::check_availability_of_requested_resource(int client_index, i
 	return (full_path);
 }
 
-void    server::check_if_method_allowed_in_location(int client_index, int location_index)
+std::string    server::check_if_method_allowed_in_location(int client_index, int location_index)
 {
-    int				            allowed;
 	LocationPair				location_block;
     std::vector<std::string>    allowed_methods;
-	
-	allowed = 0;
+
 	if (location_index == -1)
 	{
 		allowed_methods = server::_config[this->_conf_index].fetch_directive_value("allowed_methods");
@@ -194,7 +192,7 @@ void    server::check_if_method_allowed_in_location(int client_index, int locati
 			if (this->_clients[client_index]._request.get_method() == allowed_methods[i])
 			{
 				// std::cout << "ALLOWED FROM THE SERVER CONF NOT LOCATION" << std::endl;
-				allowed = 1;
+				return (allowed_methods[i]);
 			}
 		}
 	}
@@ -207,12 +205,11 @@ void    server::check_if_method_allowed_in_location(int client_index, int locati
             if (this->_clients[client_index]._request.get_method() == allowed_methods[i])
             {
                 // std::cout << "ALLOWEEEEEEED!!!!!" << std::endl;
-                allowed = 1;
+				return (allowed_methods[i]);
             }
         }
 	}
-	if (allowed == 0)
-		throw 405; // 405 Method Not Allowed
+	throw 405; // 405 Method Not Allowed
 }
 
 int	server::check_resource_type(std::string path)
@@ -236,7 +233,9 @@ int	server::check_resource_type(std::string path)
 
 void    server::handle_request(int client_index, fd_sets& set_fd, int location_index)
 {
-	this->check_if_method_allowed_in_location(client_index, location_index);
+	std::string	req_method;
+
+	req_method = this->check_if_method_allowed_in_location(client_index, location_index);
 	
 	this->_clients[client_index]._response._path_to_serve = this->check_availability_of_requested_resource(client_index, location_index);
 	
@@ -254,7 +253,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 		{
 			if (this->_clients[client_index]._request.get_target().back() == '/')
 			{
-				if (this->_clients[client_index]._request.get_method() == "DELETE")
+				if (req_method == "DELETE")
 				{
 					this->_clients[client_index].handle_delete_directory_request(set_fd);
 					return ;
@@ -269,7 +268,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					}
 					else
 					{
-						if (this->_clients[client_index]._request.get_method() == "POST")
+						if (req_method == "POST")
 						{
 							std::cout << "before throw 403" << std::endl;
 							throw 403; // Forbidden
@@ -282,7 +281,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				{
 					int autoindex_check = server::_config[this->_clients[client_index]._config_index].fetch_autoindex_value(location_index);
 
-					if (this->_clients[client_index]._request.get_method() == "POST" || autoindex_check != ON)
+					if (req_method == "POST" || autoindex_check != ON)
 					{
 						std::cout << "before throw 403**" << std::endl;
 						throw 403; // Forbidden
@@ -292,13 +291,15 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 						// this->_clients[client_index]._response._path_to_serve = path;
 
 						this->_clients[client_index]._response.autoindex(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target());
+						this->_clients[client_index].clear_client();
+						FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 						std::cout << "autoindex served !!" << std::endl;
 					}
 				}
 			}
 			else
 			{
-				if (this->_clients[client_index]._request.get_method() == "DELETE")
+				if (req_method == "DELETE")
 					throw 409; // Conflict
 
 				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), 301, this->_clients[client_index]._request.get_target() + '/');
@@ -315,7 +316,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 			}
 			else
 			{
-				std::string	method = this->_clients[client_index]._request.get_method();
+				std::string	method = req_method;
 
 				if (method == "POST")
 					throw 403; // Forbidden
