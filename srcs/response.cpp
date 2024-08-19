@@ -199,7 +199,7 @@ void	response::send_response(int fd, config serverConf)
 				this->_bytes_written = 0;
 				this->_chunk.clear();
 				this->_unsent_part.clear();
-				std::cout << "chunk sent" << std::endl;
+				std::cout << "chunk sent to fd " << fd << std::endl;
 			}
 
 		}

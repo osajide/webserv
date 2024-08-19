@@ -16,6 +16,9 @@ void    request::set_request_line(std::string request_line)
     std::stringstream   ss(request_line);
 
     ss >> this->_method;
+	if (_method != "GET" && _method != "POST" && _method != "DELETE")
+		throw 400;
+
     ss >> this->_target;
     ss >> this->_http_version;
 }
@@ -39,7 +42,7 @@ std::string	request::get_http_version()
 {
 	return (this->_http_version);
 }
-#include <unistd.h>
+
 void	request::is_well_formed()
 {
 	if (this->_headers.find("Transfer-Encoding") != this->_headers.end()
@@ -71,8 +74,6 @@ void	request::is_well_formed()
 	{
 		throw 400;
 	}
-	if (this->_http_version == "undefined")
-		sleep(5);
 	if (this->_http_version != "HTTP/1.1")
 	{
 		throw 505; //HTTP Version Not Supported

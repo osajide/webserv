@@ -120,8 +120,11 @@ void    webserv::launch_server()
 							servers[index].close_connection(j, set_fd);
 
 						else if (status >= 300 && status <= 308)
+						{
 							servers[index]._clients[j]._response.redirect(servers[index]._clients[j].get_fd(), status, servers[index]._clients[j]._response._redirection_path);
-
+							servers[index]._clients[j].clear_client();
+							FD_CLR(servers[index]._clients[j].get_fd(), &set_fd.write_fds);
+						}
 						else
 						{
 							servers[index]._clients[j]._response.return_error(status, servers[index]._clients[j].get_fd());
@@ -149,7 +152,7 @@ void    webserv::launch_server()
 
 							if (servers[index]._clients[j]._response._bytes_sent >= servers[index]._clients[j]._response._content_length)
 							{
-								std::cout << "all chunks are sent" << std::endl;
+								std::cout << "all chunks are sent to fd " << servers[index]._clients[j].get_fd() << std::endl;
 								servers[index]._clients[j].clear_client();
 								FD_CLR(servers[index]._clients[j].get_fd(), &set_fd.write_fds);
 							}

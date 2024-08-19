@@ -29,8 +29,8 @@ void    client::fill_request_object()
 	// need to exctract the first line before entering the loop
 	// and check the first word if is it different from
 	// GET, POST and DELETE
-	// getline(ss, reader);
-	// this->_request.set_request_line(reader);
+	getline(ss, reader);
+	this->_request.set_request_line(reader);
 
 	while (getline(ss, reader))
 	{
@@ -38,11 +38,7 @@ void    client::fill_request_object()
 		{
 			if (reader[i] == '\r')
 				reader.erase(i, 1);
-		}
-
-		if (reader.find("HTTP/") != reader.npos) // temp
-			this->_request.set_request_line(reader);
-		
+		}		
 		pos = reader.find(':');
 		if (pos != reader.npos)
 		{
@@ -118,6 +114,7 @@ void	client::does_location_has_redirection()
 		if (!return_directive.empty())
 		{
 			this->_response._redirection_path = return_directive.back();
+			std::cout << "path to redirect = '" << this->_response._redirection_path << "'" << std::endl;
 			throw atoi(return_directive.front().c_str());
 		}
 	}
