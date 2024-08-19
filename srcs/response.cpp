@@ -157,8 +157,6 @@ void	response::return_error(int status, int target_fd)
 
 void	response::send_response(int fd, config serverConf)
 {
-	std::cout << "*************** fd = " << fd << std::endl;
-
 	if (!this->_requested_file.is_open())
 	{
 		this->_status_line = "HTTP/1.1 200 OK";
