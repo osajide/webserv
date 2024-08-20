@@ -7,6 +7,7 @@
 #include <iostream>
 #include "response.hpp"
 #include "webserv.hpp"
+#include "cgi.hpp"
 
 
 #define BUFFER_SIZE 4999
@@ -24,6 +25,7 @@ class client
 
         request     _request;
         response    _response;
+        cgi         _cgi;
 
         int         _config_index;
         int         _location_index;
