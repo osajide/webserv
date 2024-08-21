@@ -255,8 +255,8 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				}
 
 				if (this->_clients[client_index].dir_has_index_files()) // this method modifies on path_to_serve attribute
-				{	
-					if (this->_clients[client_index].if_cgi_directive_exists())
+				{
+					if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._request.get_target()))
 					{
 						this->_clients[client_index]._cgi._cgi_processing = true;
 						// this->_clients[client_index]._cgi.run_cgi(this->_clients[client_index], env);
@@ -302,7 +302,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 		}
 		else
 		{
-			if (this->_clients[client_index].if_cgi_directive_exists())
+			if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._request.get_target()))
 			{
 				//cgi(request); to extract method and env variables
 				// if method == GET , run cgi on requested file with GET REQUEST_METHOD

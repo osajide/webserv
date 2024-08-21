@@ -30,7 +30,6 @@ class client
         int         _config_index;
         int         _location_index;
 
-        int         if_cgi_directive_exists();
         int         dir_has_index_files();
         void        handle_delete_directory_request(fd_sets&);
         void        does_location_has_redirection();

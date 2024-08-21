@@ -214,3 +214,33 @@ int	config::fetch_autoindex_value(int location_index)
 	}
 	return (OFF);
 }
+
+std::string	get_extension(std::string path)
+{
+	std::string	extension;
+	size_t		pos;
+
+	pos = path.rfind('.');
+	extension = path.substr(pos);
+
+	return (extension);
+}
+
+int	config::if_cgi_directive_exists(int location_index, std::string path)
+{
+	std::string					extension;
+	std::vector<std::string>	cgi_directive;
+
+
+	extension = get_extension(path);
+	cgi_directive = this->fetch_location_directive_value(location_index, "cgi");
+	if (!cgi_directive.empty())
+	{
+		for (size_t i = 0; i < cgi_directive.size(); i++)
+		{
+			if (extension == cgi_directive[i])
+				return (1);
+		}
+	}
+	return (0);
+}

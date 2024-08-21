@@ -24,7 +24,7 @@ class config
 		std::vector<std::string>	fetch_location_directive_value(int location_index, std::string key);
 		std::string					fetch_mime_type_value(std::string path);
         int                         fetch_autoindex_value(int location_index);
-        // void                        does_location_has_redirection(int location_index);
+        int                         if_cgi_directive_exists(int location_index, std::string path);
 
     private:
         DirectiveMap                			                    _directives;

@@ -49,21 +49,6 @@ void    client::fill_request_object()
 	}
 }
 
-int	client::if_cgi_directive_exists()
-{
-	if (this->_location_index == -1)
-	{
-		if (server::_config[this->_config_index].directive_exists("cgi"))
-			return (1);
-	}
-	else
-	{
-		if (server::_config[this->_config_index].directive_inside_location_exists(this->_location_index, "cgi"))
-			return (1);
-	}
-	return (0);
-}
-
 int	client::dir_has_index_files()
 {
 	std::vector<std::string>	index_files;
@@ -201,7 +186,7 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 
 void	client::handle_delete_directory_request(fd_sets& set_fd)
 {
-	if (this->if_cgi_directive_exists())
+	if (server::_config[this->_config_index].if_cgi_directive_exists(this->_location_index, this->_request.get_target()))
 	{
 		if (this->dir_has_index_files())
 		{
