@@ -8,7 +8,7 @@
 cgi::cgi() : _cgi_processing(false), _env_size(0), _first_time(true), _outfile("")
 {}
 
-void	cgi::set_env_variables(request client_req)
+void	cgi::set_env_variables(request client_req, char** environ)
 {
 	std::vector<std::string>	temp;
 
@@ -57,7 +57,7 @@ std::string	cgi::get_random_file_name()
 	return (file_name);
 }
 
-void	cgi::run_cgi(request client_req, std::string path)
+void	cgi::run_cgi(client & cl, char** environ)
 {
 	int				fd[2];
 	int				pid;
@@ -66,8 +66,8 @@ void	cgi::run_cgi(request client_req, std::string path)
 
 	if (this->_first_time == true)
 	{
-		this->set_args(path);
-		this->set_env_variables(client_req);
+		this->set_args(cl._response._path_to_serve);
+		this->set_env_variables(cl._request, environ);
 		this->_outfile = this->get_random_file_name();
 	
 		fd[1] = open(this->_outfile.c_str(), O_CREAT, 0644);
@@ -93,7 +93,7 @@ void	cgi::run_cgi(request client_req, std::string path)
 			}
 			close(fd[1]);
 
-			execve(path.c_str(), this->_args, this->_env);
+			execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
 			close(fd[1]);
 			exit(EXIT_FAILURE);
 		}
@@ -119,6 +119,9 @@ void	cgi::run_cgi(request client_req, std::string path)
 			}
 			else
 			{
+				// child finished with success
+				close(fd[1]);
+				cl._response.parse_cgi_response(this->_outfile);
 			}
 		}
 	}

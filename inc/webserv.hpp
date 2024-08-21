@@ -5,7 +5,7 @@
 class   webserv
 {
     public:
-        static void launch_server();
+        static void launch_server(char** env);
 };
 
 typedef struct fd_sets

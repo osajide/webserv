@@ -13,7 +13,7 @@ void	fd_sets::clear_sets()
 	FD_ZERO(&this->write_fds_tmp);
 }
 
-void    webserv::launch_server()
+void    webserv::launch_server(char** env)
 {
     std::vector<server>									servers;
 	socklen_t											client_addr_len;
@@ -141,7 +141,7 @@ void    webserv::launch_server()
 						if (servers[index]._clients[j].get_ready_for_receiving_value() == false)
 						{
 							std::cout << "handling request of client fd " << servers[index]._clients[j].get_fd() << std::endl;
-							servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index);
+							servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index, env);
 						}
 
 						if (servers[index]._clients[j].get_ready_for_receiving_value() == true)

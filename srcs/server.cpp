@@ -227,7 +227,7 @@ int	server::check_resource_type(std::string path)
 	return (REG_FILE);
 }
 
-void    server::handle_request(int client_index, fd_sets& set_fd, int location_index)
+void    server::handle_request(int client_index, fd_sets& set_fd, int location_index, char** env)
 {
 	std::string	req_method;
 
@@ -258,6 +258,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				{	
 					if (this->_clients[client_index].if_cgi_directive_exists())
 					{
+						this->_clients[client_index]._cgi.run_cgi(this->_clients[client_index], env);
 						// if method == GET , run cgi on requested file with GET REQUEST_METHOD
 						// if method == POST , run cgi on requested file with POST REQUEST_METHOD
 					}
@@ -308,6 +309,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				// if method == GET , run cgi on requested file with GET REQUEST_METHOD
 				// if method == POST , run cgi on requested file with POST REQUEST_METHOD
 				// if method == DELETE , run cgi on requested file with DELETE REQUEST_METHOD
+				this->_clients[client_index]._cgi.run_cgi(this->_clients[client_index], env);
 			}
 			else
 			{
