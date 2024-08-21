@@ -138,6 +138,16 @@ void    webserv::launch_server(char** env)
 				{
 					try
 					{
+						if (servers[index]._clients[j]._cgi._cgi_processing = true)
+						{
+							servers[index]._clients[j]._cgi.run_cgi(servers[index]._clients[j], env);
+							
+							if (servers[index]._clients[j]._cgi._cgi_processing == false)
+							{
+								servers[index]._clients[j]._response._requested_file.open(servers[index]._clients[j]._cgi._outfile);
+								servers[index]._clients[j].set_ready_for_receiving_value(true);
+							}
+						}
 						if (servers[index]._clients[j].get_ready_for_receiving_value() == false)
 						{
 							std::cout << "handling request of client fd " << servers[index]._clients[j].get_fd() << std::endl;
@@ -147,7 +157,6 @@ void    webserv::launch_server(char** env)
 						if (servers[index]._clients[j].get_ready_for_receiving_value() == true)
 						{
 							std::cout << "sending response to client with fd " << servers[index]._clients[j].get_fd() << std::endl;
-
 							servers[index]._clients[j]._response.send_response(servers[index]._clients[j].get_fd(), server::_config[servers[index].get_config_index()]);
 
 							if (servers[index]._clients[j]._response._bytes_sent >= servers[index]._clients[j]._response._content_length)

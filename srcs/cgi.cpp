@@ -139,7 +139,8 @@ void	cgi::run_cgi(client & cl, char** environ)
 			{
 				// child finished with success
 				close(fd[1]);
-				cl._response.parse_cgi_response(this->_outfile);
+				this->_cgi_processing = false;
+				// cl._response.parse_cgi_response(this->_outfile);
 			}
 		}
 	}

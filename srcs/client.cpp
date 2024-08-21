@@ -224,7 +224,7 @@ void    client::set_ready_for_receiving_value(bool value)
     this->_ready_for_receiving = value;
 }
 
-bool    client::get_ready_for_receiving_value()
+bool&    client::get_ready_for_receiving_value()
 {
     return (this->_ready_for_receiving);
 }

@@ -21,7 +21,7 @@ class client
         void        read_request(int config_index, fd_sets&);
         void        fill_request_object();
         void	    set_ready_for_receiving_value(bool value);
-		bool	    get_ready_for_receiving_value();
+		bool&	    get_ready_for_receiving_value();
 
         request     _request;
         response    _response;

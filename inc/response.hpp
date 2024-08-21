@@ -33,7 +33,7 @@ class response
         int             remove_requested_directory(int fd, std::string uri);
         void            remove_requested_file(int fd);
 
-        void            parse_cgi_response(std::string  outfile);
+        void            parse_cgi_response(std::string  outfile, bool& cgi_processing);
 
         /*=============== ATTRIBUTES ===============*/
 
