@@ -13,7 +13,6 @@ class cgi
 		bool						_cgi_processing;
 		char**						_env;
 		char**						_args;
-		int							_env_size;
 		bool						_first_time;
 		std::string					_outfile;
 

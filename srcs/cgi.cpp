@@ -5,23 +5,41 @@
 #include <dirent.h>
 #include <wait.h>
 
-cgi::cgi() : _cgi_processing(false), _env_size(0), _first_time(true), _outfile("")
+cgi::cgi() : _cgi_processing(false), _first_time(true), _outfile("")
 {}
 
 void	cgi::set_env_variables(request client_req, char** environ)
 {
 	std::vector<std::string>	temp;
-
 	temp.push_back("REQUEST_METHOD=" + client_req.get_method());
-	this->_env_size = temp.size();
 
-	this->_env = new char*[temp.size() + 1];
-	for (size_t i = 0; i < temp.size(); i++)
+	size_t	index;
+	size_t	j;
+	size_t	k;
+
+	index = 0;
+	while (environ[index] != NULL)
+		index++;
+
+	this->_env = new char*[index + temp.size() + 1];
+
+	j = 0;
+	while (j < index)
 	{
-		this->_env[i] = new char[temp[i].size()];
-		std::strcpy(this->_env[i], temp[i].c_str());
+		this->_env[j] = new char[std::strlen(environ[j])];
+		std::strcpy(this->_env[j], environ[j]);
+		j++;
 	}
-	this->_env[temp.size() + 1] = NULL;
+	k = 0;
+	while (k < temp.size())
+	{
+		this->_env[j] = new char[temp[k].size()];
+		std::strcpy(this->_env[j], temp[k].c_str());
+		j++;
+		k++;
+	}
+
+	this->_env[temp.size() + index] = NULL;
 }
 
 void	cgi::set_args(std::string path)
@@ -112,7 +130,7 @@ void	cgi::run_cgi(client & cl, char** environ)
 		{
 			// child finished
 			st = (unsigned char *)&status;
-			if (st[1] != 0)
+			if (st[0] != 0 || st[1] != 0)
 			{
 				close(fd[1]);
 				throw 500;
