@@ -316,6 +316,38 @@ void	response::remove_requested_file(int fd)
 	}
 }
 
+void	response::send_cgi_headers(int fd, std::ifstream& requested_file)
+{
+	std::string	reader;
+	std::string	headers;
+	size_t		pos;
+
+	while (getline(requested_file, reader))
+	{
+		std::cout << "reader = " << reader << std::endl;
+		if (!requested_file.eof())
+		{
+			reader += '\n';
+		}
+		if (reader == "\r\n")
+			break;
+		headers += reader;
+	}
+	pos = headers.find("\r\n\r\n");
+	std::cout << "headers before sending :" << std::endl;
+	std::cout << headers << std::endl;
+	write(fd, headers.c_str(), headers.length());
+
+	requested_file.seekg(pos + 4, std::ios::beg);
+	std::streamsize curr = requested_file.tellg();
+	requested_file.seekg(0, std::ios::end);
+	std::streamsize endofstream = requested_file.tellg();
+
+	requested_file.seekg(pos + 4, std::ios::beg);
+	this->_content_length = endofstream - curr;
+	std::cout << "length ===? " << this->_content_length << std::endl;
+}
+
 void	response::clear_response()
 {
 	this->_status_line.clear();

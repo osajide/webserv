@@ -9,6 +9,10 @@ class cgi
 		cgi();
 		~cgi();
 
+		int							_fd[2];
+		pid_t						_pid;
+		int							_exit_status;
+
 		bool						_cgi_processing;
 		char**						_env;
 		char**						_args;

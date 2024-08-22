@@ -32,6 +32,8 @@ class response
         int             remove_requested_directory(int fd, std::string uri);
         void            remove_requested_file(int fd);
 
+        void            send_cgi_headers(int fd, std::ifstream&);
+
         /*=============== ATTRIBUTES ===============*/
 
         long long       _bytes_sent;

@@ -145,7 +145,7 @@ void    webserv::launch_server(char** env)
 							if (servers[index]._clients[j]._cgi._cgi_processing == false)
 							{
 								servers[index]._clients[j]._response._requested_file.open(servers[index]._clients[j]._cgi._outfile);
-								// servers[index]._clients[j]._response.set_content_length(servers[index]._clients[j]._response._requested_file);
+								servers[index]._clients[j]._response.send_cgi_headers(servers[index]._clients[j].get_fd(), servers[index]._clients[j]._response._requested_file);
 								servers[index]._clients[j].set_ready_for_receiving_value(true);
 							}
 						}
