@@ -189,8 +189,6 @@ void	cgi::clear_cgi()
 
 cgi::~cgi()
 {
-	std::cout << "destructor called" << std::endl;
-	sleep(2);
 	int i;
 
 	if (this->_args != NULL)
