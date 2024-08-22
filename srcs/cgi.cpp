@@ -50,7 +50,8 @@ void	cgi::set_args(std::string path)
 {
 	this->_args = new char*[2];
 
-	this->_args[0] = const_cast<char *>(path.c_str());
+	this->_args[0] = new char[path.length() + 1];
+	std::strcpy(this->_args[0], path.c_str());
 	this->_args[1] = NULL;
 }
 
@@ -91,7 +92,6 @@ void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)
 		this->set_args(path_to_serve);
 		this->set_env_variables(client_req, environ);
 		this->_outfile = this->get_random_file_name();
-		std::cout << "outfile = '" << this->_outfile << "'" << std::endl;
 
 		this->_fd[1] = open(this->_outfile.c_str(), O_CREAT | O_RDWR, 0644);
 		if (this->_fd[1] == -1)
@@ -141,7 +141,6 @@ void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)
 			}
 			else
 			{
-				std::cout << "child finished with success" << std::endl;
 				close(this->_fd[1]);
 				this->_cgi_processing = false;
 			}
@@ -149,9 +148,50 @@ void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)
 	}
 }
 
+void	cgi::clear_cgi()
+{
+	int i;
+
+	if (this->_args != NULL)
+	{
+		i = -1;
+		while (this->_args[++i] != NULL)
+		{
+			delete[] this->_args[i];
+			this->_args[i] = NULL;
+		}
+
+		delete[] this->_args;
+		this->_args = NULL;
+	}
+
+	if (this->_env != NULL)
+	{
+		i = -1;
+		while (this->_env[++i] != NULL)
+		{
+			delete[] this->_env[i];
+			this->_env[i] = NULL;
+		}
+
+		delete[] this->_env;
+		this->_env = NULL;
+	}
+
+	this->_outfile.clear();
+	this->_fd[0] = -1;
+	this->_fd[1] = -1;
+	this->_cgi_processing = false;
+	this->_first_time = true;
+	this->_exit_status = -1;
+	this->_pid = -1;
+}
+
 cgi::~cgi()
 {
-	int i; 
+	std::cout << "destructor called" << std::endl;
+	sleep(2);
+	int i;
 
 	if (this->_args != NULL)
 	{
@@ -162,7 +202,6 @@ cgi::~cgi()
 		}
 
 		delete[] this->_args;
-		// this->_args = NULL;
 	}
 
 	if (this->_env != NULL)
@@ -174,6 +213,5 @@ cgi::~cgi()
 		}
 
 		delete[] this->_env;
-		// this->_env = NULL
 	}
 }

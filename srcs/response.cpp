@@ -325,27 +325,28 @@ void	response::send_cgi_headers(int fd, std::ifstream& requested_file)
 	while (getline(requested_file, reader))
 	{
 		std::cout << "reader = " << reader << std::endl;
-		if (!requested_file.eof())
-		{
-			reader += '\n';
-		}
-		if (reader == "\r\n")
-			break;
+		reader += '\n';
 		headers += reader;
+		if (reader == "\r\n")
+		{
+			std::cout << "dkhel" << std::endl;
+			break;
+		}
 	}
 	pos = headers.find("\r\n\r\n");
-	std::cout << "headers before sending :" << std::endl;
-	std::cout << headers << std::endl;
 	write(fd, headers.c_str(), headers.length());
 
 	requested_file.seekg(pos + 4, std::ios::beg);
 	std::streamsize curr = requested_file.tellg();
+	std::cout << "curr = " << curr << std::endl;
+	std::cout << "pos = " << pos << std::endl;
 	requested_file.seekg(0, std::ios::end);
 	std::streamsize endofstream = requested_file.tellg();
+	std::cout << "end = " << endofstream << std::endl;
 
+	this->_content_length = endofstream - curr - 1; // becose std::ios::end is after the last character
 	requested_file.seekg(pos + 4, std::ios::beg);
-	this->_content_length = endofstream - curr;
-	std::cout << "length ===? " << this->_content_length << std::endl;
+	std::cout << "length ===> " << this->_content_length << std::endl;
 }
 
 void	response::clear_response()

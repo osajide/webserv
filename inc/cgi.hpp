@@ -22,6 +22,7 @@ class cgi
 		void		set_env_variables(request, char**);
 		void		set_args(std::string path);
 		void		run_cgi(request client_req, std::string path_to_serve, char** environ);
+		void		clear_cgi();
 
 	private:
 		std::string	get_random_file_name();

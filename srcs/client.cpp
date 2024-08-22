@@ -221,4 +221,9 @@ void	client::clear_client()
 
 	this->_request.clear_request();
 	this->_response.clear_response();
+	if (this->_cgi._args != NULL)
+		std::cout << "salam" << std::endl;
+	else
+		std::cout << "nnnnn" << std::endl;
+	this->_cgi.clear_cgi();
 }
