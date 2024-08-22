@@ -221,13 +221,12 @@ int	server::check_resource_type(std::string path)
 
 	if (S_ISDIR(path_stat.st_mode))
 	{
-		// std::cout << "==========> The path is a directory" << std::endl;
 		return (DIRECTORY);
 	}
 	return (REG_FILE);
 }
 
-void    server::handle_request(int client_index, fd_sets& set_fd, int location_index, char** env)
+void    server::handle_request(int client_index, fd_sets& set_fd, int location_index)
 {
 	std::string	req_method;
 
@@ -259,7 +258,6 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._request.get_target()))
 					{
 						this->_clients[client_index]._cgi._cgi_processing = true;
-						// this->_clients[client_index]._cgi.run_cgi(this->_clients[client_index], env);
 					}
 					else
 					{
@@ -304,11 +302,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 		{
 			if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._request.get_target()))
 			{
-				//cgi(request); to extract method and env variables
-				// if method == GET , run cgi on requested file with GET REQUEST_METHOD
-				// if method == POST , run cgi on requested file with POST REQUEST_METHOD
-				// if method == DELETE , run cgi on requested file with DELETE REQUEST_METHOD
-				this->_clients[client_index]._cgi.run_cgi(this->_clients[client_index], env);
+				this->_clients[client_index]._cgi._cgi_processing = true;
 			}
 			else
 			{

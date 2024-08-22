@@ -5,12 +5,13 @@
 #include <dirent.h>
 #include <wait.h>
 
-cgi::cgi() : _cgi_processing(false), _first_time(true), _outfile("")
+cgi::cgi() : _cgi_processing(false), _env(NULL), _args(NULL), _first_time(true), _outfile("")
 {}
 
 void	cgi::set_env_variables(request client_req, char** environ)
 {
 	std::vector<std::string>	temp;
+
 	temp.push_back("REQUEST_METHOD=" + client_req.get_method());
 
 	size_t	index;
@@ -26,14 +27,14 @@ void	cgi::set_env_variables(request client_req, char** environ)
 	j = 0;
 	while (j < index)
 	{
-		this->_env[j] = new char[std::strlen(environ[j])];
+		this->_env[j] = new char[std::strlen(environ[j]) + 1];
 		std::strcpy(this->_env[j], environ[j]);
 		j++;
 	}
 	k = 0;
 	while (k < temp.size())
 	{
-		this->_env[j] = new char[temp[k].size()];
+		this->_env[j] = new char[temp[k].size() + 1];
 		std::strcpy(this->_env[j], temp[k].c_str());
 		j++;
 		k++;
@@ -70,24 +71,32 @@ std::string	cgi::get_random_file_name()
 			}
 		}
 		if (entry == NULL)
+		{
+			closedir(directory);
 			break;
+		}
 	}
 	return (file_name);
 }
 
-void	cgi::run_cgi(client & cl, char** environ)
+void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)
 {
 	int				fd[2];
 	int				pid;
 	int				status;
 	unsigned char*	st;
 
+	status = -1;
+	pid = -1;
+	fd[0] = -1;
+	fd[1] = -1;
+
 	if (this->_first_time == true)
 	{
-		this->set_args(cl._response._path_to_serve);
-		this->set_env_variables(cl._request, environ);
+		this->set_args(path_to_serve);
+		this->set_env_variables(client_req, environ);
 		this->_outfile = this->get_random_file_name();
-	
+
 		fd[1] = open(this->_outfile.c_str(), O_CREAT, 0644);
 		if (fd[1] == -1)
 			throw 500;
@@ -111,14 +120,20 @@ void	cgi::run_cgi(client & cl, char** environ)
 			}
 			close(fd[1]);
 
-			execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
+			execve(path_to_serve.c_str(), this->_args, this->_env);
 			close(fd[1]);
 			exit(EXIT_FAILURE);
 		}
+		else
+		{
+			this->_first_time = false;
+		}
 	}
-	else if (this->_first_time = false)
+	else if (this->_first_time == false)
 	{
 		pid_t	wpid = waitpid(pid, &status, WNOHANG);
+		std::cout << "wpid = " << wpid << std::endl;
+		std::cout << "pid = " << pid << std::endl;
 		if (wpid == -1)
 		{
 			close(fd[1]);
@@ -126,39 +141,55 @@ void	cgi::run_cgi(client & cl, char** environ)
 		}
 		if (wpid == 0)
 			return ;
-		if (wpid == pid)
+		if (wpid > 0)
 		{
-			// child finished
 			st = (unsigned char *)&status;
-			if (st[0] != 0 || st[1] != 0)
-			{
-				close(fd[1]);
-				throw 500;
-			}
-			else
-			{
+			(void)st;
+			// if (st[0] != 0 || st[1] != 0)
+			// {
+			// 	std::cout << "st[0] = '" << (int)st[0] << "'" << std::endl;
+			// 	std::cout << "st[1] = '" << (int)st[1] << "'" << std::endl;
+			// 	std::cout << "dkhel l hadi" << std::endl;
+			// 	exit(0);
+			// 	close(fd[1]);
+			// 	throw 500;
+			// }
+			// else
+			// {
 				// child finished with success
+				std::cout << "child finished with success" << std::endl;
 				close(fd[1]);
 				this->_cgi_processing = false;
-				// cl._response.parse_cgi_response(this->_outfile);
-			}
+			// }
 		}
 	}
 }
 
 cgi::~cgi()
 {
-	int i;
+	int i; 
 
-	i = -1;
-	while (this->_args[++i] != NULL)
-		delete[] this->_args[i];
+	if (this->_args != NULL)
+	{
+		i = -1;
+		while (this->_args[++i] != NULL)
+		{
+			delete[] this->_args[i];
+		}
 
-	delete[] this->_args;
+		delete[] this->_args;
+		// this->_args = NULL;
+	}
 
-	i = -1;
-	while (this->_args[++i] != NULL)
-		delete[] this->_args[i];
+	if (this->_env != NULL)
+	{
+		i = -1;
+		while (this->_env[++i] != NULL)
+		{
+			delete[] this->_env[i];
+		}
 
-	delete[] this->_args;
+		delete[] this->_env;
+		// this->_env = NULL
+	}
 }

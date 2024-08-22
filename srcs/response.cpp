@@ -316,10 +316,6 @@ void	response::remove_requested_file(int fd)
 	}
 }
 
-void	response::parse_cgi_response(std::string outfile, bool& cgi_processing)
-{
-}
-
 void	response::clear_response()
 {
 	this->_status_line.clear();

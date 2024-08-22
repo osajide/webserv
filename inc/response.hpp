@@ -27,13 +27,10 @@ class response
 
 
         void            send_response(int fd, config serverConf);
-        // void            return_index_file(std::string path);
         void            autoindex(int fd, std::string uri);
         void            redirect(int fd, int status, std::string uri);
         int             remove_requested_directory(int fd, std::string uri);
         void            remove_requested_file(int fd);
-
-        void            parse_cgi_response(std::string  outfile, bool& cgi_processing);
 
         /*=============== ATTRIBUTES ===============*/
 

@@ -2,7 +2,6 @@
 
 #include <vector>
 #include "request.hpp"
-#include "client.hpp"
 
 class cgi
 {
@@ -18,7 +17,7 @@ class cgi
 
 		void		set_env_variables(request, char**);
 		void		set_args(std::string path);
-		void		run_cgi(client &, char**);
+		void		run_cgi(request client_req, std::string path_to_serve, char** environ);
 
 	private:
 		std::string	get_random_file_name();

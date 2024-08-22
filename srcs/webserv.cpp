@@ -86,7 +86,6 @@ void    webserv::launch_server(char** env)
 					std::cout << "Connection accepted !!!\nClient number " << client_sock << std::endl;
 
 					servers[i]._clients.push_back(client(client_sock, servers[i].get_config_index()));
-
 					if (fcntl(servers[i]._clients.back().get_fd(), F_SETFL, O_NONBLOCK) == -1)
 					{
         				perror("fcntl F_SETFL");
@@ -138,20 +137,22 @@ void    webserv::launch_server(char** env)
 				{
 					try
 					{
-						if (servers[index]._clients[j]._cgi._cgi_processing = true)
+						if (servers[index]._clients[j]._cgi._cgi_processing == true)
 						{
-							servers[index]._clients[j]._cgi.run_cgi(servers[index]._clients[j], env);
+							std::cout << "dkhel l cgi" << std::endl;
+							servers[index]._clients[j]._cgi.run_cgi(servers[index]._clients[j]._request, servers[index]._clients[j]._response._path_to_serve, env);
 							
 							if (servers[index]._clients[j]._cgi._cgi_processing == false)
 							{
 								servers[index]._clients[j]._response._requested_file.open(servers[index]._clients[j]._cgi._outfile);
+								// servers[index]._clients[j]._response.set_content_length(servers[index]._clients[j]._response._requested_file);
 								servers[index]._clients[j].set_ready_for_receiving_value(true);
 							}
 						}
-						if (servers[index]._clients[j].get_ready_for_receiving_value() == false)
+						else if (servers[index]._clients[j].get_ready_for_receiving_value() == false)
 						{
 							std::cout << "handling request of client fd " << servers[index]._clients[j].get_fd() << std::endl;
-							servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index, env);
+							servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index);
 						}
 
 						if (servers[index]._clients[j].get_ready_for_receiving_value() == true)

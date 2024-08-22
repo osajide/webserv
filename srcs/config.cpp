@@ -221,8 +221,8 @@ std::string	get_extension(std::string path)
 	size_t		pos;
 
 	pos = path.rfind('.');
-	extension = path.substr(pos);
-
+	extension = path.substr(pos + 1);
+ 
 	return (extension);
 }
 
@@ -231,7 +231,9 @@ int	config::if_cgi_directive_exists(int location_index, std::string path)
 	std::string					extension;
 	std::vector<std::string>	cgi_directive;
 
-
+	if (location_index == -1)
+		return (0);
+	
 	extension = get_extension(path);
 	cgi_directive = this->fetch_location_directive_value(location_index, "cgi");
 	if (!cgi_directive.empty())
