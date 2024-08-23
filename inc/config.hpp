@@ -16,6 +16,9 @@ class config
 		static void					parse_mime_types(const char* path_to_mime_types);
 
         config(std::fstream& file);
+        config(config const &, std::string);
+
+
 		std::vector<std::string>	fetch_directive_value(std::string key);
         int	                        directive_exists(std::string key);
         int                         directive_inside_location_exists(int location_index, std::string key);
@@ -29,7 +32,7 @@ class config
     private:
         DirectiveMap                			                    _directives;
         std::vector<LocationPair>   			                    _locations;
-        std::vector<std::string>                                    _allowed_directives;
+        static std::vector<std::string>                             _allowed_directives;
         static std::vector<std::pair<std::string, std::string> >    _mime_types;
 };
 

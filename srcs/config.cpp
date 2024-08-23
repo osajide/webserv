@@ -5,6 +5,29 @@
 
 std::vector<std::pair<std::string, std::string> >    config::_mime_types;
 
+config::config(config const & rhs, std::string ip_port)
+{
+	this->_locations = rhs._locations;
+	this->_directives = rhs._directives;
+	
+	for (DirectiveMap::iterator	it = this->_directives.begin(); it != this->_directives.end(); it++)
+	{
+		if (it->first == "listen")
+		{
+			it->second.clear();
+			it->second.push_back(ip_port);
+		}
+	}
+
+	// for (DirectiveMap::iterator	it = this->_directives.begin(); it != this->_directives.end(); it++)
+	// {
+	// 	if (it->first == "listen")
+	// 	{
+	// 		std::cout << "it->second.front() = '" << it->second.front() << "'" << std::endl;
+	// 	}
+	// }
+}
+
 void	config::parse_mime_types(const char * PathToMimeTypes)
 {
 	std::fstream		file;
@@ -46,23 +69,17 @@ config::config(std::fstream& file)
 
 	while (getline(file, line))
 	{
-		// std::cout << "getline = '" << line << "'" << std::endl;
 		while (line.find('\t') != std::string::npos)
         {
 			line = strtok((char *)line.c_str(), "\t");
-            // std::cout << "`Line = '" << line << "'" << std::endl;
         }
 
 		std::stringstream s(line);
 
-		// std::cout << "line = '" << line << "'" << std::endl;
-		// if (line == "{" || line == "}")
-		// {
 		if (line == "{")
 			cr_count -= 1;
 		else if (line == "}")
 			cr_count += 1;
-		// }
 		else if (line.find("location") != std::string::npos)
 		{
 			std::stringstream   st(line);
@@ -79,7 +96,6 @@ config::config(std::fstream& file)
 				while (line.find('\t') != std::string::npos)
 				{
 					line = strtok((char *)line.c_str(), "\t");
-					// std::cout << "line = '" << line << "'" << std::endl;
 				}
 				if (line == "{")
 					cr_count -= 1;
@@ -102,11 +118,8 @@ config::config(std::fstream& file)
 		else
 		{
 			s >> key;
-			// std::cout << "key = '" << key << "'" << std::endl;
 			while (s >> value)
 			{
-			// std::cout << "value = '" << value << "'" << std::endl;
-				// std::cout << "key = '" << key << "'" << std::endl;
 				this->_directives[key].push_back(value.substr(0, value.find(';')));
 			}
 		}

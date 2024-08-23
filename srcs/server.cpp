@@ -51,14 +51,14 @@ void	server::close_connection(int client_index, fd_sets & set_fd)
 	}
 
 	close(this->_clients[client_index].get_fd());
-	// this->_clients[client_index].clear_client();
 	this->_clients.remove_from_begin(client_index);
 }
 
 void    server::parse_config(char *PathToConfig)
 {
-    std::fstream	    file;
-	std::string			reader;
+    std::fstream	    		file;
+	std::string					reader;
+	std::vector<std::string>	listen_directive;
 
 	file.open(PathToConfig);
 	if (file.is_open())
@@ -70,6 +70,28 @@ void    server::parse_config(char *PathToConfig)
 		}
 		file.close();
 	}
+	// std::cout << "conf size before adding multiple ports = " << server::_config.size() << std::endl;
+	for (size_t i = 0; i < server::_config.size(); i++)
+	{
+		listen_directive = server::_config[i].fetch_directive_value("listen");
+		if (listen_directive.size() > 1)
+		{
+			// std::cout << "multiple addresses:" << std::endl;
+			// for (size_t k = 0; k < listen_directive.size(); k++)
+			// {
+			// 	std::cout << listen_directive[k] << std::endl;
+			// }
+
+			for (size_t j = 1; j < listen_directive.size(); j++) // j = 1, to skip the first ip/port
+			{
+				// std::cout << "listen_directive[j] = '" << listen_directive[j] << "'" << std::endl;
+				config	new_conf_block(server::_config[i], listen_directive[j]);
+				server::_config.push_back(new_conf_block);
+			}
+		}
+	}
+	// std::cout << "conf size after adding multiple ports = " << server::_config.size() << std::endl;
+	// exit(0);
 }
 
 int	server::if_ip_port_already_bound(std::string ip, std::string port)
