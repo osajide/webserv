@@ -7,8 +7,8 @@
 #include <sys/stat.h>
 #include <cstdlib>
 
-std::vector<config>    								server::_config;
-std::vector<std::pair<std::string, std::string> >	server::_bound_addresses;
+std::vector<config>    																	server::_config;
+std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string>> >	server::_bound_addresses;
 
 server::server() : _bound(false)
 {}
@@ -90,8 +90,7 @@ void    server::parse_config(char *PathToConfig)
 			}
 		}
 	}
-	// std::cout << "conf size after adding multiple ports = " << server::_config.size() << std::endl;
-	// exit(0);
+
 	// check_errors();
 }
 
@@ -99,13 +98,12 @@ int	server::if_ip_port_already_bound(std::string ip, std::string port)
 {
 	for (size_t i = 0; i < server::_bound_addresses.size(); i++)
 	{
-		if (ip == server::_bound_addresses[i].first
-				&& port == server::_bound_addresses[i].second)
+		if (ip == server::_bound_addresses[i].first.first && port == server::_bound_addresses[i].first.second)
 		{
-			return (1);
+			return (i);
 		}
 	}
-	return (0);
+	return (-1);
 }
 
 server::server(int conf_index) : _bound(false), _conf_index(conf_index)
@@ -137,8 +135,31 @@ server::server(int conf_index) : _bound(false), _conf_index(conf_index)
 
 void	server::init_socket()
 {
-	if (server::if_ip_port_already_bound(this->_ip, this->_port))
+	int	bound_address_index;
+
+	bound_address_index = server::if_ip_port_already_bound(this->_ip, this->_port);
+	if (bound_address_index != -1)
+	{	
+		std::vector<std::string> server_names;
+		server_names = this->_config[this->_conf_index].fetch_directive_value("server_names");
+		if (server_names.empty())
+			std::cout << "webserv: [warn] conflicting server name "" on " << this->_ip << ":" << this->_port << ", ignored" << std::endl;
+		else
+		{
+			for (size_t i = 0; i < server_names.size(); i++)
+			{
+				for (size_t j = 0; j < server::_bound_addresses[bound_address_index].second.size(); j++)
+				{
+					if (server_names[i] == server::_bound_addresses[bound_address_index].second[j])
+					{
+						std::cout << "webserv: [warn] conflicting server name \"" << server_names[i] << "\" on " << this->_ip << ":" << this->_port << ", ignored" << std::endl;
+						break;
+					}
+				}
+			}
+		}
 		return ;
+	}
 
 	int	reuseaddr_enable;
 
@@ -161,7 +182,9 @@ void	server::init_socket()
 		close(this->_fd);
 		throw 1;
 	}
-	server::_bound_addresses.push_back(std::make_pair(this->_ip, this->_port));
+
+	// server::_bound_address is a vector of a pair of pair and vector of strings
+	server::_bound_addresses.push_back(std::make_pair(std::make_pair(this->_ip, this->_port), this->_config[this->_conf_index].fetch_directive_value("server_names")));
 	this->_bound = true;
 }
 

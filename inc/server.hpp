@@ -18,8 +18,8 @@ class server
 		static	int		match_server_name(int server_conf_index, std::string server_name_to_match);
 
         static std::vector<config>									_config;
-        static std::vector<std::pair<std::string, std::string> >	_bound_addresses;
-		
+        static std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string>> >	_bound_addresses;
+
 		server(int _conf_index);
 
 

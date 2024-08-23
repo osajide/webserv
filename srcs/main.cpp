@@ -21,4 +21,9 @@ int main(int ac, char** av, char** env)
         std::cout << "********* status catched = " << status << std::endl;
         return (0);
     }
+    catch (const char* msg)
+    {
+        std::cout << "--------- msg catched = " << msg << std::endl;
+        return (0);
+    }
 }
