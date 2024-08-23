@@ -1,14 +1,9 @@
 #pragma once
 
-#include "config.hpp"
-#include "client.hpp"
-#include "types.hpp"
-#include <string>
-// #include <sys/_types/_fd_def.h>
-#include <vector>
 #include <netinet/in.h>
-#include <iostream>
-#include "webserv.hpp"
+#include <string>
+#include <vector>
+#include "types.hpp"
 
 class server
 {
@@ -18,7 +13,7 @@ class server
 		static	int		match_server_name(int server_conf_index, std::string server_name_to_match);
 
         static std::vector<config>									_config;
-        static std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string>> >	_bound_addresses;
+        static std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string> > >	_bound_addresses;
 
 		server(int _conf_index);
 

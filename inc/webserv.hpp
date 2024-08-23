@@ -1,20 +1,13 @@
 #pragma once
 
+#include "server.hpp"
 #include <iostream>
+
 
 class   webserv
 {
     public:
         static void launch_server(char** env);
+        static std::vector<server>  servers;
+        static void serve_clients(fd_sets & set_fd, char** env);
 };
-
-typedef struct fd_sets
-{
-    fd_set	read_fds;
-    fd_set	write_fds;
-    fd_set	read_fds_tmp;
-    fd_set	write_fds_tmp;
-
-    void    clear_sets();
-
-}   fd_sets;

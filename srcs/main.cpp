@@ -1,6 +1,4 @@
 #include "../inc/webserv.hpp"
-#include "../inc/server.hpp"
-#include <iostream>
 
 
 int main(int ac, char** av, char** env)

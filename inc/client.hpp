@@ -1,14 +1,9 @@
 #pragma once
 
 #include "request.hpp"
-// #include <sys/_types/_fd_def.h>
-#include <sys/select.h>
-#include <string>
-#include <iostream>
 #include "response.hpp"
-#include "webserv.hpp"
 #include "cgi.hpp"
-
+#include "fd_sets.hpp"
 
 #define BUFFER_SIZE 4999
 

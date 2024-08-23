@@ -8,7 +8,7 @@
 #include <cstdlib>
 
 std::vector<config>    																	server::_config;
-std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string>> >	server::_bound_addresses;
+std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string> > >	server::_bound_addresses;
 
 server::server() : _bound(false)
 {}

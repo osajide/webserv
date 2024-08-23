@@ -3,6 +3,8 @@
 #include <list>
 #include "client.hpp"
 
+class client;
+
 class myList : public std::list<client>
 {
     public:
