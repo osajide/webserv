@@ -102,7 +102,7 @@ int	server::if_ip_port_already_bound(std::string ip, std::string port)
 		if (ip == server::_bound_addresses[i].first
 				&& port == server::_bound_addresses[i].second)
 		{
-				return (1);
+			return (1);
 		}
 	}
 	return (0);

@@ -31,7 +31,8 @@ void    webserv::launch_server(char** env)
 		if (fcntl(servers.back().get_fd(), F_SETFL, O_NONBLOCK) == -1)
 		{
         	perror("fcntl F_SETFL");
-        	close(servers.back().get_fd());
+			if (servers.back()._bound == true)
+        		close(servers.back().get_fd());
         	servers.erase(servers.end() - 1);
     	}
 	}
@@ -66,7 +67,10 @@ void    webserv::launch_server(char** env)
 		{
 			perror("Error in select");
 			for (size_t i = 0; i < servers.size(); i++)
-				close(servers[i].get_fd());
+			{
+				if (servers[i]._bound = true)
+					close(servers[i].get_fd());
+			}
 			throw 1;
 		}
 
