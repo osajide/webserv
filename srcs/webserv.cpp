@@ -42,8 +42,9 @@ void    webserv::launch_server(char** env)
 
 	for (size_t i = 0; i < servers.size(); i++)
 	{
-		if (servers[i]._bound = true)
+		if (servers[i]._bound == true)
 		{
+			std::cout << "index of bound server = " << i << std::endl;
 			nfds = servers[i].get_fd();
 			FD_SET(servers[i].get_fd(), &set_fd.read_fds);
 		}
@@ -54,7 +55,7 @@ void    webserv::launch_server(char** env)
 
 	std::cout << "server size() = " << servers.size() << std::endl;
 	std::cout << "number of bound addresses = " << server::_bound_addresses.size() << std::endl;
-	// exit(0);
+	exit(0);
 
 	while (true)
 	{
@@ -68,7 +69,7 @@ void    webserv::launch_server(char** env)
 			perror("Error in select");
 			for (size_t i = 0; i < servers.size(); i++)
 			{
-				if (servers[i]._bound = true)
+				if (servers[i]._bound == true)
 					close(servers[i].get_fd());
 			}
 			throw 1;
@@ -76,7 +77,7 @@ void    webserv::launch_server(char** env)
 
 		for (size_t i = 0; i < servers.size(); i++)
 		{
-			if (servers[i]._bound = false)
+			if (servers[i]._bound == false)
 				continue;
 
 			if (FD_ISSET(servers[i].get_fd(), &set_fd.read_fds_tmp))
@@ -109,7 +110,7 @@ void    webserv::launch_server(char** env)
 
 		for (size_t index = 0; index < servers.size(); index++)
 		{
-			if (servers[index]._bound = false)
+			if (servers[index]._bound == false)
 				continue;
 
 			for (size_t j = 0; j < servers[index]._clients.size(); j++)

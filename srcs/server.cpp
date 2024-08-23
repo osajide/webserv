@@ -133,6 +133,27 @@ server::server(int conf_index) : _bound(false), _conf_index(conf_index)
     this->init_socket();
 }
 
+int	server_name_exists(int index, std::string server_name)
+{
+	for (size_t i = 0; i < server::_bound_addresses[index].second.size(); i++)
+	{
+		if (server_name == server::_bound_addresses[index].second[i])
+			return (1);
+	}
+	return (0);
+}
+
+void	modify_server_names_in_bound_addresses(int index, std::vector<std::string> server_names)
+{
+	for (size_t i = 0; i < server_names.size(); i++)
+	{
+		if (!server_name_exists(index, server_names[i]))
+		{
+			server::_bound_addresses[index].second.push_back(server_names[i]);
+		}
+	}
+}
+
 void	server::init_socket()
 {
 	int	bound_address_index;
@@ -143,7 +164,7 @@ void	server::init_socket()
 		std::vector<std::string> server_names;
 		server_names = this->_config[this->_conf_index].fetch_directive_value("server_names");
 		if (server_names.empty())
-			std::cout << "webserv: [warn] conflicting server name "" on " << this->_ip << ":" << this->_port << ", ignored" << std::endl;
+			std::cout << "webserv: [warn] conflicting server name \"\" on " << this->_ip << ":" << this->_port << ", ignored" << std::endl;
 		else
 		{
 			for (size_t i = 0; i < server_names.size(); i++)
@@ -158,6 +179,7 @@ void	server::init_socket()
 				}
 			}
 		}
+		modify_server_names_in_bound_addresses(bound_address_index, server_names);
 		return ;
 	}
 
