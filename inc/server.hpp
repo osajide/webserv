@@ -34,6 +34,8 @@ class server
 		void		close_connection(int client_index, fd_sets &);
 
 		myList				_clients;
+
+		bool				_bound;
     private:
         server();
         int					_fd;

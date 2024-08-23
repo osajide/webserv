@@ -10,7 +10,7 @@
 std::vector<config>    								server::_config;
 std::vector<std::pair<std::string, std::string> >	server::_bound_addresses;
 
-server::server()
+server::server() : _bound(false)
 {}
 
 int	server::match_server_name(int server_conf_index, std::string server_name_to_match)
@@ -92,6 +92,7 @@ void    server::parse_config(char *PathToConfig)
 	}
 	// std::cout << "conf size after adding multiple ports = " << server::_config.size() << std::endl;
 	// exit(0);
+	// check_errors();
 }
 
 int	server::if_ip_port_already_bound(std::string ip, std::string port)
@@ -107,7 +108,7 @@ int	server::if_ip_port_already_bound(std::string ip, std::string port)
 	return (0);
 }
 
-server::server(int conf_index) : _conf_index(conf_index)
+server::server(int conf_index) : _bound(false), _conf_index(conf_index)
 {
     int	sock = socket(AF_INET, SOCK_STREAM,0);
 	if (sock == -1)
@@ -160,6 +161,8 @@ void	server::init_socket()
 		close(this->_fd);
 		throw 1;
 	}
+	server::_bound_addresses.push_back(std::make_pair(this->_ip, this->_port));
+	this->_bound = true;
 }
 
 int server::get_fd()

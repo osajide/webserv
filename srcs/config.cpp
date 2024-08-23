@@ -44,8 +44,6 @@ void	config::parse_mime_types(const char * PathToMimeTypes)
 			ss << reader;
 			ss >> first;
 			ss >> second;
-			// std::cout << "mime first = '" << first << "'" << std::endl;
-			// std::cout << "mime second = '" << second << "'" << std::endl;
 			_mime_types.push_back(std::make_pair(first, second));
 			first.clear();
 			second.clear();

@@ -32,7 +32,7 @@ class config
     private:
         DirectiveMap                			                    _directives;
         std::vector<LocationPair>   			                    _locations;
-        static std::vector<std::string>                             _allowed_directives;
+        static std::vector<std::string>                             _dictionary;
         static std::vector<std::pair<std::string, std::string> >    _mime_types;
 };
 

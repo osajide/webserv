@@ -37,36 +37,32 @@ void    webserv::launch_server(char** env)
 	}
 
 	set_fd.clear_sets();
-
 	nfds = 0;
 
 	for (size_t i = 0; i < servers.size(); i++)
 	{
-		FD_SET(servers[i].get_fd(), &set_fd.read_fds);
-		// if (servers[i].get_fd() > nfds + 1)
-			nfds = servers[i].get_fd() + 1;
+		if (servers[i]._bound = true)
+		{
+			nfds = servers[i].get_fd();
+			FD_SET(servers[i].get_fd(), &set_fd.read_fds);
+		}
 	}
 
 	client_addr_len = sizeof(struct sockaddr_in);
 	memset(&client_addr, 0, client_addr_len);
 
+	std::cout << "server size() = " << servers.size() << std::endl;
+	std::cout << "number of bound addresses = " << server::_bound_addresses.size() << std::endl;
+	// exit(0);
+
 	while (true)
 	{
-		std::cout << servers[0]._clients.size() << " clients available !!!!" << std::endl;
-
-		for (size_t i = 0; i < servers[0]._clients.size(); i++)
-		{
-			if (FD_ISSET(servers[0]._clients[i].get_fd(), &set_fd.write_fds))
-				std::cout << "fd " << servers[0]._clients[i].get_fd() << " is in write set" << std::endl;
-			if (!FD_ISSET(servers[0]._clients[i].get_fd(), &set_fd.write_fds))
-				std::cout << "fd " << servers[0]._clients[i].get_fd() << " is not in write set" << std::endl;
-		}
 		std::cout << "Waiting for connections...." << std::endl;
 
 		set_fd.read_fds_tmp = set_fd.read_fds;
 		set_fd.write_fds_tmp = set_fd.write_fds;
 
-		if (select(nfds, &set_fd.read_fds_tmp, &set_fd.write_fds_tmp, NULL, NULL) == -1)
+		if (select(nfds + 1, &set_fd.read_fds_tmp, &set_fd.write_fds_tmp, NULL, NULL) == -1)
 		{
 			perror("Error in select");
 			for (size_t i = 0; i < servers.size(); i++)
@@ -76,6 +72,9 @@ void    webserv::launch_server(char** env)
 
 		for (size_t i = 0; i < servers.size(); i++)
 		{
+			if (servers[i]._bound = false)
+				continue;
+
 			if (FD_ISSET(servers[i].get_fd(), &set_fd.read_fds_tmp))
 			{
 				client_sock = accept(servers[i].get_fd(), (struct sockaddr *)&client_addr, &client_addr_len);
@@ -94,7 +93,10 @@ void    webserv::launch_server(char** env)
     				}
 					else
 					{
-						nfds = client_sock + 1;
+						if (client_sock > nfds)
+						{
+							nfds = client_sock;
+						}
 						FD_SET(servers[i]._clients.back().get_fd(), &set_fd.read_fds);
 					}
 				}
@@ -103,6 +105,9 @@ void    webserv::launch_server(char** env)
 
 		for (size_t index = 0; index < servers.size(); index++)
 		{
+			if (servers[index]._bound = false)
+				continue;
+
 			for (size_t j = 0; j < servers[index]._clients.size(); j++)
 			{
 				if (FD_ISSET(servers[index]._clients[j].get_fd(), &set_fd.read_fds_tmp))
