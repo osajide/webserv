@@ -195,13 +195,13 @@ void	cgi::clear_cgi()
 	}
 
 	this->_outfile.clear();
+	this->_infile.clear();
 	this->_fd[0] = -1;
 	this->_fd[1] = -1;
 	this->_cgi_processing = false;
 	this->_first_time = true;
 	this->_exit_status = -1;
-	this->_pid = -1;
-}
+	this->_pid = -1;}
 
 cgi::~cgi()
 {

@@ -119,7 +119,6 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 	}
 	if (this->_body_file.is_open())
 	{
-		std::cout << "dkhel" << std::endl;
 		if (this->_bytes_read < this->_content_length)
 		{
 			if (this->_request._raw_body.empty())
@@ -148,7 +147,10 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 		}
 	}
 	else
+	{
+		std::cout << "this throw" << std::endl;
 		throw error(500, this->_index);
+	}
 }
 
 void    client::read_request(int conf_index, fd_sets & set_fd)
