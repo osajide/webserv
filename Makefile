@@ -5,12 +5,12 @@ CFLAGS		=	-Wall -Wextra -Werror -fsanitize=address -std=c++11
 
 INC_DIR		=	inc
 INC_FILES	=	webserv.hpp client.hpp server.hpp request.hpp config.hpp response.hpp \
-				types.hpp autoindex.hpp cgi.hpp
+				types.hpp autoindex.hpp cgi.hpp error.hpp
 INC			=	$(addprefix $(INC_DIR)/, $(INC_FILES))
 
 SRCS_DIR	=	srcs
 SRCS_FILES	=	main.cpp webserv.cpp server.cpp client.cpp request.cpp config.cpp response.cpp \
-				types.cpp autoindex.cpp cgi.cpp
+				types.cpp autoindex.cpp cgi.cpp error.cpp
 SRCS		=	$(addprefix $(SRCS_DIR)/, $(SRCS_FILES))
 
 OBJS_DIR	=	objs

@@ -3,6 +3,8 @@
 #include <vector>
 #include "request.hpp"
 
+class client;
+
 class cgi
 {
 	public:
@@ -18,12 +20,11 @@ class cgi
 		char**						_args;
 		bool						_first_time;
 		std::string					_outfile;
+		std::string					_infile;
 
 		void		set_env_variables(request, char**);
 		void		set_args(std::string path);
-		void		run_cgi(request client_req, std::string path_to_serve, char** environ);
+		void		run_cgi(client & cl, char** environ);
 		void		clear_cgi();
-
-	private:
-		std::string	get_random_file_name();
+		std::string	get_random_file_name(int client_index);
 };

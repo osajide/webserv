@@ -11,7 +11,8 @@
 client::client()
 {}
 
-client::client(int client_sock, int conf_index) : _config_index(conf_index), _location_index(-2), _fd(client_sock), _ready_for_receiving(false)
+client::client(int client_sock, int conf_index, int index) : _index(index), _config_index(conf_index), _location_index(-2), _fd(client_sock), _ready_for_receiving(false), _read_body(false),
+													_max_body_size(0), _bytes_read(0), _content_length(0)
 {}
 
 int client::get_fd()
@@ -21,7 +22,7 @@ int client::get_fd()
 
 void    client::fill_request_object()
 {
-    std::stringstream	ss(this->_request.get_rawRequest());
+    std::stringstream	ss(this->_request._raw_request);
 	std::string			reader;
 	std::string			key;
 	std::string			value;
@@ -31,7 +32,7 @@ void    client::fill_request_object()
 	// and check the first word if is it different from
 	// GET, POST and DELETE
 	getline(ss, reader);
-	this->_request.set_request_line(reader);
+	this->_request.set_request_line(reader, this->_index);
 
 	while (getline(ss, reader))
 	{
@@ -63,7 +64,7 @@ int	client::dir_has_index_files()
 	{
 		if (server::_config[this->_config_index].directive_inside_location_exists(this->_location_index, "index"))
 		{
-			index_files = server::_config[this->_config_index].fetch_location_directive_value(this->_location_index, "index"); // temp because we should loop over the whole vector
+			index_files = server::_config[this->_config_index].fetch_location_directive_value(this->_location_index, "index");
 		}
 		else
 		{
@@ -101,9 +102,52 @@ void	client::does_location_has_redirection()
 		{
 			this->_response._redirection_path = return_directive.back();
 			std::cout << "path to redirect = '" << this->_response._redirection_path << "'" << std::endl;
-			throw atoi(return_directive.front().c_str());
+			throw error(atoi(return_directive.front().c_str()), this->_index);
 		}
 	}
+}
+
+void	client::read_body_based_on_content_length(fd_sets& set_fd)
+{
+	int		valread = 0;
+	char	buffer[BUFFER_SIZE + 1];
+
+	if (this->_cgi._infile.empty())
+	{
+		this->_cgi._infile = this->_cgi.get_random_file_name(this->_index);
+		this->_body_file.open(this->_cgi._infile, std::ios::app);
+	}
+	if (this->_body_file.is_open())
+	{
+		if (this->_bytes_read < this->_content_length)
+		{
+			if (this->_request._raw_body.empty())
+			{
+				memset(buffer, 0, BUFFER_SIZE + 1);
+				valread = read(this->_fd, buffer, BUFFER_SIZE);
+				if (valread == 0 || valread == -1)
+					throw error(-1, this->_index);
+				std::cout << "buffer read from body ---------- :" << std::endl;
+				std::cout << buffer << std::endl;
+
+				this->_body_file << buffer;
+				this->_bytes_read += valread;
+			}
+			else
+			{
+				this->_body_file << this->_request._raw_body;
+				this->_bytes_read += this->_request._raw_body.length();
+				this->_request._raw_body.clear();
+			}
+		}
+		if (this->_bytes_read == this->_content_length)
+		{
+			this->_body_file.close();
+			FD_SET(this->_fd, & set_fd.write_fds);
+		}
+	}
+	else
+		throw error(500, this->_index);
 }
 
 void    client::read_request(int conf_index, fd_sets & set_fd)
@@ -111,78 +155,86 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 	size_t		pos;
 	int			valread = 0;
 	char		buffer[BUFFER_SIZE + 1];
-	static int	read_body;
 
 	memset(buffer, 0, BUFFER_SIZE + 1);
 
-	if (read_body == 0)
+	if (this->_read_body == false)
 	{
 		valread = read(this->_fd, buffer, BUFFER_SIZE);
 
 		if (valread == 0 || valread == -1)
-			throw -1;
+			throw error(-1, this->_index);
 
 		std::cout << "------------------ valread = " << valread << std::endl;
 		std::cout << "------ buffer read from fd  " << this->_fd << ":" << std::endl;
 		std::cout << buffer << std::endl;
 		std::cout << "-----------------" << std::endl;
 
-        // sleep(2)
-;
+		this->_request._raw_request += buffer;
+		pos = this->_request._raw_request.find("\r\n\r\n");
 
-		this->_request.set_raw_request(buffer);
-		pos = this->_request.get_rawRequest().find("\r\n\r\n");
-
-		if (pos != this->_request.get_rawRequest().npos)
+		if (pos != this->_request._raw_request.npos)
 		{
 			this->fill_request_object();
-			this->_request.is_well_formed();
+			this->_request.is_well_formed(this->_index);
 
 			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
 			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request.get_target());
             
         	this->does_location_has_redirection();
 
-			// if (!this->_request.retrieve_header_value("Transfer-Encoding").empty())
-			// {
-			// 	read_body = 1;
-			// }
-			// else
-			// {
+			if (this->_request.header_exists("Transfer-Encoding") || this->_request.header_exists("Content-Length"))
+			{
+				this->_read_body = true;
+				std::stringstream ss(server::_config[this->_config_index].fetch_directive_value("client_max_body_size").front()); // i expect this directive to be present at this point
+				ss >> this->_max_body_size;
+				if (this->_request.header_exists("Content-Length"))
+				{
+					std::stringstream	s(this->_request._headers["Content-Length"]);
+					s >> this->_content_length;
+				}
+
+			}
+			else
+			{
 				FD_SET(this->_fd, &set_fd.write_fds);
-			// }
+				this->_read_body = false;
+			}
 		}
 	}
 
-	// std::stringstream ss(serverConf.fetch_directive_value("client_max_body_size").front());
-	// ss >> max_body_size;
+	if (this->_read_body == true)
+	{
+		if (buffer[0] != '\0') // In case this is the first time entering this block
+		{
+			this->_request._raw_body = this->_request._raw_request.substr(pos + 4);
+		}
+		// if (this->_request.header_exists("Transfer-Encoding")) // handle_chunked_body
+		// {
+			// else
+			// {
+			// 	std::cout << "dkhellllll======" << std::endl;
+			// 	valread = read(this->_fd, buffer, BUFFER_SIZE);
+			// 	this->_rawBody += buffer;
 
-	// if (read_body == 1)
-	// {
-	// 	if (buffer[0] != '\0') // first time entering this block
-	// 	{
-	// 		this->_rawBody = this->_rawRequest.substr(pos + 4, this->_rawRequest.length()); // pos + 4 to skip "\r\n\r\n"
-	// 		std::cout << "raw_body = '" << this->_rawBody << "'" << std::endl;
-	// 		this->_rawRequest.clear();
-	// 	}
-	// 	else
-	// 	{
-	// 		std::cout << "dkhellllll======" << std::endl;
-	// 		valread = read(this->_fd, buffer, BUFFER_SIZE);
-	// 		this->_rawBody += buffer;
-
-	// 		if (valread == 0)
-	// 			throw -2;
-	// 	}
-	// 	if (valread < BUFFER_SIZE)
-	// 	{
-	// 		// std::cout << "full body :" << std::endl;
-	// 		// std::cout << "'" << this->_rawBody << "'" << std::endl;
-	// 		this->_request.parse_body(this->_rawBody, max_body_size);
-	// 		this->_rawBody.clear();
-	// 		// FD_SET(this->_fd, &write_fds);
-	// 	}
-	// }
+			// 	if (valread == 0)
+			// 		throw error(-2, this->_index);
+			// }
+			// if (valread < BUFFER_SIZE)
+			// {
+			// 	// std::cout << "full body :" << std::endl;
+			// 	// std::cout << "'" << this->_rawBody << "'" << std::endl;
+			// 	this->_request.parse_body(this->_rawBody, max_body_size);
+			// 	this->_rawBody.clear();
+			// 	// FD_SET(this->_fd, &write_fds);
+			// }
+		// }
+		// else
+		// {
+			std::cout << "heere " << std::endl;
+			this->read_body_based_on_content_length(set_fd);
+		// }
+	}
 }
 
 void	client::handle_delete_directory_request(fd_sets& set_fd)

@@ -280,7 +280,7 @@ std::string    server::check_if_method_allowed_in_location(int client_index, int
             }
         }
 	}
-	throw 405; // 405 Method Not Allowed
+	throw error(405, client_index); // 405 Method Not Allowed
 }
 
 int	server::check_resource_type(std::string path)
@@ -333,8 +333,8 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					{
 						if (req_method == "POST")
 						{
-							std::cout << "before throw 403" << std::endl;
-							throw 403; // Forbidden
+							std::cout << "cgi not found" << std::endl;
+							throw error(403, client_index); // Forbidden
 						}
 
 						this->_clients[client_index].set_ready_for_receiving_value(true);
@@ -347,7 +347,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					if (req_method == "POST" || autoindex_check != ON)
 					{
 						std::cout << "before throw 403**" << std::endl;
-						throw 403; // Forbidden
+						throw error(403, client_index); // Forbidden
 					}
 					else
 					{
@@ -361,7 +361,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 			else
 			{
 				if (req_method == "DELETE")
-					throw 409; // Conflict
+					throw error(409, client_index); // Conflict
 
 				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), 301, this->_clients[client_index]._request.get_target() + '/');
 				this->_clients[client_index].clear_client();
@@ -379,7 +379,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				std::string	method = req_method;
 
 				if (method == "POST")
-					throw 403; // Forbidden
+					throw error(403, client_index); // Forbidden
 
 				else if (method == "DELETE")
 				{

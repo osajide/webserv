@@ -1,23 +1,18 @@
 #include "../inc/request.hpp"
+#include "../inc/error.hpp"
 #include <sstream>
 
-void    request::set_raw_request(char* buffer)
-{
-    this->_rawRequest += buffer;
-}
 
-std::string	request::get_rawRequest()
-{
-	return (this->_rawRequest);
-}
+request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _http_version("")
+{}
 
-void    request::set_request_line(std::string request_line)
+void    request::set_request_line(std::string request_line, int client_index)
 {
     std::stringstream   ss(request_line);
 
     ss >> this->_method;
 	if (_method != "GET" && _method != "POST" && _method != "DELETE")
-		throw 400;
+		throw error(400, client_index);
 
     ss >> this->_target;
     ss >> this->_http_version;
@@ -43,40 +38,40 @@ std::string	request::get_http_version()
 	return (this->_http_version);
 }
 
-void	request::is_well_formed()
+void	request::is_well_formed(int client_index)
 {
 	if (this->_headers.find("Transfer-Encoding") != this->_headers.end()
 		&&	this->_headers["Transfer-Encoding"] != "chunked")
 	{
-		throw 501; // Not Implemented
+		throw error(501, client_index); // Not Implemented
 	}
 	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") == this->_headers.end()
 				&& this->_headers.find("Content-Length") == this->_headers.end())
 	{
-		throw 400; // Bad Request
+		throw error(400, client_index); // Bad Request
 	}
 	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") != this->_headers.end()
 				&& this->_headers.find("Content-Length") != this->_headers.end())
 	{
-		throw 400;
+		throw error(400, client_index);
 	}
 	if (this->_target.length() > 2048)
 	{
-		throw 414; // Request Uri Too Long
+		throw error(414, client_index); // Request Uri Too Long
 	}
 	// connection or host fields empty and check http version
 	if (this->_headers.find("Connection") == this->_headers.end()
 			|| (this->_headers["Connection"] != "keep-alive" && this->_headers["Connection"] != "closed"))
 	{
-		throw 400;
+		throw error(400, client_index);
 	}
 	if (this->_headers.find("Host") == this->_headers.end() || this->_headers["Host"].empty())
 	{
-		throw 400;
+		throw error(400, client_index);
 	}
 	if (this->_http_version != "HTTP/1.1")
 	{
-		throw 505; //HTTP Version Not Supported
+		throw error(505, client_index); //HTTP Version Not Supported
 	}
 
 }
@@ -193,9 +188,16 @@ int      notAllowedChar(const std::string& path)
     return (0);
 }*/
 
+int	request::header_exists(std::string key)
+{
+	if (this->_headers.find(key) != this->_headers.end())
+		return (1);
+	return (0);
+}
+
 void	request::clear_request()
 {
-	this->_rawRequest.clear();
+	this->_raw_request.clear();
 	this->_method.clear();
 	this->_target.clear();
 	this->_http_version.clear();

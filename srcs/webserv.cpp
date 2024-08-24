@@ -20,46 +20,22 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 	{
 		if (servers[index]._bound == false)
 			continue;
-
-		for (size_t j = 0; j < servers[index]._clients.size(); j++)
+		try
 		{
-			if (FD_ISSET(servers[index]._clients[j].get_fd(), &set_fd.read_fds_tmp))
+			for (size_t j = 0; j < servers[index]._clients.size(); j++)
 			{
-				try
+				if (FD_ISSET(servers[index]._clients[j].get_fd(), &set_fd.read_fds_tmp))
 				{
 					servers[index]._clients[j].read_request(servers[index].get_config_index(), set_fd);
 				}
-				catch (int status)
+
+				if (FD_ISSET(servers[index]._clients[j].get_fd(), &set_fd.write_fds_tmp))
 				{
-					std::cout << "status catched from read function = " << status << std::endl;
 
-					if (status == -1)
-						servers[index].close_connection(j, set_fd);
-
-					else if (status >= 300 && status <= 308)
-					{
-						servers[index]._clients[j]._response.redirect(servers[index]._clients[j].get_fd(), status, servers[index]._clients[j]._response._redirection_path);
-						servers[index]._clients[j].clear_client();
-						FD_CLR(servers[index]._clients[j].get_fd(), &set_fd.write_fds);
-					}
-					else
-					{
-						servers[index]._clients[j]._response.return_error(status, servers[index]._clients[j].get_fd());
-						servers[index].close_connection(j, set_fd);
-					}
-					continue;
-				}
-			}
-
-			if (FD_ISSET(servers[index]._clients[j].get_fd(), &set_fd.write_fds_tmp))
-			{
-				try
-				{
 					if (servers[index]._clients[j]._cgi._cgi_processing == true)
 					{
 						std::cout << "dkhel l cgi" << std::endl;
-						servers[index]._clients[j]._cgi.run_cgi(servers[index]._clients[j]._request, servers[index]._clients[j]._response._path_to_serve, env);
-						
+						servers[index]._clients[j]._cgi.run_cgi(servers[index]._clients[j], env);
 						if (servers[index]._clients[j]._cgi._cgi_processing == false)
 						{
 							servers[index]._clients[j]._response._requested_file.open(servers[index]._clients[j]._cgi._outfile.c_str());
@@ -72,12 +48,10 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 						std::cout << "handling request of client fd " << servers[index]._clients[j].get_fd() << std::endl;
 						servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index);
 					}
-
 					if (servers[index]._clients[j].get_ready_for_receiving_value() == true)
 					{
 						std::cout << "sending response to client with fd " << servers[index]._clients[j].get_fd() << std::endl;
 						servers[index]._clients[j]._response.send_response(servers[index]._clients[j].get_fd(), server::_config[servers[index].get_config_index()]);
-
 						if (servers[index]._clients[j]._response._bytes_sent >= servers[index]._clients[j]._response._content_length)
 						{
 							std::cout << "all chunks are sent to fd " << servers[index]._clients[j].get_fd() << std::endl;
@@ -86,11 +60,13 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 						}
 					}
 				}
-				catch (int status)
-				{
-					servers[index]._clients[j]._response.return_error(status, servers[index]._clients[j].get_fd());
-				}
 			}
+		}
+		catch (const error & e)
+		{
+			servers[index]._clients[e._client_index]._response.return_error(e._status, servers[index]._clients[e._client_index].get_fd());
+			servers[index]._clients[e._client_index].clear_client();
+			FD_CLR(servers[index]._clients[e._client_index].get_fd(), &set_fd.write_fds);
 		}
 	}
 }
@@ -163,27 +139,30 @@ void    webserv::launch_server(char** env)
 
 			if (FD_ISSET(servers[i].get_fd(), &set_fd.read_fds_tmp))
 			{
-				client_sock = accept(servers[i].get_fd(), (struct sockaddr *)&client_addr, &client_addr_len);
-				if (client_sock == -1)
-					perror("Error accepting connection");
-				else
+				for (int iteration = 0; (client_sock = accept(servers[i].get_fd(), (struct sockaddr *)&client_addr, &client_addr_len)) != -1; iteration++)
 				{
-					std::cout << "Connection accepted !!!\nClient number " << client_sock << std::endl;
-
-					servers[i]._clients.push_back(client(client_sock, servers[i].get_config_index()));
-					if (fcntl(servers[i]._clients.back().get_fd(), F_SETFL, O_NONBLOCK) == -1)
-					{
-        				perror("fcntl F_SETFL");
-        				close(servers[i]._clients.back().get_fd());
-        				servers[i]._clients.remove_from_end(1);
-    				}
+					// client_sock = accept(servers[i].get_fd(), (struct sockaddr *)&client_addr, &client_addr_len);
+					if (client_sock == -1)
+						perror("Error accepting connection");
 					else
 					{
-						if (client_sock > nfds)
+						std::cout << "Connection accepted !!!\nClient number " << client_sock << std::endl;
+
+						servers[i]._clients.push_back(client(client_sock, servers[i].get_config_index(), iteration));
+						if (fcntl(servers[i]._clients.back().get_fd(), F_SETFL, O_NONBLOCK) == -1)
 						{
-							nfds = client_sock;
+        					perror("fcntl F_SETFL");
+        					close(servers[i]._clients.back().get_fd());
+        					servers[i]._clients.remove_from_end(1);
+    					}
+						else
+						{
+							if (client_sock > nfds)
+							{
+								nfds = client_sock;
+							}
+							FD_SET(servers[i]._clients.back().get_fd(), &set_fd.read_fds);
 						}
-						FD_SET(servers[i]._clients.back().get_fd(), &set_fd.read_fds);
 					}
 				}
 			}

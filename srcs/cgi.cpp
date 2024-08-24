@@ -1,11 +1,14 @@
 #include "../inc/cgi.hpp"
+#include "../inc/client.hpp"
+#include <cstddef>
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
 #include <dirent.h>
-#include <wait.h>
+#include "../inc/error.hpp"
 
-cgi::cgi() : _pid(-1), _exit_status(-1), _cgi_processing(false), _env(NULL), _args(NULL), _first_time(true), _outfile("")
+cgi::cgi() : _pid(-1), _exit_status(-1), _cgi_processing(false), _env(NULL), _args(NULL), _first_time(true), _outfile(""),
+				_infile("")
 {
 	this->_fd[0] = -1;
 	this->_fd[1] = -1;
@@ -55,7 +58,7 @@ void	cgi::set_args(std::string path)
 	this->_args[1] = NULL;
 }
 
-std::string	cgi::get_random_file_name()
+std::string	cgi::get_random_file_name(int client_index)
 {
 	DIR*			directory;
 	struct dirent*	entry;
@@ -64,7 +67,13 @@ std::string	cgi::get_random_file_name()
 	file_name = "tmp";
 	while (true)
 	{
-		directory = opendir("/home/osajide/1337/wsl_webserv/");
+		// directory = opendir("/home/osajide/1337/wsl_webserv/");
+		directory = opendir("/tmp");
+		if (directory == NULL)
+		{
+			std::cerr << "Can't open directory" << std::endl;
+			throw error(500, client_index);
+		}
 		while ((entry = readdir(directory)) != NULL)
 		{
 			if (file_name == entry->d_name)
@@ -83,15 +92,16 @@ std::string	cgi::get_random_file_name()
 	return (file_name);
 }
 
-void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)
+// void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)
+void	cgi::run_cgi(client & cl, char** environ)
 {
 	unsigned char*	st;
 
 	if (this->_first_time == true)
 	{
-		this->set_args(path_to_serve);
-		this->set_env_variables(client_req, environ);
-		this->_outfile = this->get_random_file_name();
+		this->set_args(cl._response._path_to_serve);
+		this->set_env_variables(cl._request, environ);
+		this->_outfile = this->get_random_file_name(cl._index);
 
 		this->_fd[1] = open(this->_outfile.c_str(), O_CREAT | O_RDWR, 0644);
 		if (this->_fd[1] == -1)
@@ -111,7 +121,7 @@ void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)
 				exit(EXIT_FAILURE); // then i catch the exit status and throw 500
 			}
 			close(this->_fd[1]);
-			execve(path_to_serve.c_str(), this->_args, this->_env);
+			execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
 			close(_fd[1]);
 			exit(EXIT_FAILURE);
 		}
