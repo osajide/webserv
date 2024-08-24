@@ -21,6 +21,7 @@ void	cgi::set_env_variables(request client_req, char** environ)
 
 	temp.push_back("REQUEST_METHOD=" + client_req._method);
 	temp.push_back("QUERY_STRING=" + client_req._query_params);
+	
 
 	size_t	index;
 	size_t	j;

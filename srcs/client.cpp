@@ -1,5 +1,6 @@
 #include "../inc/client.hpp"
 #include <cstddef>
+#include <cstdio>
 #include <unistd.h>
 #include <iostream>
 #include <sstream>
@@ -134,6 +135,109 @@ void	client::does_location_has_redirection()
 	}
 }
 
+size_t	hex_to_decimal(std::string hex)
+{
+	size_t				decimal_val;
+	std::stringstream	ss;
+
+	ss << std::hex << hex;
+	ss >> decimal_val;
+
+	return (decimal_val);
+}
+
+size_t	client::unchunk_rest_of_raw_body()
+{
+	size_t				chunk_size;
+	char				buffer[BUFFER_SIZE + 1];
+	std::string			reader;
+	std::stringstream	ss(this->_request._raw_body);
+
+	memset(buffer, 0, BUFFER_SIZE + 1);
+
+	getline(ss, reader);
+	chunk_size = hex_to_decimal(reader);
+
+	if (chunk_size > BUFFER_SIZE)
+		ss.read(buffer, BUFFER_SIZE);
+	else
+		ss.read(buffer, chunk_size);
+
+	this->_unchunked_body_file << buffer;
+
+	if (ss.gcount() < chunk_size)
+	{
+		return (chunk_size);
+	}
+	return (0);
+}
+
+void	client::read_chunked_body(fd_sets& set_fd)
+{
+	int			valread = 0;
+	char		buffer[BUFFER_SIZE + 1];
+	std::string	reader;
+	size_t		chunk_size;
+	
+	// first phase put all chunked body in a file and after that unchunk it
+	if (!this->_unchunked_body_file.is_open())
+	{
+		if (!this->_body_file.is_open())
+		{
+			this->_body_file.open(this->_cgi.get_random_file_name(this->_index, INPUT_FILE), std::ios::app);
+		}
+		else
+		{
+			if (!this->_request._raw_body.empty())
+			{
+				this->_body_file << this->_request._raw_body;
+				if (this->_request._raw_body.rfind("0\r\n\r\n") != this->_request._raw_body.npos)
+				{
+					this->_cgi._infile = this->_cgi.get_random_file_name(this->_index, INPUT_FILE);
+					this->_unchunked_body_file.open(this->_cgi._infile, std::ios::app);
+				}
+				this->_request._raw_body.clear();
+			}
+			else
+			{
+				memset(buffer, 0, BUFFER_SIZE + 1);
+				valread = read(this->_fd, buffer, BUFFER_SIZE);
+				if (valread == 0 || valread == -1)
+					throw error(-1, this->_index);
+				// std::cout << "valread = " << valread << std::endl;
+				// std::cout << "buffer read from body ---------- :" << std::endl;
+				// std::cout << buffer << std::endl;
+				// std::cout << "--------" << std::endl;
+				sleep(2);
+
+				this->_body_file << buffer;
+				std::string	str_buffer(buffer);
+				if (str_buffer.rfind("0\r\n\r\n") != str_buffer.npos)
+				{
+					this->_cgi._infile = this->_cgi.get_random_file_name(this->_index, INPUT_FILE);
+					this->_unchunked_body_file.open(this->_cgi._infile, std::ios::app);
+				}
+			}
+		}
+	}
+	if (this->_unchunked_body_file.is_open())
+	{
+		getline(this->_body_file, reader);
+		chunk_size = hex_to_decimal(reader);
+		char	buffer[chunk_size + 1];
+		memset(buffer, 0, chunk_size + 1);
+		this->_body_file.read(buffer, chunk_size);
+		this->_request._content_length += chunk_size;
+		std::string	str_buffer(buffer);
+		if (str_buffer.rfind("0\r\n\r\n") != str_buffer.npos)
+		{
+			this->_unchunked_body_file.close();
+			this->_body_file.close();
+			FD_SET(this->_fd, &set_fd.write_fds);
+		}
+	}
+}
+
 void	client::read_body_based_on_content_length(fd_sets& set_fd)
 {
 	int		valread = 0;
@@ -157,10 +261,11 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 				valread = read(this->_fd, buffer, BUFFER_SIZE);
 				if (valread == 0 || valread == -1)
 					throw error(-1, this->_index);
-				std::cout << "valread = " << valread << std::endl;
+
+				// std::cout << "valread = " << valread << std::endl;
 				// std::cout << "buffer read from body ---------- :" << std::endl;
 				// std::cout << buffer << std::endl;
-				std::cout << "--------" << std::endl;
+				// std::cout << "--------" << std::endl;
 				sleep(2);
 
 				this->_body_file << buffer;
@@ -179,11 +284,6 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 			this->_body_file.close();
 			FD_SET(this->_fd, & set_fd.write_fds);
 		}
-	}
-	else
-	{
-		std::cout << "this throw" << std::endl;
-		throw error(500, this->_index);
 	}
 }
 
@@ -244,7 +344,6 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 			}
 		}
 	}
-
 	if (this->_read_body == true)
 	{
 		if (buffer[0] != '\0') // In case this is the first time entering this block
@@ -253,6 +352,7 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 		}
 		if (this->_request.header_exists("Transfer-Encoding")) // handle_chunked_body
 		{
+			this->read_chunked_body(set_fd);
 		}
 		else
 		{

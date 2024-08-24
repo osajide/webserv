@@ -34,6 +34,10 @@ class client
         void        does_location_has_redirection();
 
         void        read_body_based_on_content_length(fd_sets& set_fd);
+        void        read_chunked_body(fd_sets& set_fd);
+        size_t      unchunk_rest_of_raw_body();
+
+
         void        convert_numeric_values();
 
         void        clear_client();
@@ -46,4 +50,5 @@ class client
         size_t          _max_body_size;
         size_t          _bytes_read;
         std::fstream   _body_file;
+        std::fstream   _unchunked_body_file;
 };
