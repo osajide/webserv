@@ -64,9 +64,17 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 		}
 		catch (const error & e)
 		{
+			std::cout << "status catched in webserv::serve_clients: " << e._status << std::endl;
+
 			servers[index]._clients[e._client_index]._response.return_error(e._status, servers[index]._clients[e._client_index].get_fd());
-			servers[index]._clients[e._client_index].clear_client();
-			FD_CLR(servers[index]._clients[e._client_index].get_fd(), &set_fd.write_fds);
+
+			if (e._status == 501 || e._status == 400 || e._status == 414 || e._status == 413)
+				servers[index].close_connection(e._client_index, set_fd);
+			else
+			{
+				servers[index]._clients[e._client_index].clear_client();
+				FD_CLR(servers[index]._clients[e._client_index].get_fd(), &set_fd.write_fds);
+			}
 		}
 	}
 }
