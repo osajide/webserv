@@ -37,14 +37,18 @@ void	request::is_well_formed(int client_index, config conf)
 	{
 		throw error(501, client_index); // Not Implemented
 	}
-	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") == this->_headers.end()
-				&& this->_headers.find("Content-Length") == this->_headers.end())
+	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") == this->_headers.end() && this->_headers.find("Content-Length") == this->_headers.end())
 	{
 		throw error(400, client_index); // Bad Request
 	}
-	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") != this->_headers.end()
-				&& this->_headers.find("Content-Length") != this->_headers.end())
+	for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
 	{
+		std::cout << "it->first = '" << it->first << "'" << std::endl;
+		std::cout << "it->second = '" << it->second << "'" << std::endl;
+	}
+	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") != this->_headers.end() && this->_headers.find("Content-Length") != this->_headers.end())
+	{
+		std::cout << "thiiiiiiis" << std::endl;
 		throw error(400, client_index);
 	}
 	if (this->_target.length() > 2048)

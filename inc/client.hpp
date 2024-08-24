@@ -6,7 +6,7 @@
 #include "fd_sets.hpp"
 #include <fstream>
 
-#define BUFFER_SIZE 4999
+#define BUFFER_SIZE 500
 
 class client
 {

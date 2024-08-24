@@ -165,7 +165,7 @@ size_t	client::unchunk_rest_of_raw_body()
 
 	this->_unchunked_body_file << buffer;
 
-	if (ss.gcount() < chunk_size)
+	if ((size_t)ss.gcount() < chunk_size)
 	{
 		return (chunk_size);
 	}
@@ -223,6 +223,11 @@ void	client::read_chunked_body(fd_sets& set_fd)
 	if (this->_unchunked_body_file.is_open())
 	{
 		getline(this->_body_file, reader);
+		size_t pos = reader.rfind('\r');
+		if (pos != reader.npos)
+		{
+			reader.erase(pos, 1);
+		}
 		chunk_size = hex_to_decimal(reader);
 		char	buffer[chunk_size + 1];
 		memset(buffer, 0, chunk_size + 1);
