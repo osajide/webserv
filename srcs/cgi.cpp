@@ -60,13 +60,16 @@ void	cgi::set_args(std::string path)
 	this->_args[1] = NULL;
 }
 
-std::string	cgi::get_random_file_name(int client_index)
+std::string	cgi::get_random_file_name(int client_index, int file_type)
 {
 	DIR*			directory;
 	struct dirent*	entry;
 	std::string 	file_name;
 
-	file_name = "tmp";
+	if (file_type == INPUT_FILE)
+		file_name = "input";
+	else
+		file_name = "output";
 	while (true)
 	{
 		// directory = opendir("/home/osajide/1337/wsl_webserv/");
@@ -103,7 +106,7 @@ void	cgi::run_cgi(client & cl, char** environ)
 	{
 		this->set_args(cl._response._path_to_serve);
 		this->set_env_variables(cl._request, environ);
-		this->_outfile = this->get_random_file_name(cl._index);
+		this->_outfile = this->get_random_file_name(cl._index, OUTPUT_FILE);
 
 		this->_fd[1] = open(this->_outfile.c_str(), O_CREAT | O_RDWR, 0644);
 		if (this->_fd[1] == -1)
@@ -198,7 +201,7 @@ void	cgi::clear_cgi()
 
 	// std::remove(this->_outfile.c_str());
 	this->_outfile.clear();
-	std::remove(this->_infile.c_str());
+	// std::remove(this->_infile.c_str());
 	this->_infile.clear();
 	this->_fd[0] = -1;
 	this->_fd[1] = -1;

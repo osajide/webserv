@@ -114,11 +114,14 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 
 	if (this->_cgi._infile.empty())
 	{
-		this->_cgi._infile = this->_cgi.get_random_file_name(this->_index);
+		this->_cgi._infile = this->_cgi.get_random_file_name(this->_index, INPUT_FILE);
+		std::cout << "infile = " << this->_cgi._infile << std::endl;
 		this->_body_file.open(this->_cgi._infile, std::ios::app);
 	}
 	if (this->_body_file.is_open())
 	{
+		std::cout << "bytes read = " << this->_bytes_read << std::endl;
+		std::cout << "content le = " << this->_content_length << std::endl;
 		if (this->_bytes_read < this->_content_length)
 		{
 			if (this->_request._raw_body.empty())
@@ -188,13 +191,19 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 
 			if (this->_request.header_exists("Transfer-Encoding") || this->_request.header_exists("Content-Length"))
 			{
-				this->_read_body = true;
 				std::stringstream ss(server::_config[this->_config_index].fetch_directive_value("client_max_body_size").front()); // i expect this directive to be present at this point
 				ss >> this->_max_body_size;
 				if (this->_request.header_exists("Content-Length"))
 				{
 					std::stringstream	s(this->_request._headers["Content-Length"]);
 					s >> this->_content_length;
+					if (this->_content_length == 0)
+					{
+						FD_SET(this->_fd, &set_fd.write_fds);
+						this->_read_body = false;
+					}
+					else
+						this->_read_body = true;
 				}
 
 			}
@@ -212,30 +221,13 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 		{
 			this->_request._raw_body = this->_request._raw_request.substr(pos + 4);
 		}
-		// if (this->_request.header_exists("Transfer-Encoding")) // handle_chunked_body
-		// {
-			// else
-			// {
-			// 	std::cout << "dkhellllll======" << std::endl;
-			// 	valread = read(this->_fd, buffer, BUFFER_SIZE);
-			// 	this->_rawBody += buffer;
-
-			// 	if (valread == 0)
-			// 		throw error(-2, this->_index);
-			// }
-			// if (valread < BUFFER_SIZE)
-			// {
-			// 	// std::cout << "full body :" << std::endl;
-			// 	// std::cout << "'" << this->_rawBody << "'" << std::endl;
-			// 	this->_request.parse_body(this->_rawBody, max_body_size);
-			// 	this->_rawBody.clear();
-			// 	// FD_SET(this->_fd, &write_fds);
-			// }
-		// }
-		// else
-		// {
+		if (this->_request.header_exists("Transfer-Encoding")) // handle_chunked_body
+		{
+		}
+		else
+		{
 			this->read_body_based_on_content_length(set_fd);
-		// }
+		}
 	}
 }
 

@@ -116,7 +116,7 @@ void    webserv::launch_server(char** env)
 
 	while (true)
 	{
-		// std::cout << "Waiting for connections...." << std::endl;
+		std::cout << "Waiting for connections...." << std::endl;
 
 		set_fd.read_fds_tmp = set_fd.read_fds;
 		set_fd.write_fds_tmp = set_fd.write_fds;

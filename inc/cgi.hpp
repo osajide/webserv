@@ -26,5 +26,11 @@ class cgi
 		void		set_args(std::string path);
 		void		run_cgi(client & cl, char** environ);
 		void		clear_cgi();
-		std::string	get_random_file_name(int client_index);
+		std::string	get_random_file_name(int client_index, int file_type);
+};
+
+enum file_type
+{
+	INPUT_FILE,
+	OUTPUT_FILE
 };
