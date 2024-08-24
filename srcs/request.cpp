@@ -3,7 +3,7 @@
 #include <sstream>
 
 
-request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _query_params(""), _http_version("")
+request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _query_params(""), _http_version(""), _content_length(0)
 {}
 
 void    request::set_request_line(std::string request_line, int client_index)
@@ -30,7 +30,7 @@ void    request::set_header(std::string key, std::string value)
     this->_headers[key] = value;
 }
 
-void	request::is_well_formed(int client_index)
+void	request::is_well_formed(int client_index, config conf)
 {
 	if (this->_headers.find("Transfer-Encoding") != this->_headers.end()
 		&&	this->_headers["Transfer-Encoding"] != "chunked")
@@ -65,7 +65,11 @@ void	request::is_well_formed(int client_index)
 	{
 		throw error(505, client_index); //HTTP Version Not Supported
 	}
-
+	if (this->_headers.find("Content-Length") != this->_headers.end())
+	{
+		if (std::atoi(this->_headers["Content-Length"].c_str()) > std::atoi(conf.fetch_directive_value("client_body_size").front().c_str()))
+			throw error(413, client_index);
+	}
 }
 
 std::string remove_last_dir_from_path(std::string  path)

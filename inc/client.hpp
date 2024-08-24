@@ -32,6 +32,7 @@ class client
         void        does_location_has_redirection();
 
         void        read_body_based_on_content_length(fd_sets& set_fd);
+        void        convert_numeric_values();
 
         void        clear_client();
     private:
@@ -42,6 +43,5 @@ class client
         bool            _read_body;
         size_t          _max_body_size;
         size_t          _bytes_read;
-        size_t          _content_length;
         std::fstream   _body_file;
 };

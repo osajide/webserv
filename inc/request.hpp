@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstddef>
 #include <string>
 #include <map>
 #include <vector>
@@ -14,11 +15,10 @@ class request
         void    	set_request_line(std::string    request_line, int client_index);
         void    	set_header(std::string key, std::string value);
 
-		void		is_well_formed(int client_index);
+		void		is_well_formed(int client_index, config conf);
 		int			does_uri_match_location(std::vector<LocationPair> locations, std::string uri_target);
         std::string fetch_header_value(std::string key);
         int         header_exists(std::string key);
-
 
 		void		clear_request();
 
@@ -29,5 +29,6 @@ class request
         std::string                         _query_params;
         std::string                         _http_version;
         std::map<std::string, std::string>  _headers;
+        size_t                              _content_length;
 
 };

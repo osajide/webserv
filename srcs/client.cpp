@@ -12,12 +12,18 @@ client::client()
 {}
 
 client::client(int client_sock, int conf_index, int index) : _index(index), _config_index(conf_index), _location_index(-2), _fd(client_sock), _ready_for_receiving(false), _read_body(false),
-													_max_body_size(0), _bytes_read(0), _content_length(0)
+													_max_body_size(0), _bytes_read(0)
 {}
 
 int client::get_fd()
 {
     return (this->_fd);
+}
+
+void	client::convert_numeric_values()
+{
+	this->_max_body_size = std::atoi(server::_config[this->_config_index].fetch_directive_value("client_max_body_size").front().c_str());
+	this->_request._content_length = std::atoi(this->_request._headers["Content-Length"].c_str());
 }
 
 void    client::fill_request_object()
@@ -28,9 +34,6 @@ void    client::fill_request_object()
 	std::string			value;
 	size_t				pos;
 
-	// need to exctract the first line before entering the loop
-	// and check the first word if is it different from
-	// GET, POST and DELETE
 	getline(ss, reader);
 	this->_request.set_request_line(reader, this->_index);
 
@@ -49,6 +52,7 @@ void    client::fill_request_object()
 			this->_request.set_header(key, value);
 		}
 	}
+	this->convert_numeric_values();
 }
 
 int	client::dir_has_index_files()
@@ -121,8 +125,8 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 	if (this->_body_file.is_open())
 	{
 		std::cout << "bytes read = " << this->_bytes_read << std::endl;
-		std::cout << "content le = " << this->_content_length << std::endl;
-		if (this->_bytes_read < this->_content_length)
+		std::cout << "content le = " << this->_request._content_length << std::endl;
+		if (this->_bytes_read < this->_request._content_length)
 		{
 			if (this->_request._raw_body.empty())
 			{
@@ -143,7 +147,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 				this->_request._raw_body.clear();
 			}
 		}
-		if (this->_bytes_read == this->_content_length)
+		if (this->_bytes_read == this->_request._content_length)
 		{
 			this->_body_file.close();
 			FD_SET(this->_fd, & set_fd.write_fds);
@@ -182,7 +186,7 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 		if (pos != this->_request._raw_request.npos)
 		{
 			this->fill_request_object();
-			this->_request.is_well_formed(this->_index);
+			this->_request.is_well_formed(this->_index, server::_config[conf_index]);
 
 			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
 			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request._target);
@@ -196,8 +200,8 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 				if (this->_request.header_exists("Content-Length"))
 				{
 					std::stringstream	s(this->_request._headers["Content-Length"]);
-					s >> this->_content_length;
-					if (this->_content_length == 0)
+					s >> this->_request._content_length;
+					if (this->_request._content_length == 0)
 					{
 						FD_SET(this->_fd, &set_fd.write_fds);
 						this->_read_body = false;
@@ -266,7 +270,6 @@ void	client::clear_client()
 	this->_ready_for_receiving = false;
 	this->_location_index = -2;
 	this->_bytes_read = 0;
-	this->_content_length = 0;
 	this->_read_body = false;
 	this->_max_body_size = 0;
 
