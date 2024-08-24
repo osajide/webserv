@@ -108,6 +108,12 @@ void	response::return_error(int status, int target_fd)
 		this->_body = "<h1>400 Bad Request</h1>";
 		this->_content_length = this->_body.length();
 	}
+	else if (status == 413)
+	{
+		this->_status_line = "HTTP/1.1 413 Request Entity Too Large";
+		this->_body = "<h1>413 Request Entity Too Large</h1>";
+		this->_content_length = this->_body.length();
+	}
 	else if (status == 414)
 	{
 		this->_status_line = "HTTP/1.1 414 Request Uri Too Long";

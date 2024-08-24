@@ -15,6 +15,29 @@ client::client(int client_sock, int conf_index, int index) : _index(index), _con
 													_max_body_size(0), _bytes_read(0)
 {}
 
+client::client(client const &rhs) : _request(rhs._request), _response(rhs._response), _cgi(rhs._cgi)
+{
+	*this = rhs;
+}
+
+client&	client::operator=(const client &rhs)
+{
+	if (this != &rhs)
+	{
+		this->_index = rhs._index;
+		this->_request = rhs._request;
+		this->_response = rhs._response;
+		this->_config_index = rhs._config_index;
+		this->_location_index = rhs._location_index;
+		this->_fd = rhs._fd;
+		this->_ready_for_receiving = rhs._ready_for_receiving;
+		this->_read_body = rhs._read_body;
+		this->_max_body_size = rhs._max_body_size;
+		this->_bytes_read = rhs._bytes_read;
+	}
+	return (*this);
+}
+
 int client::get_fd()
 {
     return (this->_fd);
@@ -195,8 +218,7 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 
 			if (this->_request.header_exists("Transfer-Encoding") || this->_request.header_exists("Content-Length"))
 			{
-				std::stringstream ss(server::_config[this->_config_index].fetch_directive_value("client_max_body_size").front()); // i expect this directive to be present at this point
-				ss >> this->_max_body_size;
+				std::cout << "max body size = " << this->_max_body_size << std::endl;
 				if (this->_request.header_exists("Content-Length"))
 				{
 					std::stringstream	s(this->_request._headers["Content-Length"]);

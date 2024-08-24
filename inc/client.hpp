@@ -12,6 +12,8 @@ class client
 {
     public:
         client(int client_sock, int conf_index, int index);
+        client(client const &);
+        client & operator=(const client &);
 
         int         get_fd();
         void        read_request(int config_index, fd_sets&);
