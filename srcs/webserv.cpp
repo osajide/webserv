@@ -34,7 +34,7 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 
 					if (servers[index]._clients[j]._cgi._cgi_processing == true)
 					{
-						std::cout << "dkhel l cgi" << std::endl;
+						// std::cout << "dkhel l cgi" << std::endl;
 						servers[index]._clients[j]._cgi.run_cgi(servers[index]._clients[j], env);
 						if (servers[index]._clients[j]._cgi._cgi_processing == false)
 						{
@@ -116,7 +116,7 @@ void    webserv::launch_server(char** env)
 
 	while (true)
 	{
-		std::cout << "Waiting for connections...." << std::endl;
+		// std::cout << "Waiting for connections...." << std::endl;
 
 		set_fd.read_fds_tmp = set_fd.read_fds;
 		set_fd.write_fds_tmp = set_fd.write_fds;

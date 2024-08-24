@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <unistd.h>
+#include <cstdio>
 #include <dirent.h>
 #include "../inc/error.hpp"
 
@@ -18,7 +19,8 @@ void	cgi::set_env_variables(request client_req, char** environ)
 {
 	std::vector<std::string>	temp;
 
-	temp.push_back("REQUEST_METHOD=" + client_req.get_method());
+	temp.push_back("REQUEST_METHOD=" + client_req._method);
+	temp.push_back("QUERY_STRING=" + client_req._query_params);
 
 	size_t	index;
 	size_t	j;
@@ -89,7 +91,7 @@ std::string	cgi::get_random_file_name(int client_index)
 			break;
 		}
 	}
-	return (file_name);
+	return ("/tmp/" + file_name);
 }
 
 // void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)
@@ -194,14 +196,17 @@ void	cgi::clear_cgi()
 		this->_env = NULL;
 	}
 
+	// std::remove(this->_outfile.c_str());
 	this->_outfile.clear();
+	std::remove(this->_infile.c_str());
 	this->_infile.clear();
 	this->_fd[0] = -1;
 	this->_fd[1] = -1;
 	this->_cgi_processing = false;
 	this->_first_time = true;
 	this->_exit_status = -1;
-	this->_pid = -1;}
+	this->_pid = -1;
+}
 
 cgi::~cgi()
 {

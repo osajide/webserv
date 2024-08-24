@@ -76,6 +76,7 @@ int	client::dir_has_index_files()
 	for (size_t i = 0; i < index_files.size(); i++)
 	{
 		access_path = this->_response._path_to_serve + index_files[i];
+		std::cout << "access path = '" << access_path << "'" << std::endl;
 		if (access(access_path.c_str(), F_OK) == 0) // Default index
 		{
 			this->_response._path_to_serve = access_path;
@@ -83,7 +84,6 @@ int	client::dir_has_index_files()
 		}
 		access_path.clear();
 	}
-
 	return (0);
 }
 
@@ -182,7 +182,7 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 			this->_request.is_well_formed(this->_index);
 
 			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
-			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request.get_target());
+			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request._target);
             
         	this->does_location_has_redirection();
 
@@ -241,7 +241,7 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 
 void	client::handle_delete_directory_request(fd_sets& set_fd)
 {
-	if (server::_config[this->_config_index].if_cgi_directive_exists(this->_location_index, this->_request.get_target()))
+	if (server::_config[this->_config_index].if_cgi_directive_exists(this->_location_index, this->_request._target))
 	{
 		if (this->dir_has_index_files())
 		{

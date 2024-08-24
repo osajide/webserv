@@ -240,7 +240,7 @@ std::string server::check_availability_of_requested_resource(int client_index, i
 
 	}
 
-	full_path += this->_clients[client_index]._request.get_target();
+	full_path += this->_clients[client_index]._request._target;
 	std::cout << "full path =====----> '" << full_path << "'" << std::endl;
 
 	if (access(full_path.c_str(), F_OK) == -1)
@@ -260,7 +260,7 @@ std::string    server::check_if_method_allowed_in_location(int client_index, int
 
 		for (size_t i = 0; i < allowed_methods.size(); i++)
 		{
-			if (this->_clients[client_index]._request.get_method() == allowed_methods[i])
+			if (this->_clients[client_index]._request._method == allowed_methods[i])
 			{
 				// std::cout << "ALLOWED FROM THE SERVER CONF NOT LOCATION" << std::endl;
 				return (allowed_methods[i]);
@@ -273,7 +273,7 @@ std::string    server::check_if_method_allowed_in_location(int client_index, int
 
         for (size_t i = 0; i < allowed_methods.size(); i++)
         {
-            if (this->_clients[client_index]._request.get_method() == allowed_methods[i])
+            if (this->_clients[client_index]._request._method == allowed_methods[i])
             {
                 // std::cout << "ALLOWEEEEEEED!!!!!" << std::endl;
 				return (allowed_methods[i]);
@@ -315,17 +315,18 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 	{
 		if (this->check_resource_type(this->_clients[client_index]._response._path_to_serve) == DIRECTORY)
 		{
-			if (this->_clients[client_index]._request.get_target().back() == '/')
+			std::cout << "last char = '" << this->_clients[client_index]._request._target[this->_clients[client_index]._request._target.length() - 1] << "'" << std::endl;
+			if (this->_clients[client_index]._request._target[this->_clients[client_index]._request._target.length() - 1] == '/')
 			{
 				if (req_method == "DELETE")
 				{
 					this->_clients[client_index].handle_delete_directory_request(set_fd);
 					return ;
 				}
-
+				std::cout << "path before index = '" << this->_clients[client_index]._response._path_to_serve << "'" << std::endl;
 				if (this->_clients[client_index].dir_has_index_files()) // this method modifies on path_to_serve attribute
 				{
-					if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._request.get_target()))
+					if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._response._path_to_serve))
 					{
 						this->_clients[client_index]._cgi._cgi_processing = true;
 					}
@@ -351,7 +352,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					}
 					else
 					{
-						this->_clients[client_index]._response.autoindex(this->_clients[client_index].get_fd(), this->_clients[client_index]._request.get_target());
+						this->_clients[client_index]._response.autoindex(this->_clients[client_index].get_fd(), this->_clients[client_index]._request._target);
 						this->_clients[client_index].clear_client();
 						FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 						std::cout << "autoindex served !!" << std::endl;
@@ -363,14 +364,14 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				if (req_method == "DELETE")
 					throw error(409, client_index); // Conflict
 
-				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), 301, this->_clients[client_index]._request.get_target() + '/');
+				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), 301, this->_clients[client_index]._request._target + '/');
 				this->_clients[client_index].clear_client();
 				FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 			}
 		}
 		else
 		{
-			if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._request.get_target()))
+			if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._request._target))
 			{
 				this->_clients[client_index]._cgi._cgi_processing = true;
 			}

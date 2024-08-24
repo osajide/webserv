@@ -3,39 +3,31 @@
 #include <sstream>
 
 
-request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _http_version("")
+request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _query_params(""), _http_version("")
 {}
 
 void    request::set_request_line(std::string request_line, int client_index)
 {
     std::stringstream   ss(request_line);
+	size_t				pos;
 
     ss >> this->_method;
 	if (_method != "GET" && _method != "POST" && _method != "DELETE")
 		throw error(400, client_index);
 
     ss >> this->_target;
+	pos = this->_target.find("?");
+	if (pos != this->_target.npos)
+	{
+		this->_query_params = this->_target.substr(pos + 1);
+		this->_target = this->_target.substr(0, pos);
+	}
     ss >> this->_http_version;
 }
 
 void    request::set_header(std::string key, std::string value)
 {
     this->_headers[key] = value;
-}
-
-std::string	request::get_method()
-{
-	return (this->_method);
-}
-
-std::string	request::get_target()
-{
-	return (this->_target);
-}
-
-std::string	request::get_http_version()
-{
-	return (this->_http_version);
 }
 
 void	request::is_well_formed(int client_index)

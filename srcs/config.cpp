@@ -239,6 +239,7 @@ std::string	get_extension(std::string path)
 
 int	config::if_cgi_directive_exists(int location_index, std::string path)
 {
+	std::cout << "path cgi = " << path << std::endl;
 	std::string					extension;
 	std::vector<std::string>	cgi_directive;
 

@@ -13,10 +13,7 @@ class request
 		
         void    	set_request_line(std::string    request_line, int client_index);
         void    	set_header(std::string key, std::string value);
-        
-		std::string get_method();
-        std::string get_target();
-        std::string get_http_version();
+
 		void		is_well_formed(int client_index);
 		int			does_uri_match_location(std::vector<LocationPair> locations, std::string uri_target);
         std::string fetch_header_value(std::string key);
@@ -29,6 +26,7 @@ class request
     	std::string							_raw_body;
         std::string                         _method;
         std::string                         _target;
+        std::string                         _query_params;
         std::string                         _http_version;
         std::map<std::string, std::string>  _headers;
 
