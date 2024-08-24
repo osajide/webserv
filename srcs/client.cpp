@@ -157,8 +157,11 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 				valread = read(this->_fd, buffer, BUFFER_SIZE);
 				if (valread == 0 || valread == -1)
 					throw error(-1, this->_index);
-				std::cout << "buffer read from body ---------- :" << std::endl;
-				std::cout << buffer << std::endl;
+				std::cout << "valread = " << valread << std::endl;
+				// std::cout << "buffer read from body ---------- :" << std::endl;
+				// std::cout << buffer << std::endl;
+				std::cout << "--------" << std::endl;
+				sleep(2);
 
 				this->_body_file << buffer;
 				this->_bytes_read += valread;
@@ -166,6 +169,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 			else
 			{
 				this->_body_file << this->_request._raw_body;
+				std::cout << "raw body size = " << this->_request._raw_body.length() << std::endl;
 				this->_bytes_read += this->_request._raw_body.length();
 				this->_request._raw_body.clear();
 			}
