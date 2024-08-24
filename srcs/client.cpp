@@ -119,6 +119,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 	}
 	if (this->_body_file.is_open())
 	{
+		std::cout << "dkhel" << std::endl;
 		if (this->_bytes_read < this->_content_length)
 		{
 			if (this->_request._raw_body.empty())
@@ -231,7 +232,6 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 		// }
 		// else
 		// {
-			std::cout << "heere " << std::endl;
 			this->read_body_based_on_content_length(set_fd);
 		// }
 	}
@@ -271,6 +271,13 @@ void	client::clear_client()
 {
 	this->_ready_for_receiving = false;
 	this->_location_index = -2;
+	this->_bytes_read = 0;
+	this->_content_length = 0;
+	this->_read_body = false;
+	this->_max_body_size = 0;
+
+	if (this->_body_file.is_open())
+		this->_body_file.close();
 
 	this->_request.clear_request();
 	this->_response.clear_response();
