@@ -30,10 +30,10 @@ class config
         int                         if_cgi_directive_exists(int location_index, std::string path);
 
     private:
-        DirectiveMap                			                    _directives;
-        std::vector<LocationPair>   			                    _locations;
-        static std::vector<std::string>                             _dictionary;
-        static std::vector<std::pair<std::string, std::string> >    _mime_types;
+        DirectiveMap												_directives;
+        std::vector<LocationPair>									_locations;
+        static std::vector<std::string>								_dictionary;
+        static std::vector<std::pair<std::string, std::string> >	_mime_types;
 };
 
 enum autoindx

@@ -222,27 +222,52 @@ int server::get_config_index()
 
 std::string server::check_availability_of_requested_resource(int client_index, int location_index)
 {
-    std::vector<std::string>	root_directive_inside_location;
-    std::string					full_path;
+	int							alias_check;
+	std::string					target;
+	std::vector<std::string>	root_directive_inside_location;
+	std::vector<std::string>	alias_directive_inside_location;
+	std::string					full_path;
 
 	
+	alias_check = 0;
 	if (location_index == -1)
+	{
 		full_path = server::_config[this->_conf_index].fetch_directive_value("root").front();
+	}
 	else
 	{
-		root_directive_inside_location = server::_config[this->_conf_index].fetch_location_directive_value(location_index, "root");
 
-		if (root_directive_inside_location.size() == 0)
-            full_path = server::_config[this->_conf_index].fetch_directive_value("root").front();
-
+		alias_directive_inside_location = server::_config[this->_conf_index].fetch_location_directive_value(location_index, "alias");
+		if (alias_directive_inside_location.empty())
+		{
+			root_directive_inside_location = server::_config[this->_conf_index].fetch_location_directive_value(location_index, "root");
+			if (root_directive_inside_location.empty())
+			{
+				full_path = server::_config[this->_conf_index].fetch_directive_value("root").front();
+			}
+			else
+				full_path = root_directive_inside_location.front();
+		}
 		else
-			full_path = root_directive_inside_location.front();
-
+		{
+			full_path = alias_directive_inside_location.front();
+			alias_check = 1;
+		}
 	}
 
-	full_path += this->_clients[client_index]._request._target;
-	std::cout << "full path =====----> '" << full_path << "'" << std::endl;
+	if (alias_check == 1)
+	{
+		// std::string	location_dir;
 
+		// location_dir = server::_config[this->_clients[client_index]._config_index].get_location_directory_name(location_index);
+		target = this->_clients[client_index]._request._target.substr(); // here i should substruct the location from the entire target
+	}
+	else
+		target = this->_clients[client_index]._request._target;
+
+	full_path += target;
+	std::cout << "full path =====----> '" << full_path << "'" << std::endl;
+	exit(1);
 	if (access(full_path.c_str(), F_OK) == -1)
 		return ("");
 
