@@ -315,7 +315,6 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 	{
 		if (this->check_resource_type(this->_clients[client_index]._response._path_to_serve) == DIRECTORY)
 		{
-			std::cout << "last char = '" << this->_clients[client_index]._request._target[this->_clients[client_index]._request._target.length() - 1] << "'" << std::endl;
 			if (this->_clients[client_index]._request._target[this->_clients[client_index]._request._target.length() - 1] == '/')
 			{
 				if (req_method == "DELETE")
@@ -371,7 +370,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 		}
 		else
 		{
-			if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._request._target))
+			if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._response._path_to_serve))
 			{
 				this->_clients[client_index]._cgi._cgi_processing = true;
 			}

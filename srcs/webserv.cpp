@@ -33,7 +33,10 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 				if (FD_ISSET(servers[index]._clients[j].get_fd(), &set_fd.write_fds_tmp))
 				{
 					if (servers[index]._clients[j]._request._chunked_body == true)
+					{
 						servers[index]._clients[j].unchunk_body_file(set_fd);
+						continue;
+					}
 
 					if (servers[index]._clients[j]._cgi._cgi_processing == true)
 					{

@@ -157,6 +157,7 @@ size_t	hex_to_decimal(std::string hex)
 
 void	client::unchunk_body_file(fd_sets& set_fd)
 {
+	(void)set_fd;
 	std::string	reader;
 	size_t		chunk_size;
 
@@ -169,29 +170,38 @@ void	client::unchunk_body_file(fd_sets& set_fd)
 	if (this->_unchunked_body_file.is_open())
 	{
 		getline(this->_body_file, reader);
-		std::cout << "reader = " << reader << std::endl;
+		std::cout << "reader = '" << reader << "'" << std::endl;
 		chunk_size = hex_to_decimal(reader);
+		// sleep(2);
 
-		char	buffer[chunk_size + 1];
-
-		memset(buffer, 0, chunk_size + 1);
-
-		this->_body_file.read(buffer, chunk_size);
-
-		this->_request._content_length += chunk_size;
-
-		std::string	str_buffer;
-		str_buffer.assign(buffer, this->_body_file.gcount());
-
-		this->_unchunked_body_file.ignore(2); // move cursor to skip the "\r\n\ that split each chunk"
-
-		if (str_buffer.rfind("0\r\n\r\n") != str_buffer.npos)
+		if(chunk_size == 0 || this->_body_file.eof())
 		{
+			std::cout << "3ayatna l rfind" << std::endl;
 			this->_unchunked_body_file.close();
 			this->_body_file.close();
 			this->_request._chunked_body = false;
-			FD_CLR(this->_fd, &set_fd.write_fds);
+			// exit(1);
 		}
+
+		char	buffer[chunk_size + 1];
+		std::cout << "buffer t alloca" << std::endl;
+		memset(buffer, 0, chunk_size + 1);
+		std::cout << "buffer t set l 0" << std::endl;
+
+		this->_body_file.read(buffer, chunk_size);
+		std::cout << "buffer t reada" << std::endl;
+		std::cout << buffer << std::endl;
+
+		this->_request._content_length += chunk_size;
+		std::cout << "content zndna fih" << std::endl;
+
+		std::string	str_buffer;
+		str_buffer.assign(buffer, this->_body_file.gcount());
+		this->_unchunked_body_file << str_buffer;
+		std::cout << "allocina str_buffer" << std::endl;
+
+		this->_body_file.ignore(2); // move cursor to skip the "\r\n\ that split each chunk"
+		std::cout << "ignore 2 char" << std::endl;
 	}
 }
 
@@ -200,7 +210,6 @@ void	client::read_chunked_body(fd_sets& set_fd)
 	int			valread = 0;
 	char		buffer[BUFFER_SIZE + 1];
 	
-	// first phase put all chunked body in a file then unchunk it
 	if (!this->_body_file.is_open())
 	{
 		this->_body_file.open(this->_cgi.get_random_file_name(this->_index, INPUT_FILE), std::ios::in | std::ios::out | std::ios::app);
@@ -224,21 +233,21 @@ void	client::read_chunked_body(fd_sets& set_fd)
 
 			valread = read(this->_fd, buffer, BUFFER_SIZE);
 
-			std::cout << "========== buffer read -------_____---:" << std::endl;
-			std::cout << buffer << std::endl;
-			std::cout << "-----============" << std::endl;
+			// std::cout << "========== buffer read -------_____---:" << std::endl;
+			// std::cout << buffer << std::endl;
+			// std::cout << "-----============" << std::endl;
 
 			if (valread == 0 || valread == -1)
 				throw error(-1, this->_index);
 
 			this->_body_file << buffer;
 
-			std::string	str_buffer;
-			str_buffer.assign(buffer, this->_body_file.gcount());
+			std::string	str_buffer(buffer);
 
 			if (str_buffer.rfind("0\r\n\r\n") != str_buffer.npos) // temp
 			{
 				std::cout << "fouuuuund" << std::endl;
+				// sleep(5);
 				this->_body_file.seekg(0, std::ios::beg);
 				this->_request._chunked_body = true;
 				FD_SET(this->_fd, &set_fd.write_fds);
@@ -270,12 +279,6 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 				valread = read(this->_fd, buffer, BUFFER_SIZE);
 				if (valread == 0 || valread == -1)
 					throw error(-1, this->_index);
-
-				// std::cout << "valread = " << valread << std::endl;
-				// std::cout << "buffer read from body ---------- :" << std::endl;
-				// std::cout << buffer << std::endl;
-				// std::cout << "--------" << std::endl;
-				sleep(2);
 
 				this->_body_file << buffer;
 				this->_bytes_read += valread;
@@ -370,7 +373,7 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 
 void	client::handle_delete_directory_request(fd_sets& set_fd)
 {
-	if (server::_config[this->_config_index].if_cgi_directive_exists(this->_location_index, this->_request._target))
+	if (server::_config[this->_config_index].if_cgi_directive_exists(this->_location_index, this->_response._path_to_serve))
 	{
 		if (this->dir_has_index_files())
 		{
@@ -414,30 +417,3 @@ void	client::clear_client()
 	this->_response.clear_response();
 	this->_cgi.clear_cgi();
 }
-
-
-
-/*
-
-	if (this->_unchunked_body_file.is_open())
-	{
-		this->_body_file.seekg(0, std::ios::beg);
-		getline(this->_body_file, reader);
-		std::cout << "reader = " << reader << std::endl;
-		chunk_size = hex_to_decimal(reader);
-		char	buffer[chunk_size + 1];
-		memset(buffer, 0, chunk_size + 1);
-		this->_body_file.read(buffer, chunk_size);
-		this->_request._content_length += chunk_size;
-		std::string	str_buffer(buffer);
-		this->_unchunked_body_file.ignore(2); // move cursor to skip the "\r\n\ that split each chunk"
-		if (str_buffer.rfind("0\r\n\r\n") != str_buffer.npos)
-		{
-			this->_unchunked_body_file.close();
-			this->_body_file.close();
-			FD_SET(this->_fd, &set_fd.write_fds);
-		}
-	}
-
-
-*/
