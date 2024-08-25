@@ -172,36 +172,28 @@ void	client::unchunk_body_file(fd_sets& set_fd)
 		getline(this->_body_file, reader);
 		std::cout << "reader = '" << reader << "'" << std::endl;
 		chunk_size = hex_to_decimal(reader);
-		// sleep(2);
 
 		if(chunk_size == 0 || this->_body_file.eof())
 		{
-			std::cout << "3ayatna l rfind" << std::endl;
-			this->_unchunked_body_file.close();
+			std::remove(this->_cgi._infile.substr(0, this->_cgi._infile.length() - 1).c_str()); // since i generate files with '_' added
 			this->_body_file.close();
+			this->_unchunked_body_file.close();
 			this->_request._chunked_body = false;
-			// exit(1);
 		}
 
 		char	buffer[chunk_size + 1];
-		std::cout << "buffer t alloca" << std::endl;
 		memset(buffer, 0, chunk_size + 1);
-		std::cout << "buffer t set l 0" << std::endl;
 
 		this->_body_file.read(buffer, chunk_size);
-		std::cout << "buffer t reada" << std::endl;
 		std::cout << buffer << std::endl;
 
 		this->_request._content_length += chunk_size;
-		std::cout << "content zndna fih" << std::endl;
 
 		std::string	str_buffer;
 		str_buffer.assign(buffer, this->_body_file.gcount());
 		this->_unchunked_body_file << str_buffer;
-		std::cout << "allocina str_buffer" << std::endl;
 
 		this->_body_file.ignore(2); // move cursor to skip the "\r\n\ that split each chunk"
-		std::cout << "ignore 2 char" << std::endl;
 	}
 }
 
