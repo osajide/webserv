@@ -35,7 +35,7 @@ class client
 
         void        read_body_based_on_content_length(fd_sets& set_fd);
         void        read_chunked_body(fd_sets& set_fd);
-        size_t      unchunk_rest_of_raw_body();
+        void        unchunk_body_file(fd_sets& set_fd);
 
 
         void        convert_numeric_values();

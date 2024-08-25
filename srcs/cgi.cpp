@@ -74,7 +74,8 @@ std::string	cgi::get_random_file_name(int client_index, int file_type)
 	while (true)
 	{
 		// directory = opendir("/home/osajide/1337/wsl_webserv/");
-		directory = opendir("/tmp");
+		// directory = opendir("/tmp");
+		directory = opendir("/tmp/post_test");
 		if (directory == NULL)
 		{
 			std::cerr << "Can't open directory" << std::endl;
@@ -95,7 +96,8 @@ std::string	cgi::get_random_file_name(int client_index, int file_type)
 			break;
 		}
 	}
-	return ("/tmp/" + file_name);
+	// return ("/tmp/" + file_name);
+	return ("/tmp/post_test/" + file_name);
 }
 
 // void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)

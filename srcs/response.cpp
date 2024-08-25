@@ -179,7 +179,7 @@ void	response::send_response(int fd, config serverConf)
 			if (this->_bytes_written == 0)
 			{
 				this->_chunk = this->get_chunk(this->_requested_file);
-
+				std::cout << "chunk ---->> '" << this->_chunk << "'" << std::endl;
 				this->_bytes_written = write(fd, this->_chunk.c_str(), this->_chunk.length());
 
 				this->_bytes_sent += this->_bytes_written;
@@ -346,11 +346,13 @@ void	response::send_cgi_headers(int fd, std::ifstream& requested_file)
 	std::streamsize curr = requested_file.tellg();
 	std::cout << "curr = " << curr << std::endl;
 	std::cout << "pos = " << pos << std::endl;
+	getline(this->_requested_file, reader);
+	std::cout << "r=========>>>>  '" << reader << "'" << std::endl;
 	requested_file.seekg(0, std::ios::end);
 	std::streamsize endofstream = requested_file.tellg();
 	std::cout << "end = " << endofstream << std::endl;
 
-	this->_content_length = endofstream - curr - 1; // becose std::ios::end is after the last character
+	this->_content_length = endofstream - curr;
 	requested_file.seekg(pos + 4, std::ios::beg);
 	std::cout << "length ===> " << this->_content_length << std::endl;
 }

@@ -3,7 +3,8 @@
 #include <sstream>
 
 
-request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _query_params(""), _http_version(""), _content_length(0)
+request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _query_params(""), _http_version(""), _content_length(0),
+						_chunked_body(false)
 {}
 
 void    request::set_request_line(std::string request_line, int client_index)
@@ -40,11 +41,6 @@ void	request::is_well_formed(int client_index, config conf)
 	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") == this->_headers.end() && this->_headers.find("Content-Length") == this->_headers.end())
 	{
 		throw error(400, client_index); // Bad Request
-	}
-	for (std::map<std::string, std::string>::iterator it = this->_headers.begin(); it != this->_headers.end(); it++)
-	{
-		std::cout << "it->first = '" << it->first << "'" << std::endl;
-		std::cout << "it->second = '" << it->second << "'" << std::endl;
 	}
 	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") != this->_headers.end() && this->_headers.find("Content-Length") != this->_headers.end())
 	{

@@ -26,15 +26,18 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 			{
 				if (FD_ISSET(servers[index]._clients[j].get_fd(), &set_fd.read_fds_tmp))
 				{
+					std::cout << "read request from fd " << servers[index]._clients[j].get_fd() << std::endl;
 					servers[index]._clients[j].read_request(servers[index].get_config_index(), set_fd);
 				}
 
 				if (FD_ISSET(servers[index]._clients[j].get_fd(), &set_fd.write_fds_tmp))
 				{
+					if (servers[index]._clients[j]._request._chunked_body == true)
+						servers[index]._clients[j].unchunk_body_file(set_fd);
 
 					if (servers[index]._clients[j]._cgi._cgi_processing == true)
 					{
-						// std::cout << "dkhel l cgi" << std::endl;
+						std::cout << "dkhel l cgi" << std::endl;
 						servers[index]._clients[j]._cgi.run_cgi(servers[index]._clients[j], env);
 						if (servers[index]._clients[j]._cgi._cgi_processing == false)
 						{
@@ -68,7 +71,7 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 
 			servers[index]._clients[e._client_index]._response.return_error(e._status, servers[index]._clients[e._client_index].get_fd());
 
-			if (e._status == 501 || e._status == 400 || e._status == 414 || e._status == 413)
+			if (e._status == -1 || e._status == 501 || e._status == 400 || e._status == 414 || e._status == 413)
 				servers[index].close_connection(e._client_index, set_fd);
 			else
 			{
