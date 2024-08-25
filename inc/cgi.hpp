@@ -22,7 +22,7 @@ class cgi
 		std::string					_outfile;
 		std::string					_infile;
 
-		void		set_env_variables(request, char**);
+		void		set_env_variables(request, std::string full_path, char**);
 		void		set_args(std::string path);
 		void		run_cgi(client & cl, char** environ);
 		void		clear_cgi();

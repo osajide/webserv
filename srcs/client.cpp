@@ -164,13 +164,12 @@ void	client::unchunk_body_file(fd_sets& set_fd)
 	if (!this->_unchunked_body_file.is_open())
 	{
 		this->_cgi._infile = this->_cgi.get_random_file_name(this->_index, INPUT_FILE);
-		std::cout << "infile ---- >>> '" << this->_cgi._infile << "'" << std::endl;
+		// std::cout << "infile ---- >>> '" << this->_cgi._infile << "'" << std::endl;
 		this->_unchunked_body_file.open(this->_cgi._infile, std::ios::in | std::ios::app);
 	}
 	if (this->_unchunked_body_file.is_open())
 	{
 		getline(this->_body_file, reader);
-		std::cout << "reader = '" << reader << "'" << std::endl;
 		chunk_size = hex_to_decimal(reader);
 
 		if(chunk_size == 0 || this->_body_file.eof())

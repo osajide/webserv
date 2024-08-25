@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstring>
 #include <fcntl.h>
+#include <sstream>
 #include <unistd.h>
 #include <cstdio>
 #include <dirent.h>
@@ -15,12 +16,20 @@ cgi::cgi() : _pid(-1), _exit_status(-1), _cgi_processing(false), _env(NULL), _ar
 	this->_fd[1] = -1;
 }
 
-void	cgi::set_env_variables(request client_req, char** environ)
+void	cgi::set_env_variables(request client_req, std::string full_path, char** environ)
 {
+	std::stringstream			helper;
 	std::vector<std::string>	temp;
 
 	temp.push_back("REQUEST_METHOD=" + client_req._method);
 	temp.push_back("QUERY_STRING=" + client_req._query_params);
+	temp.push_back("PATH_INFO=" + full_path);
+	
+	helper << client_req._content_length;
+	temp.push_back("CONTENT_LENGTH=" + helper.str());
+	std::cout << "temp.content length = " << temp.back() << std::endl;
+
+	// temp.push_back("CONTENT_TYPE=");
 	
 
 	size_t	index;
@@ -108,7 +117,7 @@ void	cgi::run_cgi(client & cl, char** environ)
 	if (this->_first_time == true)
 	{
 		this->set_args(cl._response._path_to_serve);
-		this->set_env_variables(cl._request, environ);
+		this->set_env_variables(cl._request, cl._response._path_to_serve, environ);
 		this->_outfile = this->get_random_file_name(cl._index, OUTPUT_FILE);
 
 		this->_fd[1] = open(this->_outfile.c_str(), O_CREAT | O_RDWR, 0644);
