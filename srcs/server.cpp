@@ -267,7 +267,7 @@ std::string server::check_availability_of_requested_resource(int client_index, i
 
 	full_path += target;
 	std::cout << "full path =====----> '" << full_path << "'" << std::endl;
-	exit(1);
+	// exit(1);
 	if (access(full_path.c_str(), F_OK) == -1)
 		return ("");
 
