@@ -25,13 +25,12 @@ void	cgi::set_env_variables(request client_req, std::string full_path, char** en
 	temp.push_back("REQUEST_METHOD=" + client_req._method);
 	temp.push_back("QUERY_STRING=" + client_req._query_params);
 	temp.push_back("PATH_INFO=" + full_path);
+	if (client_req.header_exists("Content-Type"))
+		temp.push_back("CONTENT_TYPE=" + client_req._headers["Content-Type"]);
 	
 	helper << client_req._content_length;
 	temp.push_back("CONTENT_LENGTH=" + helper.str());
 	std::cout << "temp.content length = " << temp.back() << std::endl;
-	// temp.push_back("CONTENT_TYPE=" + client_req._headers)
-
-	// temp.push_back("CONTENT_TYPE=");
 	
 
 	size_t	index;
@@ -162,6 +161,8 @@ void	cgi::run_cgi(client & cl, char** environ)
 			if (this->_fd[0] != -1)
 				close (this->_fd[0]);
 			close(this->_fd[1]);
+
+			chdir(cl._response._path_to_serve.substr(0, cl._response._path_to_serve.rfind('/')).c_str());
 
 			execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
 
