@@ -7,6 +7,7 @@
 #include <fstream>
 
 #define BUFFER_SIZE 500
+#define CLOSE_CONNECTION 10
 
 class client
 {

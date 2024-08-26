@@ -61,8 +61,12 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 						if (servers[index]._clients[j]._response._bytes_sent >= servers[index]._clients[j]._response._content_length)
 						{
 							std::cout << "all chunks are sent to fd " << servers[index]._clients[j].get_fd() << std::endl;
-							servers[index]._clients[j].clear_client();
 							FD_CLR(servers[index]._clients[j].get_fd(), &set_fd.write_fds);
+
+							if (servers[index]._clients[j]._request._headers["Connection"] == "closed")
+								throw error(CLOSE_CONNECTION, j);
+		
+							servers[index]._clients[j].clear_client();
 						}
 					}
 				}
@@ -72,9 +76,10 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 		{
 			std::cout << "status catched in webserv::serve_clients: " << e._status << std::endl;
 
-			servers[index]._clients[e._client_index]._response.return_error(e._status, servers[index]._clients[e._client_index].get_fd());
+			if (e._status != CLOSE_CONNECTION)
+				servers[index]._clients[e._client_index]._response.return_error(e._status, servers[index]._clients[e._client_index].get_fd());
 
-			if (e._status == -1 || e._status == 501 || e._status == 400 || e._status == 414 || e._status == 413)
+			if (e._status == CLOSE_CONNECTION || e._status == -1 || e._status == 501 || e._status == 400 || e._status == 414 || e._status == 413)
 				servers[index].close_connection(e._client_index, set_fd);
 			else
 			{

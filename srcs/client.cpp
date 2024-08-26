@@ -379,8 +379,12 @@ void	client::handle_delete_directory_request(fd_sets& set_fd)
 		this->_response.remove_requested_directory(this->_fd, this->_response._path_to_serve);
 	}
 
-	this->clear_client();
 	FD_CLR(this->_fd, &set_fd.write_fds);
+
+	if (this->_request._headers["Connection"] == "closed")
+		throw error(CLOSE_CONNECTION, this->_index);
+
+	this->clear_client();
 }
 
 void    client::set_ready_for_receiving_value(bool value)

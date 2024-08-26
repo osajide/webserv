@@ -333,8 +333,13 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 	{
 		this->_clients[client_index]._response.return_error(404, this->_clients[client_index].get_fd());
 		std::cout << "404 SERVED!!!" << std::endl;
-		this->_clients[client_index].clear_client();
+		
 		FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
+		
+		if (this->_clients[client_index]._request._headers["Connection"] == "closed")
+			throw error(CLOSE_CONNECTION, client_index);
+		
+		this->_clients[client_index].clear_client();
 	}
 	else
 	{
@@ -377,8 +382,12 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					else
 					{
 						this->_clients[client_index]._response.autoindex(this->_clients[client_index].get_fd(), this->_clients[client_index]._request._target);
+						(this->_clients[client_index].get_fd(), &set_fd.write_fds);
+						
+						if (this->_clients[client_index]._request._headers["Connection"] == "closed")
+							throw error(CLOSE_CONNECTION, client_index);
+
 						this->_clients[client_index].clear_client();
-						FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 						std::cout << "autoindex served !!" << std::endl;
 					}
 				}
@@ -389,8 +398,13 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					throw error(409, client_index); // Conflict
 
 				this->_clients[client_index]._response.redirect(this->_clients[client_index].get_fd(), 301, this->_clients[client_index]._request._target + '/');
-				this->_clients[client_index].clear_client();
+				
 				FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
+
+				if (this->_clients[client_index]._request._headers["Connection"] == "closed")
+					throw error(CLOSE_CONNECTION, client_index);
+
+				this->_clients[client_index].clear_client();
 			}
 		}
 		else
@@ -410,8 +424,12 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				{
 					this->_clients[client_index]._response.remove_requested_file(this->_clients[client_index].get_fd());
 
-					this->_clients[client_index].clear_client();
 					FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
+					
+					if (this->_clients[client_index]._request._headers["Connection"] == "closed")
+						throw error(CLOSE_CONNECTION, client_index);
+
+					this->_clients[client_index].clear_client();
 				}
 				else
 				{
