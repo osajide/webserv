@@ -8,6 +8,7 @@
 #include <cstdio>
 #include <dirent.h>
 #include "../inc/error.hpp"
+#include <wait.h>
 
 cgi::cgi() : _pid(-1), _exit_status(-1), _cgi_processing(false), _env(NULL), _args(NULL), _first_time(true), _outfile(""),
 				_infile("")
@@ -28,6 +29,7 @@ void	cgi::set_env_variables(request client_req, std::string full_path, char** en
 	helper << client_req._content_length;
 	temp.push_back("CONTENT_LENGTH=" + helper.str());
 	std::cout << "temp.content length = " << temp.back() << std::endl;
+	// temp.push_back("CONTENT_TYPE=" + client_req._headers)
 
 	// temp.push_back("CONTENT_TYPE=");
 	
@@ -109,7 +111,6 @@ std::string	cgi::get_random_file_name(int client_index, int file_type)
 	return ("/tmp/post_test/" + file_name);
 }
 
-// void	cgi::run_cgi(request client_req, std::string path_to_serve, char** environ)
 void	cgi::run_cgi(client & cl, char** environ)
 {
 	unsigned char*	st;
@@ -119,6 +120,13 @@ void	cgi::run_cgi(client & cl, char** environ)
 		this->set_args(cl._response._path_to_serve);
 		this->set_env_variables(cl._request, cl._response._path_to_serve, environ);
 		this->_outfile = this->get_random_file_name(cl._index, OUTPUT_FILE);
+
+		if (cl._request._method == "POST")
+		{
+			this->_fd[0] = open(this->_infile.c_str(), O_CREAT | O_RDWR, 0644);
+			if (this->_fd[0] == -1)
+				throw error(500, cl._index);
+		}
 
 		this->_fd[1] = open(this->_outfile.c_str(), O_CREAT | O_RDWR, 0644);
 		if (this->_fd[1] == -1)
@@ -136,13 +144,29 @@ void	cgi::run_cgi(client & cl, char** environ)
 		}
 		if (this->_pid == 0)
 		{
+			if (cl._request._method == "POST")
+			{
+				if (dup2(this->_fd[0], STDIN_FILENO) == -1)
+				{
+					close(this->_fd[0]);
+					exit(EXIT_FAILURE);
+				}
+			}
 			if (dup2(this->_fd[1], STDOUT_FILENO) == -1)
 			{
+				if (this->_fd[0] != -1)
+					close (this->_fd[0]);
 				close(this->_fd[1]);
 				exit(EXIT_FAILURE); // then i catch the exit status and throw 500
 			}
+			if (this->_fd[0] != -1)
+				close (this->_fd[0]);
 			close(this->_fd[1]);
+
 			execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
+
+			if (this->_fd[0] != -1)
+				close (this->_fd[0]);
 			close(_fd[1]);
 			exit(EXIT_FAILURE);
 		}
