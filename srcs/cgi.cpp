@@ -8,7 +8,7 @@
 #include <cstdio>
 #include <dirent.h>
 #include "../inc/error.hpp"
-#include <wait.h>
+// #include <wait.h>
 
 cgi::cgi() : _pid(-1), _exit_status(-1), _cgi_processing(false), _env(NULL), _args(NULL), _first_time(true), _outfile(""),
 				_infile("")
@@ -84,7 +84,7 @@ std::string	cgi::get_random_file_name(int client_index, int file_type)
 		file_name = "output";
 	while (true)
 	{
-		// directory = opendir("/home/osajide/1337/wsl_webserv/");
+		// directory = opendir("/home/ykhayri/Desktop/webserv/");
 		// directory = opendir("/tmp");
 		directory = opendir("/tmp/post_test");
 		if (directory == NULL)
