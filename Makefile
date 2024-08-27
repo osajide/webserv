@@ -10,7 +10,7 @@ INC			=	$(addprefix $(INC_DIR)/, $(INC_FILES))
 
 SRCS_DIR	=	srcs
 SRCS_FILES	=	main.cpp webserv.cpp server.cpp client.cpp request.cpp config.cpp response.cpp \
-				types.cpp autoindex.cpp cgi.cpp error.cpp
+				types.cpp autoindex.cpp cgi.cpp error.cpp confCheck.cpp
 SRCS		=	$(addprefix $(SRCS_DIR)/, $(SRCS_FILES))
 
 OBJS_DIR	=	objs

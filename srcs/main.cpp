@@ -11,6 +11,7 @@ int main(int ac, char** av, char** env)
 
     try
     {
+        run_check(av[1]);
         server::parse_config(av[1]);
         webserv::launch_server(env);
     }

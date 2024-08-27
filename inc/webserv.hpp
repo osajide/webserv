@@ -11,3 +11,5 @@ class   webserv
         static std::vector<server>  servers;
         static void serve_clients(fd_sets & set_fd, char** env);
 };
+
+void run_check(char *conf);
