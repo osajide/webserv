@@ -1,11 +1,10 @@
 #include "../inc/response.hpp"
+#include "../inc/autoindex.hpp"
 #include <dirent.h>
 #include <fstream>
 #include <sstream>
-// #include <sys/_types/_fd_def.h>
 #include <cstring>
 #include <unistd.h>
-#include "../inc/server.hpp"
 
 response::response() : _bytes_sent(0), _status_line(""), _content_length(0), _content_type(""), _location(""), _body(""), _headers(""),
 						_chunk(""), _bytes_written(0), _unsent_part(""), _redirection_path("")
@@ -161,7 +160,7 @@ void	response::return_error(int status, int target_fd)
 	this->clear_response();
 }
 
-void	response::send_response(int fd, config serverConf)
+void	response::send_response(int fd, config serverConf, time_t & client_connection_time)
 {
 	if (!this->_requested_file.is_open())
 	{
@@ -171,6 +170,7 @@ void	response::send_response(int fd, config serverConf)
 		this->_content_type = serverConf.fetch_mime_type_value(this->_path_to_serve);
 
 		this->send_reply(fd);
+		client_connection_time = time(NULL);
 	}
 	else if (this->_requested_file.is_open())
 	{
@@ -181,7 +181,7 @@ void	response::send_response(int fd, config serverConf)
 				this->_chunk = this->get_chunk(this->_requested_file);
 				std::cout << "chunk ---->> '" << this->_chunk << "'" << std::endl;
 				this->_bytes_written = write(fd, this->_chunk.c_str(), this->_chunk.length());
-
+				client_connection_time = time(NULL);
 				this->_bytes_sent += this->_bytes_written;
 			}
 
@@ -193,7 +193,7 @@ void	response::send_response(int fd, config serverConf)
 				this->_unsent_part = this->_chunk.substr(this->_bytes_written);
 
 				local_write = write(fd, this->_unsent_part.c_str(), this->_unsent_part.length());
-
+				client_connection_time = time(NULL);
 				this->_bytes_sent += local_write;
 				this->_bytes_written += local_write;
 			}
@@ -205,7 +205,6 @@ void	response::send_response(int fd, config serverConf)
 				this->_unsent_part.clear();
 				std::cout << "chunk sent to fd " << fd << std::endl;
 			}
-
 		}
 	}
 }

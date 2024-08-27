@@ -182,6 +182,13 @@ void	cgi::run_cgi(client & cl, char** environ)
 	}
 	else if (this->_first_time == false)
 	{
+		if (time(NULL) - this->_cgi_time >= CGI_TIMEOUT)
+		{
+			if (cl._request._method == "POST")
+				close(this->_fd[0]);
+			close(this->_fd[1]);
+			throw error(504, cl._index);
+		}
 		pid_t	wpid = waitpid(this->_pid, &this->_exit_status, WNOHANG);
 		if (wpid == -1)
 		{
@@ -197,12 +204,16 @@ void	cgi::run_cgi(client & cl, char** environ)
 			
 			if (st[0] != 0 || st[1] != 0)
 			{
+				if (cl._request._method == "POST")
+					close(this->_fd[0]);
 				// std::cout << "st = 1" << std::endl;
 				close(this->_fd[1]);
 				throw error(500, cl._index);
 			}
 			else
 			{
+				if (cl._request._method == "POST")
+					close(this->_fd[0]);
 				close(this->_fd[1]);
 				this->_cgi_processing = false;
 			}
