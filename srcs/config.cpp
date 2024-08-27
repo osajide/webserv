@@ -175,7 +175,12 @@ void	config::check_validity_of_global_directives()
 			}
 			else if (it->first == "root")
 			{
-				if (it->second.size() != 1)
+				if (it->second.size() == 1)
+				{
+					if (it->second[0][it->second[0].length() - 1] == '/')
+						throw "root: Remove '/' from the end";
+				}
+				else
 					throw "root: Invalid number of values";
 			}
 		}
@@ -190,6 +195,11 @@ void	config::check_validity_of_location_directives()
 
 	for (size_t i = 0; i < this->_locations.size(); i++)
 	{
+		if (this->_locations[i].first[this->_locations[i].first.length() - 1] == '/')
+			throw "Remove '/' from the end";
+		if (this->_locations[i].first[0] != '/')
+			throw "Location name must start with '/'";
+
 		for (LocationPair::second_type::iterator it = this->_locations[i].second.begin(); it != this->_locations[i].second.end(); it++)
 		{
 			vecIter = std::find(config::_location_dictionary.begin(), config::_location_dictionary.end(), it->first);
@@ -197,7 +207,12 @@ void	config::check_validity_of_location_directives()
 			{
 				if (it->first == "root")
 				{
-					if (it->second.size() != 1)
+					if (it->second.size() == 1)
+					{
+						if (it->second[0][it->second[0].length() - 1] == '/')
+							throw "root in location: Remove '/' from the end";
+					}
+					else
 						throw "root in location: Invalid number of values";
 				}
 				else if (it->first == "allowed_methods")
@@ -220,6 +235,16 @@ void	config::check_validity_of_location_directives()
 					}
 					else
 						throw "return: Invalid number of values";
+				}
+				else if (it->first == "alias")
+				{
+					if (it->second.size() == 1)
+					{
+						if (it->second[0][it->second[0].length() - 1] == '/')
+							throw "alias: Remove '/' from the end";
+					}
+					else
+						throw "alias: Invalid number of values";
 				}
 			}
 			else
@@ -254,9 +279,9 @@ std::vector<std::string>	config::fetch_directive_value(std::string key)
 	return (std::vector<std::string>()); // return an empty vector
 }
 
-std::vector<LocationPair>   config::get_locations()
+std::vector<LocationPair>	config::get_locations()
 {
-    return (this->_locations);
+	return (this->_locations);
 }
 
 LocationPair	config::get_location_block(int location_index)
