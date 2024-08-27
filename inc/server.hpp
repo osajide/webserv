@@ -17,7 +17,6 @@ class server
 
 		server(int _conf_index);
 
-
 		void		init_socket();
 		int			get_fd();
 		int			get_config_index();

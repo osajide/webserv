@@ -1,7 +1,10 @@
 #include "../inc/config.hpp"
+#include <algorithm>
+#include <climits>
+#include <cstddef>
 #include <sstream>
 #include <cstring>
-#include <iostream>
+#include "../inc/webserv.hpp"
 
 std::vector<std::pair<std::string, std::string> >	config::_mime_types;
 
@@ -47,6 +50,26 @@ void	config::parse_mime_types(const char * PathToMimeTypes)
 		perror("Error in opening mime.types");
 		exit(EXIT_FAILURE);
 	}
+}
+
+void	config::set_dictionary()
+{
+	config::_global_dictionary.push_back("listen");
+	config::_global_dictionary.push_back("root");
+	config::_global_dictionary.push_back("index");
+	config::_global_dictionary.push_back("server_names");
+	config::_global_dictionary.push_back("error_page");
+	config::_global_dictionary.push_back("client_max_body_size");
+
+	config::_location_dictionary.push_back("root");
+	config::_location_dictionary.push_back("allowed_methods");
+	config::_location_dictionary.push_back("return");
+	config::_location_dictionary.push_back("alias");
+	config::_location_dictionary.push_back("autoindex");
+	config::_location_dictionary.push_back("index");
+	config::_location_dictionary.push_back("cgi");
+	config::_location_dictionary.push_back("upload_allowed");
+	config::_location_dictionary.push_back("upload_dir");
 }
 
 config::config(std::fstream& file)
@@ -115,6 +138,93 @@ config::config(std::fstream& file)
 		}
 		if (cr_count == 0)
 			break;
+	}
+}
+
+void	config::check_validity_of_global_directives()
+{
+	std::vector<std::string>::iterator vecIter;
+
+	for (DirectiveMap::iterator it = this->_directives.begin(); it != this->_directives.end(); it++)
+	{
+		vecIter = std::find(config::_global_dictionary.begin(), config::_global_dictionary.end(), it->first);
+		if (vecIter != config::_global_dictionary.end()) // i.e the directive is found
+		{
+			if (it->first == "error_page")
+			{
+				if (it->second.size() == 2)
+				{
+					int status = std::atoi(it->second.front().c_str());
+					if (status != 400 && status != 403 && status != 404 && status != 405 && status != 413 && status != 414
+							&& status != 500 && status != 501 && status != 504 && status != 505)
+						throw "Invalid error code";
+				}
+				else
+					throw "error_page: Invalid number of values";
+			}
+			else if (it->first == "client_max_body_size")
+			{
+				if (it->second.size() == 1)
+				{
+					int max_body_size = std::atoi(it->second.front().c_str());
+					if (max_body_size == -1 || max_body_size == 0 || max_body_size > INT_MAX)
+						throw "client_max_body_size: Invalid size";
+				}
+				else
+					throw "client_max_body_size: Invalid number of values";
+			}
+			else if (it->first == "root")
+			{
+				if (it->second.size() != 1)
+					throw "root: Invalid number of values";
+			}
+		}
+		else
+			throw "Directive not known";
+	}
+}
+
+void	config::check_validity_of_location_directives()
+{
+	std::vector<std::string>::iterator vecIter;
+
+	for (size_t i = 0; i < this->_locations.size(); i++)
+	{
+		for (LocationPair::second_type::iterator it = this->_locations[i].second.begin(); it != this->_locations[i].second.end(); it++)
+		{
+			vecIter = std::find(config::_location_dictionary.begin(), config::_location_dictionary.end(), it->first);
+			if (vecIter != config::_location_dictionary.end()) // i.e the directive is found
+			{
+				if (it->first == "root")
+				{
+					if (it->second.size() != 1)
+						throw "root in location: Invalid number of values";
+				}
+				else if (it->first == "allowed_methods")
+				{
+					if (it->second.size() > 0 && it->second.size() < 4)
+					{
+						for (size_t j = 0; j < it->second.size(); j++)
+						{
+							if (it->second[j] != "GET" && it->second[j] != "POST" && it->second[j] != "DELETE")
+								throw "allowed_methods: Unknown methods";
+						}
+					}
+				}
+				else if (it->first == "return")
+				{
+					if (it->second.size() == 2)
+					{
+						if (webserv::status_lines.find(it->second.front()) == webserv::status_lines.end())
+							throw "return: Invalid status code";
+					}
+					else
+						throw "return: Invalid number of values";
+				}
+			}
+			else
+				throw "Directive inside location not known";
+		}
 	}
 }
 

@@ -12,11 +12,17 @@ typedef std::pair<std::string, DirectiveMap> LocationPair;
 class config
 {
 	public:
+		static std::vector<std::string>								_global_dictionary;
+		static std::vector<std::string>								_location_dictionary;
+
+		static void					set_dictionary();
 		static void					parse_mime_types(const char* path_to_mime_types);
 
 		config(std::fstream& file);
 		config(config const &, std::string);
 
+		void						check_validity_of_global_directives();
+		void						check_validity_of_location_directives();
 
 		std::vector<std::string>	fetch_directive_value(std::string key);
 		int							directive_exists(std::string key);
@@ -32,7 +38,6 @@ class config
 	private:
 		DirectiveMap												_directives;
 		std::vector<LocationPair>									_locations;
-		static std::vector<std::string>								_dictionary;
 		static std::vector<std::pair<std::string, std::string> >	_mime_types;
 };
 
