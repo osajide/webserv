@@ -1,7 +1,9 @@
 #pragma once
 
-#include <vector>
 #include "request.hpp"
+#include <ctime>
+
+#define CGI_TIMEOUT 50
 
 class client;
 
@@ -21,6 +23,7 @@ class cgi
 		bool						_first_time;
 		std::string					_outfile;
 		std::string					_infile;
+		time_t						_cgi_time;
 
 		void		set_env_variables(request, std::string full_path, char**);
 		void		set_args(std::string path);

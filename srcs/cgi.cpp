@@ -130,9 +130,13 @@ void	cgi::run_cgi(client & cl, char** environ)
 		this->_fd[1] = open(this->_outfile.c_str(), O_CREAT | O_RDWR, 0644);
 		if (this->_fd[1] == -1)
 		{
+			if (cl._request._method == "POST")
+				close(this->_fd[0]);
 			// std::cout << "fd not opened" << std::endl;
 			throw error(500, cl._index);
 		}
+
+		this->_cgi_time = time(NULL);
 
 		this->_pid = fork();
 		if (this->_pid == -1)

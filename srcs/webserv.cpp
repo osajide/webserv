@@ -115,6 +115,7 @@ void    webserv::launch_server(char** env)
 	struct timeval										timeout;
 	fd_sets												set_fd;
 	int													nfds;
+	int													select_rval;
 
 	config::parse_mime_types("conf/mime.types");
 
@@ -159,7 +160,8 @@ void    webserv::launch_server(char** env)
 		set_fd.read_fds_tmp = set_fd.read_fds;
 		set_fd.write_fds_tmp = set_fd.write_fds;
 
-		if (select(nfds + 1, &set_fd.read_fds_tmp, &set_fd.write_fds_tmp, NULL, &timeout) == -1)
+		select_rval = select(nfds + 1, &set_fd.read_fds_tmp, &set_fd.write_fds_tmp, NULL, &timeout);
+		if (select_rval == -1)
 		{
 			perror("Error in select");
 			for (size_t i = 0; i < servers.size(); i++)
@@ -171,6 +173,9 @@ void    webserv::launch_server(char** env)
 		}
 
 		webserv::check_timeout(set_fd);
+
+		if (select_rval == 0)
+			continue;
 
 		for (size_t i = 0; i < servers.size(); i++)
 		{
