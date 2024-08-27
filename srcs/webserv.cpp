@@ -1,6 +1,7 @@
 #include "../inc/webserv.hpp"
 #include "../inc/config.hpp"
 #include "../inc/error.hpp"
+#include <sstream>
 #include <unistd.h>
 #include <fcntl.h>
 #include <cstring>
@@ -16,29 +17,28 @@ void	fd_sets::clear_sets()
 	FD_ZERO(&this->write_fds_tmp);
 }
 
+void	webserv::set_status_lines()
+{
+	status_lines["200"] = "HTTP/1.1 200 OK";
+	status_lines["400"] = "HTTP/1.1 400 Bad Request";
+	status_lines["403"] = "HTTP/1.1 403 Forbidden";
+	status_lines["404"] = "HTTP/1.1 404 Not Found";
+	status_lines["405"] = "HTTP/1.1 405 Method Not Allowed";
+	status_lines["413"] = "HTTP/1.1 413 Request Entity Too Large";
+	status_lines["414"] = "HTTP/1.1 414 Request Uri Too Long";
+	status_lines["500"] = "HTTP/1.1 500 Internal Server Error";
+	status_lines["501"] = "HTTP/1.1 501 Not Implemented";
+	status_lines["504"] = "HTTP/1.1 504 Gateway Timeout";
+	status_lines["505"] = "HTTP/1.1 505 HTTP Version Not Supported";
+}
+
 std::string	webserv::get_corresponding_status(int status)
 {
-	if (status == 200)
-		return ("HTTP/1.1 200 OK");
-	else if (status == 400)
-		return ("HTTP/1.1 400 Bad Request");
-	else if (status == 403)
-		return ("HTTP/1.1 403 Forbidden");
-	else if (status == 404)
-		return ("HTTP/1.1 404 Not Found");
-	else if (status == 405)
-		return ("HTTP/1.1 405 Method Not Allowed");
-	else if (status == 413)
-		return ("HTTP/1.1 413 Request Entity Too Large");
-	else if (status == 414)
-		return ("HTTP/1.1 414 Request Uri Too Long");
-	else if (status == 500)
-		return ("HTTP/1.1 500 Internal Server Error");
-	else if (status == 501)
-		return ("HTTP/1.1 501 Not Implemented");
-	else if (status == 505)
-		return ("HTTP/1.1 505 HTTP Version Not Supported");
-	return ("");
+	std::string			str_status;
+	std::stringstream	helper(status);
+
+	helper >> str_status;
+	return (webserv::status_lines[str_status]);
 }
 
 void	webserv::check_timeout(fd_sets& set_fd)
@@ -158,6 +158,7 @@ void	webserv::launch_server(char** env)
 	int													select_rval;
 
 	config::parse_mime_types("conf/mime.types");
+	webserv::set_status_lines();
 
 	for (size_t i = 0; i < server::_config.size(); i++)
 	{
