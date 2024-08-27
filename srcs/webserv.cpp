@@ -1,8 +1,10 @@
 #include "../inc/webserv.hpp"
-#include <fcntl.h>
 #include "../inc/config.hpp"
+#include "../inc/error.hpp"
 #include <unistd.h>
+#include <fcntl.h>
 #include <cstring>
+#include <ctime>
 
 std::vector<server>	webserv::servers;
 
@@ -12,6 +14,20 @@ void	fd_sets::clear_sets()
 	FD_ZERO(&this->read_fds_tmp);
 	FD_ZERO(&this->write_fds);
 	FD_ZERO(&this->write_fds_tmp);
+}
+
+void	webserv::check_timeout(fd_sets& set_fd)
+{
+	for (size_t i = 0; i < webserv::servers.size(); i++)
+	{
+		for (size_t j = 0; j < webserv::servers[i]._clients.size(); j++)
+		{
+			if (time(NULL) - webserv::servers[i]._clients[j]._connection_time >= TIMEOUT)
+			{
+				webserv::servers[i].close_connection(j, set_fd);
+			}
+		}
+	}
 }
 
 void	webserv::serve_clients(fd_sets & set_fd, char** env)
@@ -95,7 +111,7 @@ void    webserv::launch_server(char** env)
 	socklen_t											client_addr_len;
 	struct sockaddr_in									client_addr;
 	int													client_sock;
-	// struct timeval										connection_time;
+	struct timeval										timeout;
 	fd_sets												set_fd;
 	int													nfds;
 
@@ -106,11 +122,11 @@ void    webserv::launch_server(char** env)
 		servers.push_back(server(i));
 		if (fcntl(servers.back().get_fd(), F_SETFL, O_NONBLOCK) == -1)
 		{
-        	perror("fcntl F_SETFL");
+			perror("fcntl F_SETFL");
 			if (servers.back()._bound == true)
-        		close(servers.back().get_fd());
-        	servers.erase(servers.end() - 1);
-    	}
+				close(servers.back().get_fd());
+			servers.erase(servers.end() - 1);
+		}
 	}
 
 	set_fd.clear_sets();
@@ -131,16 +147,18 @@ void    webserv::launch_server(char** env)
 
 	std::cout << "server size() = " << servers.size() << std::endl;
 	std::cout << "number of bound addresses = " << server::_bound_addresses.size() << std::endl;
-	// exit(0);
+
 
 	while (true)
 	{
 		std::cout << "Waiting for connections...." << std::endl;
 
+		timeout.tv_sec = TIMEOUT;
+		timeout.tv_usec = 0;
 		set_fd.read_fds_tmp = set_fd.read_fds;
 		set_fd.write_fds_tmp = set_fd.write_fds;
 
-		if (select(nfds + 1, &set_fd.read_fds_tmp, &set_fd.write_fds_tmp, NULL, NULL) == -1)
+		if (select(nfds + 1, &set_fd.read_fds_tmp, &set_fd.write_fds_tmp, NULL, &timeout) == -1)
 		{
 			perror("Error in select");
 			for (size_t i = 0; i < servers.size(); i++)
@@ -151,6 +169,8 @@ void    webserv::launch_server(char** env)
 			throw 1;
 		}
 
+		webserv::check_timeout(set_fd);
+
 		for (size_t i = 0; i < servers.size(); i++)
 		{
 			if (servers[i]._bound == false)
@@ -160,7 +180,6 @@ void    webserv::launch_server(char** env)
 			{
 				for (int iteration = 0; (client_sock = accept(servers[i].get_fd(), (struct sockaddr *)&client_addr, &client_addr_len)) != -1; iteration++)
 				{
-					// client_sock = accept(servers[i].get_fd(), (struct sockaddr *)&client_addr, &client_addr_len);
 					if (client_sock == -1)
 						perror("Error accepting connection");
 					else
@@ -170,10 +189,10 @@ void    webserv::launch_server(char** env)
 						servers[i]._clients.push_back(client(client_sock, servers[i].get_config_index(), iteration));
 						if (fcntl(servers[i]._clients.back().get_fd(), F_SETFL, O_NONBLOCK) == -1)
 						{
-        					perror("fcntl F_SETFL");
-        					close(servers[i]._clients.back().get_fd());
-        					servers[i]._clients.remove_from_end(1);
-    					}
+							perror("fcntl F_SETFL");
+							close(servers[i]._clients.back().get_fd());
+							servers[i]._clients.remove_from_end(1);
+						}
 						else
 						{
 							if (client_sock > nfds)

@@ -7,14 +7,18 @@
 #include <cstring>
 #include <cstdlib>
 #include "../inc/server.hpp"
+#include "../inc/error.hpp"
+#include <ctime>
 
 
 client::client()
 {}
 
 client::client(int client_sock, int conf_index, int index) : _index(index), _config_index(conf_index), _location_index(-2), _fd(client_sock), _ready_for_receiving(false), _read_body(false),
-													_max_body_size(0), _bytes_read(0)
-{}
+																_max_body_size(0), _bytes_read(0)
+{
+	this->_connection_time = time(NULL);
+}
 
 client::client(client const &rhs) : _request(rhs._request), _response(rhs._response), _cgi(rhs._cgi)
 {
@@ -25,6 +29,7 @@ client&	client::operator=(const client &rhs)
 {
 	if (this != &rhs)
 	{
+		this->_connection_time = rhs._connection_time;
 		this->_index = rhs._index;
 		this->_request = rhs._request;
 		this->_response = rhs._response;
@@ -41,7 +46,7 @@ client&	client::operator=(const client &rhs)
 
 int client::get_fd()
 {
-    return (this->_fd);
+	return (this->_fd);
 }
 
 void	client::convert_numeric_values()
@@ -51,9 +56,9 @@ void	client::convert_numeric_values()
 		this->_request._content_length = std::atoi(this->_request._headers["Content-Length"].c_str());
 }
 
-void    client::fill_request_object()
+void	client::fill_request_object()
 {
-    std::stringstream	ss(this->_request._raw_request);
+	std::stringstream	ss(this->_request._raw_request);
 	std::string			reader;
 	std::string			key;
 	std::string			value;

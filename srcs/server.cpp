@@ -1,13 +1,13 @@
 #include "../inc/server.hpp"
 #include <fstream>
 #include <arpa/inet.h> // temp for inet_addr()
-// #include <sys/_types/_fd_def.h>
 #include <sys/fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <cstdlib>
+#include "../inc/error.hpp"
 
-std::vector<config>    																	server::_config;
+std::vector<config>																		server::_config;
 std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string> > >	server::_bound_addresses;
 
 server::server() : _bound(false)
@@ -44,13 +44,10 @@ void	server::close_connection(int client_index, fd_sets & set_fd)
 	std::cout << "closing fd " << this->_clients[client_index].get_fd() << std::endl;
 
 	FD_CLR(this->_clients[client_index].get_fd(), &set_fd.read_fds);
-
-	if (FD_ISSET(this->_clients[client_index].get_fd(), &set_fd.write_fds))
-	{
-		FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
-	}
+	FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 
 	close(this->_clients[client_index].get_fd());
+
 	this->_clients.remove_from_begin(client_index);
 }
 
@@ -382,7 +379,8 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					else
 					{
 						this->_clients[client_index]._response.autoindex(this->_clients[client_index].get_fd(), this->_clients[client_index]._request._target);
-						(this->_clients[client_index].get_fd(), &set_fd.write_fds);
+						
+						FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 						
 						if (this->_clients[client_index]._request._headers["Connection"] == "closed")
 							throw error(CLOSE_CONNECTION, client_index);
