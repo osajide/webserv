@@ -8,6 +8,7 @@
 #include <cstdlib>
 #include "../inc/server.hpp"
 #include "../inc/error.hpp"
+#include "../inc/webserv.hpp"
 #include <ctime>
 
 
@@ -342,7 +343,6 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 						this->_read_body = false;
 					}
 				}
-
 			}
 			else
 			{
@@ -377,7 +377,7 @@ void	client::handle_delete_directory_request(fd_sets& set_fd)
 			// this->_cgi.run_cgi(*this, env);
 		}
 		else
-			this->_response.return_error(403, this->_fd);
+			this->_response.return_error(webserv::get_corresponding_status(403), this->_fd);
 	}
 	else
 	{

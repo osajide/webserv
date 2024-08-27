@@ -20,11 +20,11 @@ class response
 
 		void			send_reply(int target_fd);
 
-		void			return_error(int status, int target_fd);
+		void			return_error(std::string status_line, int target_fd);
 		void			clear_response();
 
 
-		void			send_response(int fd, config serverConf, time_t &);
+		void			send_response(int fd, std::string status_line, config serverConf, time_t &);
 		void			autoindex(int fd, std::string uri);
 		void			redirect(int fd, int status, std::string uri);
 		int				remove_requested_directory(int fd, std::string uri);
@@ -47,5 +47,6 @@ class response
 		std::ifstream	_requested_file;
 		std::string		_path_to_serve;
 		std::string		_redirection_path;
+		int				_status_code;
 
 };

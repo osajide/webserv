@@ -6,6 +6,7 @@
 #include <sys/stat.h>
 #include <cstdlib>
 #include "../inc/error.hpp"
+#include "../inc/webserv.hpp"
 
 std::vector<config>																		server::_config;
 std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string> > >	server::_bound_addresses;
@@ -328,7 +329,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 	
 	if (this->_clients[client_index]._response._path_to_serve.empty()) // in the previous function if the path doesn't exist i return an empty string
 	{
-		this->_clients[client_index]._response.return_error(404, this->_clients[client_index].get_fd());
+		this->_clients[client_index]._response.return_error(webserv::get_corresponding_status(404), this->_clients[client_index].get_fd());
 		std::cout << "404 SERVED!!!" << std::endl;
 		
 		FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
@@ -349,7 +350,6 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					this->_clients[client_index].handle_delete_directory_request(set_fd);
 					return ;
 				}
-				std::cout << "path before index = '" << this->_clients[client_index]._response._path_to_serve << "'" << std::endl;
 				if (this->_clients[client_index].dir_has_index_files()) // this method modifies on path_to_serve attribute
 				{
 					if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._response._path_to_serve))
@@ -364,6 +364,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 							throw error(403, client_index); // Forbidden
 						}
 
+						this->_clients[client_index]._response._status_code = 200;
 						this->_clients[client_index].set_ready_for_receiving_value(true);
 					}
 				}
@@ -431,6 +432,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				}
 				else
 				{
+					this->_clients[client_index]._response._status_code = 200;
 					this->_clients[client_index].set_ready_for_receiving_value(true);
 				}
 

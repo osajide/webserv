@@ -1,9 +1,9 @@
 #include "../inc/config.hpp"
 #include <sstream>
 #include <cstring>
-#include "../inc/client.hpp"
+#include <iostream>
 
-std::vector<std::pair<std::string, std::string> >    config::_mime_types;
+std::vector<std::pair<std::string, std::string> >	config::_mime_types;
 
 config::config(config const & rhs, std::string ip_port)
 {
@@ -18,14 +18,6 @@ config::config(config const & rhs, std::string ip_port)
 			it->second.push_back(ip_port);
 		}
 	}
-
-	// for (DirectiveMap::iterator	it = this->_directives.begin(); it != this->_directives.end(); it++)
-	// {
-	// 	if (it->first == "listen")
-	// 	{
-	// 		std::cout << "it->second.front() = '" << it->second.front() << "'" << std::endl;
-	// 	}
-	// }
 }
 
 void	config::parse_mime_types(const char * PathToMimeTypes)
@@ -59,18 +51,18 @@ void	config::parse_mime_types(const char * PathToMimeTypes)
 
 config::config(std::fstream& file)
 {
-	std::string     line;
+	std::string		line;
 	std::string 	token;
 	std::string 	key;
 	std::string 	value;
-	int             cr_count = 0;
+	int				cr_count = 0;
 
 	while (getline(file, line))
 	{
 		while (line.find('\t') != std::string::npos)
-        {
+		{
 			line = strtok((char *)line.c_str(), "\t");
-        }
+		}
 
 		std::stringstream s(line);
 
@@ -121,19 +113,9 @@ config::config(std::fstream& file)
 				this->_directives[key].push_back(value.substr(0, value.find(';')));
 			}
 		}
-
 		if (cr_count == 0)
 			break;
 	}
-
-	// DirectiveMap::iterator      it;
-
-	// std::cout << "PRINT DIRECTIVES" << std::endl;
-	// for (it = this->_directives.begin(); it != this->_directives.end(); it++)
-	// {
-	// 	std::cout << "key = '" << it->first << "' | value = '" << it->second.front() << "'" << std::endl;
-	// }
-	// std::cout << "----------------" << std::endl;
 }
 
 int	config::directive_exists(std::string key)
@@ -167,14 +149,14 @@ std::vector<LocationPair>   config::get_locations()
     return (this->_locations);
 }
 
-LocationPair    config::get_location_block(int location_index)
+LocationPair	config::get_location_block(int location_index)
 {
-    return (this->_locations[location_index]);
+	return (this->_locations[location_index]);
 }
 
 std::vector<std::string>    config::fetch_location_directive_value(int location_index, std::string key)
 {
-    LocationPair location_block;
+	LocationPair location_block;
 
 	location_block = this->get_location_block(location_index);
 	if (location_block.second.find(key) == location_block.second.end())
@@ -194,7 +176,6 @@ std::string config::fetch_mime_type_value(std::string path)
 	if (pos != path.npos)
 	{
 		extension = path.substr(pos + 1);
-		// std::cout << "extension = '" << extension << "'" << std::endl;
 	}
 
 	for (size_t i = 0; i < this->_mime_types.size(); i++)
@@ -257,4 +238,28 @@ int	config::if_cgi_directive_exists(int location_index, std::string path)
 		}
 	}
 	return (0);
+}
+
+std::string	config::error_page_well_defined(int status)
+{
+	std::stringstream			helper(status);
+	std::string					str_status;
+	std::vector<std::string>	error_page_directive;
+
+	error_page_directive = this->fetch_directive_value("error_page");
+	if (!error_page_directive.empty())
+	{
+		for (size_t i = 0; i < error_page_directive.size(); i += 2)
+		{
+			// since i can have multiple error_page directive inside i single server block and when adding a new value to an std::map
+			// with the same key it overiddes the previous value so i will store the other values of error_pages in the same previous std::vector
+			// and since the first element is always the key the second will be the path to the error page so i will loop and increment the i by 2
+			// and when matching the same status code i will return the path to the error page
+			if (str_status == error_page_directive[i])
+			{
+				return (error_page_directive[i + 1]);
+			}
+		}
+	}
+	return ("");
 }
