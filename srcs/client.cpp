@@ -295,7 +295,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 	}
 }
 
-void    client::read_request(int conf_index, fd_sets & set_fd)
+void	client::read_request(int conf_index, fd_sets & set_fd)
 {
 	size_t		pos;
 	int			valread = 0;
@@ -325,8 +325,8 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 
 			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
 			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request._target);
-            
-        	this->does_location_has_redirection();
+
+			this->does_location_has_redirection();
 
 			if (this->_request.header_exists("Transfer-Encoding") || this->_request.header_exists("Content-Length"))
 			{
@@ -392,18 +392,20 @@ void	client::handle_delete_directory_request(fd_sets& set_fd)
 	this->clear_client();
 }
 
-void    client::set_ready_for_receiving_value(bool value)
+void	client::set_ready_for_receiving_value(bool value)
 {
-    this->_ready_for_receiving = value;
+	this->_ready_for_receiving = value;
 }
 
-bool&    client::get_ready_for_receiving_value()
+bool&	client::get_ready_for_receiving_value()
 {
-    return (this->_ready_for_receiving);
+	return (this->_ready_for_receiving);
 }
 
 void	client::clear_client()
 {
+	this->_connection_time = time(NULL);
+
 	this->_ready_for_receiving = false;
 	this->_location_index = -2;
 	this->_bytes_read = 0;

@@ -44,6 +44,7 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 				{
 					std::cout << "read request from fd " << servers[index]._clients[j].get_fd() << std::endl;
 					servers[index]._clients[j].read_request(servers[index].get_config_index(), set_fd);
+					servers[index]._clients[j]._connection_time = time(NULL);
 				}
 
 				if (FD_ISSET(servers[index]._clients[j].get_fd(), &set_fd.write_fds_tmp))
