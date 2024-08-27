@@ -88,7 +88,7 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 						{
 							servers[index]._clients[j]._response._requested_file.open(servers[index]._clients[j]._cgi._outfile.c_str());
 							servers[index]._clients[j]._response.send_cgi_headers(servers[index]._clients[j].get_fd(), servers[index]._clients[j]._response._requested_file);
-							servers[index]._clients[j]._response._status_code = 200; // temp because i need to see the cgi status code
+							// here no need to set the status because the headers are already sent and only the body that will be processed in the send_response()
 							servers[index]._clients[j].set_ready_for_receiving_value(true);
 						}
 					}
