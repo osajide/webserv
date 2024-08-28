@@ -137,7 +137,7 @@ void	response::send_response(int fd, std::string status_line, config serverConf,
 			if (this->_bytes_written == 0)
 			{
 				this->_chunk = this->get_chunk(this->_requested_file);
-				std::cout << "chunk ---->> '" << this->_chunk << "'" << std::endl;
+				// std::cout << "chunk ---->> '" << this->_chunk << "'" << std::endl;
 				this->_bytes_written = write(fd, this->_chunk.c_str(), this->_chunk.length());
 				client_connection_time = time(NULL);
 				this->_bytes_sent += this->_bytes_written;

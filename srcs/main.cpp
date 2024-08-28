@@ -28,4 +28,8 @@ int main(int ac, char** av, char** env)
 	{
 		std::cout << "execption : " << msg << std::endl;
 	}
+	catch(std::out_of_range & e)
+	{
+		std::cout << "catched : " << e.what() << std::endl;
+	}
 }
