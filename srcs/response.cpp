@@ -1,33 +1,30 @@
 #include "../inc/response.hpp"
+#include "../inc/autoindex.hpp"
+#include "../inc/webserv.hpp"
 #include <dirent.h>
 #include <fstream>
 #include <sstream>
-// #include <sys/_types/_fd_def.h>
 #include <cstring>
 #include <unistd.h>
-#include "../inc/server.hpp"
 
 response::response() : _bytes_sent(0), _status_line(""), _content_length(0), _content_type(""), _location(""), _body(""), _headers(""),
-						_chunk(""), _bytes_written(0), _unsent_part(""), _redirection_path("")
+						_chunk(""), _bytes_written(0), _unsent_part(""), _redirection_path(""), _status_code(0)
 {}
 
 response::response(response const & rhs)
 {
-	// std::cout << "dkhel l copy constructor dyal response class" << std::endl;
-	(void)rhs;
+	// this->_body = "";
+	// this->_bytes_sent = 0;
+	// this->_bytes_written = 0;
+	// this->_unsent_part = "";
+	// this->_chunk = "";
+	// this->_content_length = 0;
+	// this->_content_type = "";
+	// this->_headers = "";
+	// this->_location = "";
+	// this->_status_line = "";
 
-	this->_body = "";
-	this->_bytes_sent = 0;
-	this->_bytes_written = 0;
-	this->_unsent_part = "";
-	this->_chunk = "";
-	this->_content_length = 0;
-	this->_content_type = "";
-	this->_headers = "";
-	this->_location = "";
-	this->_status_line = "";
-	// std::cout << "rhs.bytes sent = " << rhs._bytes_sent << std::endl;
-	// std::cout << "this.bytes sent = " << this->_bytes_sent << std::endl;
+	*this = rhs;
 }
 
 response &	response::operator=(response const & rhs)
@@ -35,16 +32,27 @@ response &	response::operator=(response const & rhs)
 	std::cout << "dkhel copy operator dyal response class" << std::endl;
 	if (this != &rhs)
 	{
-		this->_body = "";
-		this->_bytes_sent = 0;
-		this->_bytes_written = 0;
-		this->_unsent_part = "";
-		this->_chunk = "";
-		this->_content_length = 0;
-		this->_content_type = "";
-		this->_headers = "";
-		this->_location = "";
-		this->_status_line = "";
+		// this->_body = "";
+		// this->_bytes_sent = 0;
+		// this->_bytes_written = 0;
+		// this->_unsent_part = "";
+		// this->_chunk = "";
+		// this->_content_length = 0;
+		// this->_content_type = "";
+		// this->_headers = "";
+		// this->_location = "";
+		// this->_status_line = "";
+
+		this->_body = rhs._body;
+		this->_bytes_sent = rhs._bytes_sent;
+		this->_bytes_written = rhs._bytes_written;
+		this->_unsent_part = rhs._unsent_part;
+		this->_chunk = rhs._chunk;
+		this->_content_length = rhs._content_length;
+		this->_content_type = rhs._content_type;
+		this->_headers = rhs._headers;
+		this->_location = rhs._location;
+		this->_status_line = rhs._location;
 	}
 	return (*this);
 }
@@ -100,77 +108,27 @@ void	response::send_reply(int target_fd)
 	write(target_fd, this->_headers.c_str(), this->_headers.length());
 }
 
-void	response::return_error(int status, int target_fd)
+void	response::return_error(std::string status_line, int target_fd)
 {
-	if (status == 400)
-	{
-		this->_status_line = "HTTP/1.1 400 Bad Request";
-		this->_body = "<h1>400 Bad Request</h1>";
-		this->_content_length = this->_body.length();
-	}
-	else if (status == 413)
-	{
-		this->_status_line = "HTTP/1.1 413 Request Entity Too Large";
-		this->_body = "<h1>413 Request Entity Too Large</h1>";
-		this->_content_length = this->_body.length();
-	}
-	else if (status == 414)
-	{
-		this->_status_line = "HTTP/1.1 414 Request Uri Too Long";
-		this->_body = "<h1>414 Request Uri Too Long</h1>";
-		this->_content_length = this->_body.length();
-	}
-	else if (status == 403)
-	{
-		this->_status_line = "HTTP/1.1 403 Forbidden";
-		this->_body = "<h1>403 Forbidden</h1>";
-		this->_content_length = this->_body.length();
-	}
-	else if (status == 404)
-	{
-		this->_status_line = "HTTP/1.1 404 Not Found";
-		this->_body = "<h1>404 Not found</h1>";
-		this->_content_length = this->_body.length();
-	}
-	else if (status == 405)
-	{
-		this->_status_line = "HTTP/1.1 405 Method Not Allowed";
-		this->_body = "<h1>405 Method Not Allowed</h1>";
-		this->_content_length = this->_body.length();
-	}
-	else if (status == 500)
-	{
-		this->_status_line = "HTTP/1.1 500 Internal Server Error";
-		this->_body = "<h1>500 Internal Server Error</h1>";
-		this->_content_length = this->_body.length();
-	}
-	else if (status == 501)
-	{
-		this->_status_line = "HTTP/1.1 501 Not Implemented";
-		this->_body = "<h1>501 Not Implemented</h1>";
-		this->_content_length = this->_body.length();
-	}
-	else if (status == 505)
-	{
-		this->_status_line = "HTTP/1.1 505 HTTP Version Not Supported";
-		this->_body = "<h1>HTTP Version Not Supported</h1>";
-		this->_content_length = this->_body.length();
-	}
+	this->_status_line = status_line;
+	this->_body = "<h1>" + status_line.substr(9) + "</h1>";
+	this->_content_length = this->_body.length();
 
 	this->send_reply(target_fd);
 	this->clear_response();
 }
 
-void	response::send_response(int fd, config serverConf)
+void	response::send_response(int fd, std::string status_line, config serverConf, time_t & client_connection_time)
 {
 	if (!this->_requested_file.is_open())
 	{
-		this->_status_line = "HTTP/1.1 200 OK";
-		this->_requested_file.open(this->_path_to_serve);
+		this->_status_line = status_line;
+		this->_requested_file.open(this->_path_to_serve.c_str());
 		this->set_content_length(this->_requested_file);
 		this->_content_type = serverConf.fetch_mime_type_value(this->_path_to_serve);
 
 		this->send_reply(fd);
+		client_connection_time = time(NULL);
 	}
 	else if (this->_requested_file.is_open())
 	{
@@ -179,9 +137,9 @@ void	response::send_response(int fd, config serverConf)
 			if (this->_bytes_written == 0)
 			{
 				this->_chunk = this->get_chunk(this->_requested_file);
-				std::cout << "chunk ---->> '" << this->_chunk << "'" << std::endl;
+				// std::cout << "chunk ---->> '" << this->_chunk << "'" << std::endl;
 				this->_bytes_written = write(fd, this->_chunk.c_str(), this->_chunk.length());
-
+				client_connection_time = time(NULL);
 				this->_bytes_sent += this->_bytes_written;
 			}
 
@@ -193,7 +151,7 @@ void	response::send_response(int fd, config serverConf)
 				this->_unsent_part = this->_chunk.substr(this->_bytes_written);
 
 				local_write = write(fd, this->_unsent_part.c_str(), this->_unsent_part.length());
-
+				client_connection_time = time(NULL);
 				this->_bytes_sent += local_write;
 				this->_bytes_written += local_write;
 			}
@@ -205,7 +163,6 @@ void	response::send_response(int fd, config serverConf)
 				this->_unsent_part.clear();
 				std::cout << "chunk sent to fd " << fd << std::endl;
 			}
-
 		}
 	}
 }
@@ -245,7 +202,7 @@ int	response::remove_requested_directory(int fd, std::string uri)
 	directory = opendir(uri.c_str());
 	if (directory == NULL)
 	{
-		this->return_error(403, fd);
+		this->return_error(webserv::get_corresponding_status(403), fd);
 		return (-1);
 	}
 
@@ -265,10 +222,10 @@ int	response::remove_requested_directory(int fd, std::string uri)
 			{
 				if (access(str_entry.c_str(), R_OK) == 0)
 				{
-					this->return_error(500, fd);
+					this->return_error(webserv::get_corresponding_status(500), fd);
 				}
 				else
-					this->return_error(403, fd);
+					this->return_error(webserv::get_corresponding_status(403), fd);
 
 				closedir(directory);
 				return (-1);
@@ -304,12 +261,12 @@ void	response::remove_requested_file(int fd)
 		if (access(this->_path_to_serve.c_str(), R_OK) == 0)
 		{
 			std::cout << "File not removed due to internal error" << std::endl;
-			this->return_error(500, fd);
+			this->return_error(webserv::get_corresponding_status(500), fd);
 		}
 		else
 		{
 			std::cout << "Doesn't have write permission" << std::endl;
-			this->return_error(403, fd);
+			this->return_error(webserv::get_corresponding_status(403), fd);
 		}
 	}
 	else

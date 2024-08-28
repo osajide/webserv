@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <sstream>
+#include <cstdlib>
 #include <unistd.h>
 #include <cstdio>
 #include <dirent.h>
@@ -130,9 +131,13 @@ void	cgi::run_cgi(client & cl, char** environ)
 		this->_fd[1] = open(this->_outfile.c_str(), O_CREAT | O_RDWR, 0644);
 		if (this->_fd[1] == -1)
 		{
+			if (cl._request._method == "POST")
+				close(this->_fd[0]);
 			// std::cout << "fd not opened" << std::endl;
 			throw error(500, cl._index);
 		}
+
+		this->_cgi_time = time(NULL);
 
 		this->_pid = fork();
 		if (this->_pid == -1)
@@ -178,6 +183,13 @@ void	cgi::run_cgi(client & cl, char** environ)
 	}
 	else if (this->_first_time == false)
 	{
+		if (time(NULL) - this->_cgi_time >= CGI_TIMEOUT)
+		{
+			if (cl._request._method == "POST")
+				close(this->_fd[0]);
+			close(this->_fd[1]);
+			throw error(504, cl._index);
+		}
 		pid_t	wpid = waitpid(this->_pid, &this->_exit_status, WNOHANG);
 		if (wpid == -1)
 		{
@@ -193,12 +205,16 @@ void	cgi::run_cgi(client & cl, char** environ)
 			
 			if (st[0] != 0 || st[1] != 0)
 			{
+				if (cl._request._method == "POST")
+					close(this->_fd[0]);
 				// std::cout << "st = 1" << std::endl;
 				close(this->_fd[1]);
 				throw error(500, cl._index);
 			}
 			else
 			{
+				if (cl._request._method == "POST")
+					close(this->_fd[0]);
 				close(this->_fd[1]);
 				this->_cgi_processing = false;
 			}

@@ -1,15 +1,21 @@
 #pragma once
 
+#include "fd_sets.hpp"
 #include "server.hpp"
-#include <iostream>
 
+#define TIMEOUT 60
 
 class   webserv
 {
-    public:
-        static void launch_server(char** env);
-        static std::vector<server>  servers;
-        static void serve_clients(fd_sets & set_fd, char** env);
+	public:
+		static std::vector<server>					servers;
+		static std::map<std::string, std::string>	status_lines;
+
+		static void									launch_server(char** env);
+		static void									serve_clients(fd_sets & set_fd, char** env);
+		static void									check_timeout(fd_sets & set_fd);
+		static std::string							get_corresponding_status(int status);
+		static void									set_status_lines();
 };
 
 void run_check(char *conf);

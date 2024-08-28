@@ -1,13 +1,14 @@
 #include "../inc/server.hpp"
 #include <fstream>
 #include <arpa/inet.h> // temp for inet_addr()
-// #include <sys/_types/_fd_def.h>
 #include <sys/fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <cstdlib>
+#include "../inc/error.hpp"
+#include "../inc/webserv.hpp"
 
-std::vector<config>    																	server::_config;
+std::vector<config>																		server::_config;
 std::vector<std::pair<std::pair<std::string, std::string>, std::vector<std::string> > >	server::_bound_addresses;
 
 server::server() : _bound(false)
@@ -44,54 +45,48 @@ void	server::close_connection(int client_index, fd_sets & set_fd)
 	std::cout << "closing fd " << this->_clients[client_index].get_fd() << std::endl;
 
 	FD_CLR(this->_clients[client_index].get_fd(), &set_fd.read_fds);
-
-	if (FD_ISSET(this->_clients[client_index].get_fd(), &set_fd.write_fds))
-	{
-		FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
-	}
+	FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 
 	close(this->_clients[client_index].get_fd());
+
 	this->_clients.remove_from_begin(client_index);
 }
 
-void    server::parse_config(char *PathToConfig)
+void	server::parse_config(char *PathToConfig)
 {
-    std::fstream	    		file;
+	std::fstream				file;
 	std::string					reader;
 	std::vector<std::string>	listen_directive;
 
 	file.open(PathToConfig);
 	if (file.is_open())
 	{
-    	while (getline(file, reader))
+		while (getline(file, reader))
 		{
 			if (reader == "server")
 				server::_config.push_back(config(file));
 		}
 		file.close();
 	}
-	// std::cout << "conf size before adding multiple ports = " << server::_config.size() << std::endl;
 	for (size_t i = 0; i < server::_config.size(); i++)
 	{
 		listen_directive = server::_config[i].fetch_directive_value("listen");
-		if (listen_directive.size() > 1)
+		if (listen_directive.size() > 1) // i.e we have more than one ip/port
 		{
-			// std::cout << "multiple addresses:" << std::endl;
-			// for (size_t k = 0; k < listen_directive.size(); k++)
-			// {
-			// 	std::cout << listen_directive[k] << std::endl;
-			// }
-
 			for (size_t j = 1; j < listen_directive.size(); j++) // j = 1, to skip the first ip/port
 			{
-				// std::cout << "listen_directive[j] = '" << listen_directive[j] << "'" << std::endl;
 				config	new_conf_block(server::_config[i], listen_directive[j]);
 				server::_config.push_back(new_conf_block);
 			}
 		}
 	}
-
-	// check_errors();
+	config::set_dictionary();
+	for (size_t i = 0; i < server::_config.size(); i++)
+	{
+		server::_config[i].check_validity_of_global_directives();
+		server::_config[i].check_validity_of_location_directives();
+		server::_config[i].check_presence_of_mandatory_directives();
+	}
 }
 
 int	server::if_ip_port_already_bound(std::string ip, std::string port)
@@ -283,6 +278,8 @@ std::string    server::check_if_method_allowed_in_location(int client_index, int
 	{
 		allowed_methods = server::_config[this->_conf_index].fetch_directive_value("allowed_methods");
 
+		if (allowed_methods.empty())
+			return ("GET");
 		for (size_t i = 0; i < allowed_methods.size(); i++)
 		{
 			if (this->_clients[client_index]._request._method == allowed_methods[i])
@@ -331,7 +328,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 	
 	if (this->_clients[client_index]._response._path_to_serve.empty()) // in the previous function if the path doesn't exist i return an empty string
 	{
-		this->_clients[client_index]._response.return_error(404, this->_clients[client_index].get_fd());
+		this->_clients[client_index]._response.return_error(webserv::get_corresponding_status(404), this->_clients[client_index].get_fd());
 		std::cout << "404 SERVED!!!" << std::endl;
 		
 		FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
@@ -352,7 +349,6 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					this->_clients[client_index].handle_delete_directory_request(set_fd);
 					return ;
 				}
-				std::cout << "path before index = '" << this->_clients[client_index]._response._path_to_serve << "'" << std::endl;
 				if (this->_clients[client_index].dir_has_index_files()) // this method modifies on path_to_serve attribute
 				{
 					if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._response._path_to_serve))
@@ -367,6 +363,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 							throw error(403, client_index); // Forbidden
 						}
 
+						this->_clients[client_index]._response._status_code = 200;
 						this->_clients[client_index].set_ready_for_receiving_value(true);
 					}
 				}
@@ -433,6 +430,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 				}
 				else
 				{
+					this->_clients[client_index]._response._status_code = 200;
 					this->_clients[client_index].set_ready_for_receiving_value(true);
 				}
 

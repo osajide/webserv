@@ -7,14 +7,19 @@
 #include <cstring>
 #include <cstdlib>
 #include "../inc/server.hpp"
+#include "../inc/error.hpp"
+#include "../inc/webserv.hpp"
+#include <ctime>
 
 
 client::client()
 {}
 
 client::client(int client_sock, int conf_index, int index) : _index(index), _config_index(conf_index), _location_index(-2), _fd(client_sock), _ready_for_receiving(false), _read_body(false),
-													_max_body_size(0), _bytes_read(0)
-{}
+																_max_body_size(0), _bytes_read(0)
+{
+	this->_connection_time = time(NULL);
+}
 
 client::client(client const &rhs) : _request(rhs._request), _response(rhs._response), _cgi(rhs._cgi)
 {
@@ -25,6 +30,7 @@ client&	client::operator=(const client &rhs)
 {
 	if (this != &rhs)
 	{
+		this->_connection_time = rhs._connection_time;
 		this->_index = rhs._index;
 		this->_request = rhs._request;
 		this->_response = rhs._response;
@@ -41,7 +47,7 @@ client&	client::operator=(const client &rhs)
 
 int client::get_fd()
 {
-    return (this->_fd);
+	return (this->_fd);
 }
 
 void	client::convert_numeric_values()
@@ -51,9 +57,9 @@ void	client::convert_numeric_values()
 		this->_request._content_length = std::atoi(this->_request._headers["Content-Length"].c_str());
 }
 
-void    client::fill_request_object()
+void	client::fill_request_object()
 {
-    std::stringstream	ss(this->_request._raw_request);
+	std::stringstream	ss(this->_request._raw_request);
 	std::string			reader;
 	std::string			key;
 	std::string			value;
@@ -165,7 +171,7 @@ void	client::unchunk_body_file(fd_sets& set_fd)
 	{
 		this->_cgi._infile = this->_cgi.get_random_file_name(this->_index, INPUT_FILE);
 		// std::cout << "infile ---- >>> '" << this->_cgi._infile << "'" << std::endl;
-		this->_unchunked_body_file.open(this->_cgi._infile, std::ios::in | std::ios::app);
+		this->_unchunked_body_file.open(this->_cgi._infile.c_str(), std::ios::in | std::ios::app);
 	}
 	if (this->_unchunked_body_file.is_open())
 	{
@@ -203,7 +209,7 @@ void	client::read_chunked_body(fd_sets& set_fd)
 	
 	if (!this->_body_file.is_open())
 	{
-		this->_body_file.open(this->_cgi.get_random_file_name(this->_index, INPUT_FILE), std::ios::in | std::ios::out | std::ios::app);
+		this->_body_file.open(this->_cgi.get_random_file_name(this->_index, INPUT_FILE).c_str(), std::ios::in | std::ios::out | std::ios::app);
 	}
 	if (this->_body_file.is_open())
 	{
@@ -256,7 +262,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 	{
 		this->_cgi._infile = this->_cgi.get_random_file_name(this->_index, INPUT_FILE);
 		std::cout << "infile = " << this->_cgi._infile << std::endl;
-		this->_body_file.open(this->_cgi._infile, std::ios::app);
+		this->_body_file.open(this->_cgi._infile.c_str(), std::ios::app);
 	}
 	if (this->_body_file.is_open())
 	{
@@ -290,7 +296,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 	}
 }
 
-void    client::read_request(int conf_index, fd_sets & set_fd)
+void	client::read_request(int conf_index, fd_sets & set_fd)
 {
 	size_t		pos;
 	int			valread = 0;
@@ -320,8 +326,8 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 
 			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
 			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request._target);
-            
-        	this->does_location_has_redirection();
+
+			this->does_location_has_redirection();
 
 			if (this->_request.header_exists("Transfer-Encoding") || this->_request.header_exists("Content-Length"))
 			{
@@ -337,7 +343,6 @@ void    client::read_request(int conf_index, fd_sets & set_fd)
 						this->_read_body = false;
 					}
 				}
-
 			}
 			else
 			{
@@ -372,7 +377,7 @@ void	client::handle_delete_directory_request(fd_sets& set_fd)
 			// this->_cgi.run_cgi(*this, env);
 		}
 		else
-			this->_response.return_error(403, this->_fd);
+			this->_response.return_error(webserv::get_corresponding_status(403), this->_fd);
 	}
 	else
 	{
@@ -387,18 +392,20 @@ void	client::handle_delete_directory_request(fd_sets& set_fd)
 	this->clear_client();
 }
 
-void    client::set_ready_for_receiving_value(bool value)
+void	client::set_ready_for_receiving_value(bool value)
 {
-    this->_ready_for_receiving = value;
+	this->_ready_for_receiving = value;
 }
 
-bool&    client::get_ready_for_receiving_value()
+bool&	client::get_ready_for_receiving_value()
 {
-    return (this->_ready_for_receiving);
+	return (this->_ready_for_receiving);
 }
 
 void	client::clear_client()
 {
+	this->_connection_time = time(NULL);
+
 	this->_ready_for_receiving = false;
 	this->_location_index = -2;
 	this->_bytes_read = 0;
