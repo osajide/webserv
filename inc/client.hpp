@@ -5,7 +5,7 @@
 #include "cgi.hpp"
 #include "fd_sets.hpp"
 #include <fstream>
-#include <sys/_types/_timeval.h>
+// #include <sys/_types/_timeval.h>
 
 #define BUFFER_SIZE 500
 #define CLOSE_CONNECTION 10

@@ -23,6 +23,7 @@ class config
 
 		void						check_validity_of_global_directives();
 		void						check_validity_of_location_directives();
+		void						check_presence_of_mandatory_directives();
 
 		std::vector<std::string>	fetch_directive_value(std::string key);
 		int							directive_exists(std::string key);

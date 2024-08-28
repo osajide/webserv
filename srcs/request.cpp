@@ -1,6 +1,7 @@
 #include "../inc/request.hpp"
 #include "../inc/error.hpp"
 #include <sstream>
+#include <cstdlib>
 
 
 request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _query_params(""), _http_version(""), _content_length(0),
@@ -68,7 +69,7 @@ void	request::is_well_formed(int client_index, config conf)
 	if (this->_headers.find("Content-Length") != this->_headers.end())
 	{
 		std::cout << "here" << std::endl;
-		if (this->_content_length > (size_t)std::atoi(conf.fetch_directive_value("client_max_body_size").front().c_str()))
+		if (this->_content_length > (size_t)atoi(conf.fetch_directive_value("client_max_body_size").front().c_str()))
 			throw error(413, client_index);
 	}
 }
@@ -103,7 +104,7 @@ int	request::does_uri_match_location(std::vector<LocationPair> locations, std::s
 {
 	if (!locations.empty())
     {
-        if (uri_target.size() > 1 && uri_target.back() == '/') // check the size in case of request line like this "GET / HTTP/1.1"
+        if (uri_target.size() > 1 && uri_target[uri_target.length() - 1] == '/') // check the size in case of request line like this "GET / HTTP/1.1"
 		{
             uri_target.erase(uri_target.size() - 1, 1);
         }

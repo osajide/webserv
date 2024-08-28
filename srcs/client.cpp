@@ -171,7 +171,7 @@ void	client::unchunk_body_file(fd_sets& set_fd)
 	{
 		this->_cgi._infile = this->_cgi.get_random_file_name(this->_index, INPUT_FILE);
 		// std::cout << "infile ---- >>> '" << this->_cgi._infile << "'" << std::endl;
-		this->_unchunked_body_file.open(this->_cgi._infile, std::ios::in | std::ios::app);
+		this->_unchunked_body_file.open(this->_cgi._infile.c_str(), std::ios::in | std::ios::app);
 	}
 	if (this->_unchunked_body_file.is_open())
 	{
@@ -209,7 +209,7 @@ void	client::read_chunked_body(fd_sets& set_fd)
 	
 	if (!this->_body_file.is_open())
 	{
-		this->_body_file.open(this->_cgi.get_random_file_name(this->_index, INPUT_FILE), std::ios::in | std::ios::out | std::ios::app);
+		this->_body_file.open(this->_cgi.get_random_file_name(this->_index, INPUT_FILE).c_str(), std::ios::in | std::ios::out | std::ios::app);
 	}
 	if (this->_body_file.is_open())
 	{
@@ -262,7 +262,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 	{
 		this->_cgi._infile = this->_cgi.get_random_file_name(this->_index, INPUT_FILE);
 		std::cout << "infile = " << this->_cgi._infile << std::endl;
-		this->_body_file.open(this->_cgi._infile, std::ios::app);
+		this->_body_file.open(this->_cgi._infile.c_str(), std::ios::app);
 	}
 	if (this->_body_file.is_open())
 	{

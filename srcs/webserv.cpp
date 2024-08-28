@@ -7,7 +7,8 @@
 #include <cstring>
 #include <ctime>
 
-std::vector<server>	webserv::servers;
+std::vector<server>					webserv::servers;
+std::map<std::string, std::string>	webserv::status_lines;
 
 void	fd_sets::clear_sets()
 {
@@ -35,8 +36,9 @@ void	webserv::set_status_lines()
 std::string	webserv::get_corresponding_status(int status)
 {
 	std::string			str_status;
-	std::stringstream	helper(status);
+	std::stringstream	helper;
 
+	helper << status;
 	helper >> str_status;
 	return (webserv::status_lines[str_status]);
 }
@@ -100,7 +102,9 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 					if (servers[index]._clients[j].get_ready_for_receiving_value() == true)
 					{
 						std::cout << "sending response to client with fd " << servers[index]._clients[j].get_fd() << std::endl;
-						servers[index]._clients[j]._response.send_response(servers[index]._clients[j].get_fd(), get_corresponding_status(200),server::_config[servers[index].get_config_index()], servers[index]._clients[j]._connection_time);
+						servers[index]._clients[j]._response.send_response(servers[index]._clients[j].get_fd(),
+							get_corresponding_status(servers[index]._clients[j]._response._status_code),
+								server::_config[servers[index].get_config_index()], servers[index]._clients[j]._connection_time);
 						if (servers[index]._clients[j]._response._bytes_sent >= servers[index]._clients[j]._response._content_length)
 						{
 							std::cout << "all chunks are sent to fd " << servers[index]._clients[j].get_fd() << std::endl;

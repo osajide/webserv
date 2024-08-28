@@ -123,7 +123,7 @@ void	response::send_response(int fd, std::string status_line, config serverConf,
 	if (!this->_requested_file.is_open())
 	{
 		this->_status_line = status_line;
-		this->_requested_file.open(this->_path_to_serve);
+		this->_requested_file.open(this->_path_to_serve.c_str());
 		this->set_content_length(this->_requested_file);
 		this->_content_type = serverConf.fetch_mime_type_value(this->_path_to_serve);
 

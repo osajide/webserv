@@ -7,6 +7,8 @@
 #include "../inc/webserv.hpp"
 
 std::vector<std::pair<std::string, std::string> >	config::_mime_types;
+std::vector<std::string>							config::_global_dictionary;
+std::vector<std::string>							config::_location_dictionary;
 
 config::config(config const & rhs, std::string ip_port)
 {
@@ -185,7 +187,7 @@ void	config::check_validity_of_global_directives()
 			}
 		}
 		else
-			throw "Directive not known";
+			throw it->first + ": Directive not known";
 	}
 }
 
@@ -251,6 +253,23 @@ void	config::check_validity_of_location_directives()
 				throw "Directive inside location not known";
 		}
 	}
+}
+
+void	config::check_presence_of_mandatory_directives()
+{
+	int							found;
+
+	found = 0;
+
+	for (DirectiveMap::iterator it = this->_directives.begin(); it != this->_directives.end(); it++)
+	{
+		if (it->first == "listen")
+			found++;
+		else if (it->first == "client_max_body_size")
+			found++;
+	}
+	if (found != 2)
+		throw "Few mandatory directives";
 }
 
 int	config::directive_exists(std::string key)
@@ -377,10 +396,11 @@ int	config::if_cgi_directive_exists(int location_index, std::string path)
 
 std::string	config::error_page_well_defined(int status)
 {
-	std::stringstream			helper(status);
+	std::stringstream			helper;
 	std::string					str_status;
 	std::vector<std::string>	error_page_directive;
 
+	helper << status;
 	error_page_directive = this->fetch_directive_value("error_page");
 	if (!error_page_directive.empty())
 	{

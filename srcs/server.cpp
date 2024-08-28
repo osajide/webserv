@@ -85,6 +85,7 @@ void	server::parse_config(char *PathToConfig)
 	{
 		server::_config[i].check_validity_of_global_directives();
 		server::_config[i].check_validity_of_location_directives();
+		server::_config[i].check_presence_of_mandatory_directives();
 	}
 }
 
@@ -277,6 +278,8 @@ std::string    server::check_if_method_allowed_in_location(int client_index, int
 	{
 		allowed_methods = server::_config[this->_conf_index].fetch_directive_value("allowed_methods");
 
+		if (allowed_methods.empty())
+			return ("GET");
 		for (size_t i = 0; i < allowed_methods.size(); i++)
 		{
 			if (this->_clients[client_index]._request._method == allowed_methods[i])

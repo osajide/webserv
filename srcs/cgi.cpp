@@ -4,6 +4,7 @@
 #include <cstring>
 #include <fcntl.h>
 #include <sstream>
+#include <cstdlib>
 #include <unistd.h>
 #include <cstdio>
 #include <dirent.h>
