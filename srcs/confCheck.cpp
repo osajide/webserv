@@ -1,5 +1,6 @@
 #include "../inc/webserv.hpp"
 #include <algorithm>
+#include <cstdio>
 #include <cstdlib>
 #include <ostream>
 #include <string>
@@ -25,30 +26,27 @@ int	count_char(std::string str, char c) {
 	return count;
 }
 
-void	check_nums(std::string str, const char *set) {
-	char *lim;
+void	check_nums(std::string str, char set) {
+	std::stringstream stream(str);
+	std::string lim;
 	int i = -1;
 	char *endp;
 
-	lim = strtok(const_cast<char *>(str.c_str()), set);
-	while (lim != NULL) {
+	while (std::getline(stream, lim, set)) {
 		if (count_char(lim, '.'))
-			check_nums(lim, ".");
+			check_nums(lim, '.');
 		else {
-			i = std::strtod(lim, &endp);
-			if (endp[0] != 0 || i < 0 || i > 255)
+			i = std::strtod(const_cast<char *>(lim.c_str()), &endp);
+			if (i < 0 || (set != ':' && (endp[0] != 0 || i > 255)) || (set == ':' && i > 65535))
 				throw("Invalid IP address!");
 		}
-		std::cout << lim << std::endl;
-		lim = strtok(NULL, set);
 	}
 }
 
-int is_valid_IP(std::string ip) {
+void is_valid_IP(std::string ip) {
 	if (count_char(ip, '.') != 3 || count_char(ip, ':') != 1)
 		throw("Invalid IP address!");
-	check_nums(ip, ":");
-	return (1);
+	check_nums(ip, ':');
 }
 
 void run_check(char *conf) {
