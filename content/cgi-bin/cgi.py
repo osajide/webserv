@@ -7,7 +7,7 @@ import sys
 meth = os.environ['REQUEST_METHOD']
 data = ''
 
-if (meth == 'POST'):
+if (meth != 'GET'):
 	while True:
 		line = sys.stdin.readline()
 		if not line:
