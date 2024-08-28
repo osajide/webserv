@@ -179,7 +179,7 @@ void	config::check_validity_of_global_directives()
 			{
 				if (it->second.size() == 1)
 				{
-					if (it->second[0][it->second[0].length() - 1] == '/')
+					if (it->second[0].length() > 1 && it->second[0][it->second[0].length() - 1] == '/')
 						throw "root: Remove '/' from the end";
 				}
 				else
@@ -197,8 +197,8 @@ void	config::check_validity_of_location_directives()
 
 	for (size_t i = 0; i < this->_locations.size(); i++)
 	{
-		if (this->_locations[i].first[this->_locations[i].first.length() - 1] == '/')
-			throw "Remove '/' from the end";
+		if (this->_locations[i].first.length() > 1 && this->_locations[i].first[this->_locations[i].first.length() - 1] == '/')
+			throw "Remove '/' from the end of location";
 		if (this->_locations[i].first[0] != '/')
 			throw "Location name must start with '/'";
 
