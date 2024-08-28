@@ -3,7 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <ostream>
-#include <string>
+#include <cstring>
 #include <sstream>
 
 std::string trim_whitespace(std::string str) {
