@@ -260,6 +260,7 @@ std::string server::check_availability_of_requested_resource(int client_index, i
 	else
 		target = this->_clients[client_index]._request._target;
 
+	std::cout << "target = " << target << std::endl;
 	full_path += target;
 	std::cout << "full path =====----> '" << full_path << "'" << std::endl;
 	// exit(1);

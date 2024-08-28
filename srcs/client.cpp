@@ -78,6 +78,7 @@ void	client::fill_request_object()
 		pos = reader.find(':');
 		if (pos != reader.npos)
 		{
+			std::cout << "haaad substr" << std::endl;
 			key = reader.substr(0, pos);
 			value = reader.substr(pos + 2, reader.size());
 			this->_request.set_header(key, value);
@@ -354,6 +355,7 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 	{
 		if (buffer[0] != '\0') // In case this is the first time entering this block
 		{
+			std::cout << "substr" << std::endl;
 			this->_request._raw_body = this->_request._raw_request.substr(pos + 4);
 		}
 		if (this->_request.header_exists("Transfer-Encoding")) // handle_chunked_body

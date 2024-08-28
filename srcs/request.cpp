@@ -68,7 +68,6 @@ void	request::is_well_formed(int client_index, config conf)
 	}
 	if (this->_headers.find("Content-Length") != this->_headers.end())
 	{
-		std::cout << "here" << std::endl;
 		if (this->_content_length > (size_t)atoi(conf.fetch_directive_value("client_max_body_size").front().c_str()))
 			throw error(413, client_index);
 	}

@@ -13,36 +13,13 @@ response::response() : _bytes_sent(0), _status_line(""), _content_length(0), _co
 
 response::response(response const & rhs)
 {
-	// this->_body = "";
-	// this->_bytes_sent = 0;
-	// this->_bytes_written = 0;
-	// this->_unsent_part = "";
-	// this->_chunk = "";
-	// this->_content_length = 0;
-	// this->_content_type = "";
-	// this->_headers = "";
-	// this->_location = "";
-	// this->_status_line = "";
-
 	*this = rhs;
 }
 
 response &	response::operator=(response const & rhs)
 {
-	std::cout << "dkhel copy operator dyal response class" << std::endl;
 	if (this != &rhs)
 	{
-		// this->_body = "";
-		// this->_bytes_sent = 0;
-		// this->_bytes_written = 0;
-		// this->_unsent_part = "";
-		// this->_chunk = "";
-		// this->_content_length = 0;
-		// this->_content_type = "";
-		// this->_headers = "";
-		// this->_location = "";
-		// this->_status_line = "";
-
 		this->_body = rhs._body;
 		this->_bytes_sent = rhs._bytes_sent;
 		this->_bytes_written = rhs._bytes_written;
