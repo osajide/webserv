@@ -30,7 +30,7 @@ void	cgi::set_env_variables(request client_req, std::string full_path, char** en
 	{
 		temp.push_back("CONTENT_TYPE=" + client_req._headers["Content-Type"]);
 		std::cout << "temp.back() = " << temp.back() << std::endl;
-		exit(0);
+		// exit(0);
 	}
 	
 	helper << client_req._content_length;

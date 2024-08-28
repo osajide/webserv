@@ -17,7 +17,7 @@ myCGI.addEventListener('submit', (e) => {
 	myCGI.action = '/cgi-bin/cgi.' + myEntries.language;
 	myCGI.method = myEntries.methode;
 	myCGI.submit();
-	document.getElementById('name').value = '';
-	document.getElementById('email').value = '';
-	document.getElementById('message').value = '';
+	// document.getElementById('name').value = '';
+	// document.getElementById('email').value = '';
+	// document.getElementById('message').value = '';
 })
