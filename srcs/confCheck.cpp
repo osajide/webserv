@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <ostream>
 #include <string>
+#include <sstream>
 
 std::string trim_whitespace(std::string str) {
 	size_t start = str.find_first_not_of(" \t\r\v\n");
