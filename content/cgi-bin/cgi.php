@@ -3,6 +3,7 @@
 
 $data = '';
 $methode = $_ENV['REQUEST_METHOD'];
+
 if ($methode == 'POST') {
     while (($line = fgets(STDIN)) !== false) {
         $data .= $line;

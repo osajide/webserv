@@ -1,9 +1,22 @@
 #!/usr/bin/env python3
+
 import os
 import urllib.parse
+import sys
 
 meth = os.environ['REQUEST_METHOD']
-data = urllib.parse.unquote(os.environ['QUERY_STRING'].replace('+', ' ')).split('&')
+data = ''
+
+if (meth == 'POST'):
+	while True:
+		line = sys.stdin.readline()
+		if not line:
+			break
+		data += line
+else:
+	data = os.environ['QUERY_STRING']
+
+data = urllib.parse.unquote(data.replace('+', ' ')).split('&')
 
 body = f"""
 	<!DOCTYPE html>
