@@ -380,7 +380,6 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 					else
 					{
 						this->_clients[client_index]._response.autoindex(this->_clients[client_index].get_fd(), this->_clients[client_index]._request._target);
-						
 						FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);
 						
 						if (this->_clients[client_index]._request._headers["Connection"] == "closed")

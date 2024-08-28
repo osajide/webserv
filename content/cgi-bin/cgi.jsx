@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+
+meth = process.env.REQUEST_METHOD
 data = decodeURIComponent(process.env.QUERY_STRING?.replace('+', ' ')).split('&')
 
 body = `
@@ -14,7 +16,7 @@ body = `
 
 	<body>
 		<div class="response">
-			<h1>Methode: ${process.env.REQUEST_METHOD}</h1>
+			<h1>Methode: ${meth}</h1>
 			<h2>${data[2]?.replace('=', ': ')}</h2>
 			<h2>${data[3]?.replace('=', ': ')}</h2>
 			<h2>${data[4]?.replace('=', ': ')}</h2>
