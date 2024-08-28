@@ -123,7 +123,7 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 		{
 			std::cout << "status catched in webserv::serve_clients: " << e._status << std::endl;
 
-			if (e._status != CLOSE_CONNECTION) // because in case of CLOSE_CONNECTION i shouldn't send any error just close the connection
+			if (e._status != CLOSE_CONNECTION && e._status != -1) // because in case of CLOSE_CONNECTION i shouldn't send any error just close the connection
 			{
 				servers[index]._clients[e._client_index]._response._path_to_serve = server::_config[servers[index]._clients[e._client_index]._config_index].error_page_well_defined(e._status);
 				if (servers[index]._clients[e._client_index]._response._path_to_serve.empty())
@@ -134,7 +134,6 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 				{
 					// server the headers and then set ready_for_receiving value = true so the file will be served by the same
 					// function that serves the regular files
-
 					servers[index]._clients[e._client_index]._response._status_code = e._status;
 					servers[index]._clients[e._client_index].get_ready_for_receiving_value() = true;
 				}

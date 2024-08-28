@@ -78,7 +78,6 @@ void	client::fill_request_object()
 		pos = reader.find(':');
 		if (pos != reader.npos)
 		{
-			std::cout << "haaad substr" << std::endl;
 			key = reader.substr(0, pos);
 			value = reader.substr(pos + 2, reader.size());
 			this->_request.set_header(key, value);
@@ -319,12 +318,10 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 
 		this->_request._raw_request += buffer;
 		pos = this->_request._raw_request.find("\r\n\r\n");
-
 		if (pos != this->_request._raw_request.npos)
 		{
 			this->fill_request_object();
 			this->_request.is_well_formed(this->_index, server::_config[conf_index]);
-
 			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
 			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request._target);
 
@@ -355,7 +352,6 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 	{
 		if (buffer[0] != '\0') // In case this is the first time entering this block
 		{
-			std::cout << "substr" << std::endl;
 			this->_request._raw_body = this->_request._raw_request.substr(pos + 4);
 		}
 		if (this->_request.header_exists("Transfer-Encoding")) // handle_chunked_body
