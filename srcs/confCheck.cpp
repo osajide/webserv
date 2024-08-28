@@ -83,11 +83,15 @@ void run_check(char *conf) {
 			}
 			if (!std::strcmp(lim, "listen"))
 				checkIp = 1;
+			int iter = 1;
 			while (lim != NULL) {
 				lim = strtok(NULL, " ");
 				if (checkIp && lim)
 					is_valid_IP(lim);
+				iter++;
 			}
+			if (content != "server" && iter < 3)
+					throw("Missing value!");
 		}
 		if (braces)
 			throw("Invalid config structure!");
