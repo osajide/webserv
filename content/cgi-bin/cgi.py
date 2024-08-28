@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+
 import os
 import urllib.parse
 import sys
 
 meth = os.environ['REQUEST_METHOD']
 data = ''
+
 if (meth == 'POST'):
 	while True:
 		line = sys.stdin.readline()

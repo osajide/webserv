@@ -1,7 +1,26 @@
 #!/usr/bin/env node
 
 meth = process.env.REQUEST_METHOD
-data = decodeURIComponent(process.env.QUERY_STRING?.replace('+', ' ')).split('&')
+data = ''
+
+if (meth == 'POST') { 
+	const readline = require('readline');
+
+	const rl = readline.createInterface({
+	input: process.stdin,
+	output: process.stdout
+	});
+
+	rl.on('line', (line) => {
+		console.error(line)
+		if (line)
+			data += line
+	});
+}
+else
+	data = process.env.QUERY_STRING
+
+data = decodeURIComponent(data?.replace('+', ' ')).split('&')
 
 body = `
 	<!DOCTYPE html>
@@ -20,6 +39,7 @@ body = `
 			<h2>${data[2]?.replace('=', ': ')}</h2>
 			<h2>${data[3]?.replace('=', ': ')}</h2>
 			<h2>${data[4]?.replace('=', ': ')}</h2>
+			<h2>${JSON.stringify(data)}</h2>
 		</div>
 	</body>
 
