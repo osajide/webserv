@@ -16,7 +16,7 @@ const addUp = () => {
 	upl.classList.remove("hide");
 	upl.innerHTML = `
 		<label for="upload">Upload file</label>
-		<input required name="upload" id="upload" type="file" />`;
+		<input name="upload" id="upload" type="file" />`;
 }
 
 const remInput = () => {
@@ -66,12 +66,16 @@ myCGI.addEventListener("submit", (e) => {
 	// ];
 	const data = new FormData(myCGI);
 	data.forEach((value, key) => {
-		myEntries[key] = value;
+		if (key != 'upload' || value.name.length){
+			if (key == 'upload')
+				myCGI.enctype= "multipart/form-data"
+			myEntries[key] = value;
+		}
+		else
+			myCGI.enctype= ""
 	});
 	myCGI.action = "/cgi-bin/cgi." + myEntries.language;
 	myCGI.method = myEntries.methode;
 	myCGI.submit();
-	// document.getElementById('name').value = '';
-	// document.getElementById('email').value = '';
-	// document.getElementById('message').value = '';
+	  // myForm.reset();
 });

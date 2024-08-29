@@ -1,11 +1,9 @@
 #!/usr/bin/env node
 
 meth = process.env.REQUEST_METHOD
-data = ''
+contentType = process.env.CONTENT_TYPE
 
-const displayRes = () => {
-	data = decodeURIComponent(data?.replace('+', ' ')).split('&')
-	
+const displayRes = (formD) => {
 	body = `
 		<!DOCTYPE html>
 		<html lang="en">
@@ -20,19 +18,21 @@ const displayRes = () => {
 		<body>
 			<div class="response">
 				<h1>Methode: ${meth}</h1>
-				<h2>${data[2]?.replace('=', ': ')}</h2>
-				<h2>${data[3]?.replace('=', ': ')}</h2>
-				<h2>${data[4]?.replace('=', ': ')}</h2>
+				${formD.map((a, index) => {
+					if (index > 1 && a.length > a.indexOf('=') + 1)	
+						return `<h2>${a?.replace('=', ': ')}</h2>`
+				}).join('')}
 			</div>
 		</body>
 	
 		</html>
 	`
-	
+
 	console.log(`HTTP/1.1 200 OK\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n\r\n${body}`)
 }
 
-if (meth != 'GET') { 
+if (meth == 'POST') {
+	data = ''
 	const readline = require('readline');
 
 	const rl = readline.createInterface({
@@ -46,10 +46,28 @@ if (meth != 'GET') {
 	});
 
 	rl.on('close', () => {
-		displayRes()
+		contentType = contentType.split(';')
+		test = decodeURIComponent(data?.replace('+', ' ')).split('&')
+		if (contentType[0] === "multipart/form-data") {
+			data = data.split('--' + contentType[1].split('=')[1])
+			data.shift()
+			data.pop()
+			test = data.map(elm => {
+				if (elm.indexOf('filename') < 0) {
+					ret = elm.split('Content-Disposition: form-data; ').join('')
+					ret = ret.substr(6).replace('"', ': ')
+					return ret
+				}
+				else
+					return ''
+			})
+		}
+
+		displayRes(test)
 	});
 }
 else {
 	data = process.env.QUERY_STRING
-	displayRes()
+	data = decodeURIComponent(data?.replace('+', ' ')).split('&')
+	displayRes(data)
 }

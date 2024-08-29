@@ -38,12 +38,14 @@ form {
   position: relative;
   z-index: 2;
 }
-form input, form textarea {
+form input,
+form textarea {
   padding: 10px;
   border-radius: 5px;
   border: none;
 }
-form input:focus, form textarea:focus {
+form input:focus,
+form textarea:focus {
   outline: 2px solid rgb(0, 208, 208);
 }
 
@@ -124,6 +126,8 @@ p {
   padding: 40px 20px;
   background: #000;
   border-radius: 10px;
+  max-width: 80%;
+  word-break: break-all;
 }
 .response > * {
   margin: 0;
