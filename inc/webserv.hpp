@@ -17,5 +17,3 @@ class   webserv
 		static std::string							get_corresponding_status(int status);
 		static void									set_status_lines();
 };
-
-void run_check(char *conf);

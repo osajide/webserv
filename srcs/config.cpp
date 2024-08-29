@@ -159,10 +159,10 @@ void	config::check_validity_of_global_directives()
 					int status = std::atoi(it->second.front().c_str());
 					if (status != 400 && status != 403 && status != 404 && status != 405 && status != 413 && status != 414
 							&& status != 500 && status != 501 && status != 504 && status != 505)
-						throw "Invalid error code";
+						throw std::string("Invalid error code");
 				}
 				else
-					throw "error_page: Invalid number of values";
+					throw std::string("error_page: Invalid number of values");
 			}
 			else if (it->first == "client_max_body_size")
 			{
@@ -170,19 +170,21 @@ void	config::check_validity_of_global_directives()
 				{
 					int max_body_size = std::atoi(it->second.front().c_str());
 					if (max_body_size == -1 || max_body_size == 0 || max_body_size > INT_MAX)
-						throw "client_max_body_size: Invalid size";
+						throw std::string("client_max_body_size: Invalid size");
 				}
 				else
-					throw "client_max_body_size: Invalid number of values";
+					throw std::string("client_max_body_size: Invalid number of values");
 			}
 			else if (it->first == "root")
 			{
 				if (it->second.size() != 1)
-					throw "root: Invalid number of values";
+					throw std::string("root: Invalid number of values");
 			}
 		}
 		else
-			throw (it->first + ": Directive not known").c_str();
+		{
+			throw std::string(it->first + ": Directive not known");
+		}
 	}
 }
 
@@ -200,7 +202,7 @@ void	config::check_validity_of_location_directives()
 				if (it->first == "root")
 				{
 					if (it->second.size() != 1)
-						throw "root in location: Invalid number of values";
+						throw std::string("root in location: Invalid number of values");
 				}
 				else if (it->first == "allowed_methods")
 				{
@@ -209,7 +211,7 @@ void	config::check_validity_of_location_directives()
 						for (size_t j = 0; j < it->second.size(); j++)
 						{
 							if (it->second[j] != "GET" && it->second[j] != "POST" && it->second[j] != "DELETE")
-								throw "allowed_methods: Unknown methods";
+								throw std::string("allowed_methods: Unknown methods");
 						}
 					}
 				}
@@ -218,19 +220,19 @@ void	config::check_validity_of_location_directives()
 					if (it->second.size() == 2)
 					{
 						if (webserv::status_lines.find(it->second.front()) == webserv::status_lines.end())
-							throw "return: Invalid status code";
+							throw std::string("return: Invalid status code");
 					}
 					else
-						throw "return: Invalid number of values";
+						throw std::string("return: Invalid number of values");
 				}
 				else if (it->first == "alias")
 				{
 					if (it->second.size() != 1)
-						throw "alias: Invalid number of values";
+						throw std::string("alias: Invalid number of values");
 				}
 			}
 			else
-				throw "Directive inside location not known";
+				throw std::string(it->first + ": Directive inside location not known");
 		}
 	}
 }
@@ -242,7 +244,7 @@ void	config::check_for_conflicts_and_set_default_values()
 		if (this->directive_inside_location_exists(i, "alias"))
 		{
 			if (this->directive_inside_location_exists(i, "root"))
-				throw "Conflicts: can't have alias and root in same location";
+				throw std::string("Conflicts: can't have alias and root in same location");
 		}
 	}
 	if (!this->directive_exists("root"))
@@ -265,7 +267,7 @@ void	config::check_presence_of_mandatory_directives()
 			found++;
 	}
 	if (found != 2)
-		throw "Few mandatory directives";
+		throw std::string("Few mandatory directives");
 }
 
 int	config::directive_exists(std::string key)

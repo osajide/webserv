@@ -52,11 +52,13 @@ void	server::close_connection(int client_index, fd_sets & set_fd)
 	this->_clients.remove_from_begin(client_index);
 }
 
-void	server::parse_config(char *PathToConfig)
+void	server::parse_config(const char *PathToConfig)
 {
 	std::fstream				file;
 	std::string					reader;
 	std::vector<std::string>	listen_directive;
+
+	server::run_check(PathToConfig);
 
 	file.open(PathToConfig);
 	if (file.is_open())
@@ -68,6 +70,17 @@ void	server::parse_config(char *PathToConfig)
 		}
 		file.close();
 	}
+
+	config::set_dictionary();
+
+	for (size_t i = 0; i < server::_config.size(); i++)
+	{
+		server::_config[i].check_validity_of_global_directives();
+		server::_config[i].check_validity_of_location_directives();
+		server::_config[i].check_for_conflicts_and_set_default_values();
+		server::_config[i].check_presence_of_mandatory_directives();
+	}
+
 	for (size_t i = 0; i < server::_config.size(); i++)
 	{
 		listen_directive = server::_config[i].fetch_directive_value("listen");
@@ -79,14 +92,6 @@ void	server::parse_config(char *PathToConfig)
 				server::_config.push_back(new_conf_block);
 			}
 		}
-	}
-	config::set_dictionary();
-	for (size_t i = 0; i < server::_config.size(); i++)
-	{
-		server::_config[i].check_validity_of_global_directives();
-		server::_config[i].check_validity_of_location_directives();
-		server::_config[i].check_for_conflicts_and_set_default_values();
-		server::_config[i].check_presence_of_mandatory_directives();
 	}
 }
 
