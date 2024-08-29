@@ -192,13 +192,17 @@ void	cgi::run_cgi(client & cl, char** environ)
 			if (cl._request._method == "POST")
 				close(this->_fd[0]);
 			close(this->_fd[1]);
+			kill(this->_pid, SIGKILL);
 			throw error(504, cl._index);
 		}
 		pid_t	wpid = waitpid(this->_pid, &this->_exit_status, WNOHANG);
 		if (wpid == -1)
 		{
 			// std::cout << "wpid = -1" << std::endl;
+			if (this->_fd[0] != -1)
+				close (this->_fd[0]);
 			close(this->_fd[1]);
+			kill(this->_pid, SIGKILL);
 			throw error(500, cl._index);
 		}
 		if (wpid == 0)
