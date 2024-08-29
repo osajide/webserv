@@ -53,7 +53,7 @@ std::string	response::get_chunk(std::ifstream& requested_file)
 	std::string	chunk;
 	char		buffer[5000];
 
-	memset(buffer, 0, 5000);
+	std::memset(buffer, 0, 5000);
 
 	requested_file.read(buffer, 4999);
 

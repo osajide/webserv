@@ -20,6 +20,7 @@ OBJS		=	$(addprefix $(OBJS_DIR)/, $(SRCS_FILES:.cpp=.o))
 all	:	$(NAME)
 
 $(NAME)	:	$(OBJS)
+	@mkdir -p /tmp/post_test
 	@$(CC) $(CFLAGS) $^ -o $@
 
 $(OBJS_DIR)/%.o	:	$(SRCS_DIR)/%.cpp $(INC)

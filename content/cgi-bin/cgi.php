@@ -2,16 +2,16 @@
 <?php
 
 $data = '';
-$methode = $_ENV['REQUEST_METHOD'];
+$methode = $_SERVER['REQUEST_METHOD'];
 
-if ($methode == 'POST') {
+if ($methode != 'GET') {
     while (($line = fgets(STDIN)) !== false) {
         $data .= $line;
     }
     $data = urldecode($data);
 }
 else {
-    $data = urldecode($_ENV['QUERY_STRING']);
+    $data = urldecode($_SERVER['QUERY_STRING']);
 }
 
 $data = explode('&', urldecode($data));

@@ -9,7 +9,7 @@
 </head>
 
 <body>
-	<form id="myForm">
+	<form id="myForm" enctype="multipart/form-data">
 		<div class="inp">
 			<p>Choose language:</p>
 			<div class="select language">
@@ -24,10 +24,10 @@
 		<div class="inp">
 			<p>Choose methode:</p>
 			<div class="select methodes">
-				<input name="methode" type="radio" value="POST" id="post" checked />
-				<label for="post">POST</label>
-				<input name="methode" type="radio" value="GET" id="get" />
+				<input name="methode" type="radio" value="GET" id="get" checked/>
 				<label for="get">GET</label>
+				<input name="methode" type="radio" value="POST" id="post"/>
+				<label for="post">POST</label>
 				<input name="methode" type="radio" value="DELETE" id="delete" />
 				<label for="delete">DELETE</label>
 			</div>
@@ -39,6 +39,8 @@
 		<div class="inp">
 			<label for="email">Email</label>
 			<input required name="Email" id="email" type="email" placeholder="Enter your email" />
+		</div>
+		<div class="inp hide" id="up">
 		</div>
 		<div class="inp">
 			<label for="message">Message</label>

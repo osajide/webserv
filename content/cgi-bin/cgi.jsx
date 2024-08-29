@@ -32,12 +32,12 @@ const displayRes = () => {
 	console.log(`HTTP/1.1 200 OK\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n\r\n${body}`)
 }
 
-if (meth == 'POST') { 
+if (meth != 'GET') { 
 	const readline = require('readline');
 
 	const rl = readline.createInterface({
-	input: process.stdin,
-	output: process.stdout
+		input: process.stdin,
+		output: process.stdout
 	});
 
 	rl.on('line', (line) => {

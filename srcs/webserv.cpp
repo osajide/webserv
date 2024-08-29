@@ -189,7 +189,7 @@ void	webserv::launch_server(char** env)
 	}
 
 	client_addr_len = sizeof(struct sockaddr_in);
-	memset(&client_addr, 0, client_addr_len);
+	std::memset(&client_addr, 0, client_addr_len);
 
 	std::cout << "server size() = " << servers.size() << std::endl;
 	std::cout << "number of bound addresses = " << server::_bound_addresses.size() << std::endl;

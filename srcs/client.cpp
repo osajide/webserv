@@ -187,7 +187,7 @@ void	client::unchunk_body_file(fd_sets& set_fd)
 		}
 
 		char	buffer[chunk_size + 1];
-		memset(buffer, 0, chunk_size + 1);
+		std::memset(buffer, 0, chunk_size + 1);
 
 		this->_body_file.read(buffer, chunk_size);
 		std::cout << buffer << std::endl;
@@ -226,7 +226,7 @@ void	client::read_chunked_body(fd_sets& set_fd)
 		}
 		else
 		{
-			memset(buffer, 0, BUFFER_SIZE + 1);
+			std::memset(buffer, 0, BUFFER_SIZE + 1);
 
 			valread = read(this->_fd, buffer, BUFFER_SIZE);
 
@@ -272,7 +272,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 		{
 			if (this->_request._raw_body.empty())
 			{
-				memset(buffer, 0, BUFFER_SIZE + 1);
+				std::memset(buffer, 0, BUFFER_SIZE + 1);
 				valread = read(this->_fd, buffer, BUFFER_SIZE);
 				if (valread == 0 || valread == -1)
 					throw error(-1, this->_index);
@@ -302,7 +302,7 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 	int			valread = 0;
 	char		buffer[BUFFER_SIZE + 1];
 
-	memset(buffer, 0, BUFFER_SIZE + 1);
+	std::memset(buffer, 0, BUFFER_SIZE + 1);
 
 	if (this->_read_body == false)
 	{
