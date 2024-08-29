@@ -36,7 +36,6 @@ class config
 		int							if_cgi_directive_exists(int location_index, std::string path);
 		std::string					error_page_well_defined(int status);
 
-	private:
 		DirectiveMap												_directives;
 		std::vector<LocationPair>									_locations;
 		static std::vector<std::pair<std::string, std::string> >	_mime_types;

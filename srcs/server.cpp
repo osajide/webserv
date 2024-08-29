@@ -252,10 +252,10 @@ std::string server::check_availability_of_requested_resource(int client_index, i
 
 	if (alias_check == 1)
 	{
-		// std::string	location_dir;
+		std::string location_name = server::_config[this->_clients[client_index]._config_index]._locations[location_index].first;
+		size_t pos = this->_clients[client_index]._request._target.find(location_name);
 
-		// location_dir = server::_config[this->_clients[client_index]._config_index].get_location_directory_name(location_index);
-		target = this->_clients[client_index]._request._target.substr(); // here i should substruct the location from the entire target
+		target = this->_clients[client_index]._request._target.substr(pos + location_name.length());
 	}
 	else
 		target = this->_clients[client_index]._request._target;
