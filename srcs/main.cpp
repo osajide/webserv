@@ -27,10 +27,6 @@ int main(int ac, char** av, char** env)
 		std::cout << "--------- msg catched = " << msg << std::endl;
 		return (0);
 	}
-	catch (const std::string & msg)
-	{
-		std::cout << "execption : " << msg << std::endl;
-	}
 	catch(std::out_of_range & e)
 	{
 		std::cout << "catched : " << e.what() << std::endl;

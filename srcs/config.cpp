@@ -182,7 +182,7 @@ void	config::check_validity_of_global_directives()
 			}
 		}
 		else
-			throw it->first + ": Directive not known";
+			throw (it->first + ": Directive not known").c_str();
 	}
 }
 
@@ -248,7 +248,7 @@ void	config::check_for_conflicts_and_set_default_values()
 	if (!this->directive_exists("root"))
 		this->_directives["root"].push_back("/home/osajide/1337/wsl_webserv/content");
 	if (!this->directive_exists("index"))
-		this->_directives["listen"].push_back("index.html");
+		this->_directives["index"].push_back("index.html");
 }
 
 void	config::check_presence_of_mandatory_directives()
