@@ -129,7 +129,7 @@ server::server(int conf_index) : _bound(false), _conf_index(conf_index)
 
 	this->_addr.sin_family = AF_INET;
 	this->_addr.sin_addr.s_addr = inet_addr(_ip.c_str());
-	this->_addr.sin_port = htons(atoi(_port.c_str()));
+	this->_addr.sin_port = htons(std::atoi(_port.c_str()));
 
     this->init_socket();
 }

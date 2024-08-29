@@ -135,9 +135,8 @@ void	client::does_location_has_redirection()
 		return_directive = server::_config[this->_config_index].fetch_location_directive_value(this->_location_index, "return");
 		if (!return_directive.empty())
 		{
-			this->_response._redirection_path = return_directive.back();
-			std::cout << "path to redirect = '" << this->_response._redirection_path << "'" << std::endl;
-			throw error(atoi(return_directive.front().c_str()), this->_index);
+			this->_response.redirect(this->_fd, std::atoi(return_directive.front().c_str()), return_directive.back());
+			throw error(CLOSE_CONNECTION, this->_index);
 		}
 	}
 }
