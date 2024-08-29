@@ -177,12 +177,7 @@ void	config::check_validity_of_global_directives()
 			}
 			else if (it->first == "root")
 			{
-				if (it->second.size() == 1)
-				{
-					if (it->second[0].length() > 1 && it->second[0][it->second[0].length() - 1] == '/')
-						throw "root: Remove '/' from the end";
-				}
-				else
+				if (it->second.size() != 1)
 					throw "root: Invalid number of values";
 			}
 		}
@@ -197,11 +192,6 @@ void	config::check_validity_of_location_directives()
 
 	for (size_t i = 0; i < this->_locations.size(); i++)
 	{
-		if (this->_locations[i].first.length() > 1 && this->_locations[i].first[this->_locations[i].first.length() - 1] == '/')
-			throw "Remove '/' from the end of location";
-		if (this->_locations[i].first[0] != '/')
-			throw "Location name must start with '/'";
-
 		for (LocationPair::second_type::iterator it = this->_locations[i].second.begin(); it != this->_locations[i].second.end(); it++)
 		{
 			vecIter = std::find(config::_location_dictionary.begin(), config::_location_dictionary.end(), it->first);
@@ -209,12 +199,7 @@ void	config::check_validity_of_location_directives()
 			{
 				if (it->first == "root")
 				{
-					if (it->second.size() == 1)
-					{
-						if (it->second[0][it->second[0].length() - 1] == '/')
-							throw "root in location: Remove '/' from the end";
-					}
-					else
+					if (it->second.size() != 1)
 						throw "root in location: Invalid number of values";
 				}
 				else if (it->first == "allowed_methods")
@@ -240,12 +225,7 @@ void	config::check_validity_of_location_directives()
 				}
 				else if (it->first == "alias")
 				{
-					if (it->second.size() == 1)
-					{
-						if (it->second[0][it->second[0].length() - 1] == '/')
-							throw "alias: Remove '/' from the end";
-					}
-					else
+					if (it->second.size() != 1)
 						throw "alias: Invalid number of values";
 				}
 			}
@@ -253,6 +233,22 @@ void	config::check_validity_of_location_directives()
 				throw "Directive inside location not known";
 		}
 	}
+}
+
+void	config::check_for_conflicts_and_set_default_values()
+{
+	for (size_t i = 0; i < this->_locations.size(); i++)
+	{
+		if (this->directive_inside_location_exists(i, "alias"))
+		{
+			if (this->directive_inside_location_exists(i, "root"))
+				throw "Conflicts: can't have alias and root in same location";
+		}
+	}
+	if (!this->directive_exists("root"))
+		this->_directives["root"].push_back("/home/osajide/1337/wsl_webserv/content");
+	if (!this->directive_exists("index"))
+		this->_directives["listen"].push_back("index.html");
 }
 
 void	config::check_presence_of_mandatory_directives()

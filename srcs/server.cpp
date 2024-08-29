@@ -85,6 +85,7 @@ void	server::parse_config(char *PathToConfig)
 	{
 		server::_config[i].check_validity_of_global_directives();
 		server::_config[i].check_validity_of_location_directives();
+		server::_config[i].check_for_conflicts_and_set_default_values();
 		server::_config[i].check_presence_of_mandatory_directives();
 	}
 }
