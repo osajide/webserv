@@ -71,6 +71,10 @@ void	request::is_well_formed(int client_index, config conf)
 		if (this->_content_length > (size_t)std::atoi(conf.fetch_directive_value("client_max_body_size").front().c_str()))
 			throw error(413, client_index);
 	}
+	// if (this->notAllowedChar())
+	// {
+	// 	throw error(400, client_index);
+	// }
 }
 
 std::string remove_last_dir_from_path(std::string  path)
@@ -130,13 +134,11 @@ std::string	request::fetch_header_value(std::string key)
 	return ("");
 }
 /*
-// int             Request::hexToInt(const std::string& hexStr) 
 int             hexToInt(const std::string& hexStr) 
 {
     return std::stoi(hexStr, nullptr, 16);
 }
 
-// std::string     Request::convertChars(const std::string& path)
 std::string     convertChars(const std::string& path)
 {
     std::string str = "";
@@ -168,8 +170,7 @@ std::string     convertChars(const std::string& path)
     return (str);
 }
 
-// int      Request::notAllowedChar(const std::string& path)
-int      notAllowedChar(const std::string& path)
+int	request::notAllowedChar(const std::string& path)
 {
     std::string allowed_chars;
     std::string converted_str;

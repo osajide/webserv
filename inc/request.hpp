@@ -20,6 +20,8 @@ class request
         std::string fetch_header_value(std::string key);
         int         header_exists(std::string key);
 
+        int         notAllowedChar(const std::string& path);
+
 		void		clear_request();
 
     	std::string							_raw_request;
