@@ -16,6 +16,7 @@ function dataRet($elm) {
 if ($methode === 'POST') {
     while (($line = fgets(STDIN)) !== false) {
         $data .= $line;
+        $data .= "\n";
     }
     $i = 5;
     $contentType = explode(';', $contentType);

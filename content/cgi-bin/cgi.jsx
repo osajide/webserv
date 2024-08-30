@@ -18,7 +18,7 @@ const displayRes = (formD) => {
 	
 		<body>
 			<div class="response">
-				<h1>Methode: ${meth}</h1>
+				<h1>Methode: ${friw}</h1>
 				${formD.map((a, index) => {
 					if (index > 1 && a.length > a.indexOf('=') + 1)	
 						return `<h2>${a?.replace('=', ': ')}</h2>`
@@ -33,24 +33,7 @@ const displayRes = (formD) => {
 }
 
 const fs = require('fs');
-
-// Function to create and fill a file with data
-const createAndFillFile = (filePath, vals) => {
-  try {
-    // Check if the file already exists
-    if (fs.existsSync(filePath)) {
-      console.log('File already exists.');
-      return;
-    }
-
-    // Create the file and write vals to it
-    fs.writeFileSync(filePath, vals, 'utf8');
-    console.log('File created and filled successfully.');
-  } catch (err) {
-    console.error('Error creating file:', err);
-  }
-}
-
+friw = 0
 
 if (meth == 'POST') {
 	data = ''
@@ -64,7 +47,7 @@ if (meth == 'POST') {
 
 	rl.on('line', (line) => {
 		if (line)
-			data += line
+			data += line + '\n'
 	});
 
 	rl.on('close', () => {
@@ -75,12 +58,17 @@ if (meth == 'POST') {
 			data.pop()
 			test = data.map(elm => {
 				if (elm.indexOf('filename') < 0) {
-					ret = elm.split('Content-Disposition: form-data; ').join('')
+					ret = elm.split('\nContent-Disposition: form-data; ').join('')
 					ret = ret.substr(6).replace('"', ': ')
 					return ret
 				}
 				else {
-					createAndFillFile('./uploads/myFile.txt', data);
+					fileEntries = elm.split('\n')
+					fileName = fileEntries[1].substr('Content-Disposition: form-data; name="upload"; filename="'.length)
+					fileName = fileName.substr(0, fileName.length - 1)
+					fileData = fileEntries.slice(3).join('\n')
+					friw = fileData.length
+					fs.writeFileSync(`./uploads/${fileName}`, fileData);
 					return ''
 				}
 			})

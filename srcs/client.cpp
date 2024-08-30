@@ -276,8 +276,13 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 				if (valread == 0 || valread == -1)
 					throw error(-1, this->_index);
 
-				this->_body_file << buffer;
+				std::string str_buffer;
+
+				str_buffer.assign(buffer, valread);
+				this->_body_file << str_buffer;
+				// this->_body_file << buffer;
 				this->_bytes_read += valread;
+
 			}
 			else
 			{
@@ -287,6 +292,8 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 				this->_request._raw_body.clear();
 			}
 		}
+		std::cout << "bytes read = " << this->_bytes_read << " | content length = " << this->_request._content_length << std::endl;
+		// usleep(100000);
 		if (this->_bytes_read == this->_request._content_length)
 		{
 			this->_body_file.close();

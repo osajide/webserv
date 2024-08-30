@@ -173,7 +173,11 @@ void	cgi::run_cgi(client & cl, char** environ)
 
 			chdir(cl._response._path_to_serve.substr(0, cl._response._path_to_serve.rfind('/')).c_str());
 
-			execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
+			// execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
+			// char *dreb[3] = {"/home/ykhayri/.nvm/versions/node/v16.20.2/bin/node", "/home/ykhayri/1337/wsl_webserv/content/cgi-bin/cgi.jsx", NULL};
+			// char *dreb[3] = {"/usr/bin/php", "/home/ykhayri/1337/wsl_webserv/content/cgi-bin/cgi.php", NULL};
+			char *dreb[3] = {"/usr/bin/python3", "/home/ykhayri/1337/wsl_webserv/content/cgi-bin/cgi.py", NULL};
+			execve("/usr/bin/python3", dreb, this->_env);
 
 			if (this->_fd[0] != -1)
 				close (this->_fd[0]);
