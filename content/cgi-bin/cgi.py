@@ -6,17 +6,41 @@ import sys
 
 meth = os.environ['REQUEST_METHOD']
 data = ''
+disp = ''
+# contentType = os.environ['CONTENT_TYPE']
+# def formatData (elm):
+# 	if (elm.indexOf('filename') < 0):
+# 		ret = elm.split('Content-Disposition: form-data; ').join('')
+# 		ret = ret.substr(6).replace('"', ': ')
+# 		return ret
+# 	else:
+# 		return ''
 
-if (meth != 'GET'):
-	while True:
-		line = sys.stdin.readline()
-		if not line:
-			break
-		data += line
-else:
-	data = os.environ['QUERY_STRING']
+def addH2():
+    tmp = ''
+    for index, elem in enumerate(data):
+        if (index > 1 and len(elem) > elem.index('=') + 1):
+        	tmp = tmp + f'<h2>{elem}</h2>'
+    return tmp
 
+# if (meth == 'POST'):
+# 	while True:
+# 		line = sys.stdin.readline()
+# 		if not line:
+# 			break
+# 		data += line
+# 	contentType = contentType.split(';')
+# 	if (contentType[0] == "multipart/form-data") :
+# 		data = data.split('--' + contentType[1].split('=')[1])
+# 		data.shift()
+# 		data.pop()
+# 		data = map(formatData, data)
+	
+# else:
+data = os.environ['QUERY_STRING']
 data = urllib.parse.unquote(data.replace('+', ' ')).split('&')
+# disp = data
+disp = addH2()
 
 body = f"""
 	<!DOCTYPE html>
@@ -32,9 +56,7 @@ body = f"""
 	<body>
 		<div class="response">
 			<h1>Methode: {meth}</h1>
-			<h2>{data[2].replace('=', ': ')}</h2>
-			<h2>{data[3].replace('=', ': ')}</h2>
-			<h2>{data[4].replace('=', ': ')}</h2>
+			{disp}
 		</div>
 	</body>
 
