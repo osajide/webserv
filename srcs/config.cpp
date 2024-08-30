@@ -70,8 +70,8 @@ void	config::set_dictionary()
 	config::_location_dictionary.push_back("autoindex");
 	config::_location_dictionary.push_back("index");
 	config::_location_dictionary.push_back("cgi");
-	config::_location_dictionary.push_back("upload_allowed");
-	config::_location_dictionary.push_back("upload_dir");
+	config::_location_dictionary.push_back("upload");
+	config::_location_dictionary.push_back("upload_path");
 }
 
 config::config(std::fstream& file)
