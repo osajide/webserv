@@ -128,27 +128,6 @@ server::server(int conf_index) : _bound(false), _conf_index(conf_index)
     this->init_socket();
 }
 
-int	server_name_exists(int index, std::string server_name)
-{
-	for (size_t i = 0; i < server::_bound_addresses[index].second.size(); i++)
-	{
-		if (server_name == server::_bound_addresses[index].second[i])
-			return (1);
-	}
-	return (0);
-}
-
-void	modify_server_names_in_bound_addresses(int index, std::vector<std::string> server_names)
-{
-	for (size_t i = 0; i < server_names.size(); i++)
-	{
-		if (!server_name_exists(index, server_names[i]))
-		{
-			server::_bound_addresses[index].second.push_back(server_names[i]);
-		}
-	}
-}
-
 void	server::init_socket()
 {
 	int	bound_address_index;
@@ -164,7 +143,8 @@ void	server::init_socket()
 		{
 			for (size_t i = 0; i < server_names.size(); i++)
 			{
-				for (size_t j = 0; j < server::_bound_addresses[bound_address_index].second.size(); j++)
+				size_t j = 0;
+				for (; j < server::_bound_addresses[bound_address_index].second.size(); j++)
 				{
 					if (server_names[i] == server::_bound_addresses[bound_address_index].second[j])
 					{
@@ -172,9 +152,12 @@ void	server::init_socket()
 						break;
 					}
 				}
+				if (j == server::_bound_addresses[bound_address_index].second.size())
+				{
+					server::_bound_addresses[bound_address_index].second.push_back(server_names[i]);
+				}
 			}
 		}
-		modify_server_names_in_bound_addresses(bound_address_index, server_names);
 		return ;
 	}
 
