@@ -193,7 +193,7 @@ void	client::unchunk_body_file(fd_sets& set_fd)
 		std::memset(buffer, 0, chunk_size + 1);
 
 		this->_body_file.read(buffer, chunk_size);
-		std::cout << buffer << std::endl;
+		// std::cout << buffer << std::endl;
 
 		this->_request._content_length += chunk_size;
 
@@ -278,6 +278,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 			{
 				std::memset(buffer, 0, BUFFER_SIZE + 1);
 				valread = read(this->_fd, buffer, BUFFER_SIZE);
+				std::cout << "valread ===>>> " << valread << std::endl;
 				if (valread == 0 || valread == -1)
 					throw error(-1, this->_index);
 
@@ -285,7 +286,6 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 
 				str_buffer.assign(buffer, valread);
 				this->_body_file << str_buffer;
-				// this->_body_file << buffer;
 				this->_bytes_read += valread;
 
 			}
@@ -293,12 +293,12 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 			{
 				this->_body_file << this->_request._raw_body;
 				std::cout << "raw body size = " << this->_request._raw_body.length() << std::endl;
+				// exit(1);
 				this->_bytes_read += this->_request._raw_body.length();
 				this->_request._raw_body.clear();
 			}
 		}
 		std::cout << "bytes read = " << this->_bytes_read << " | content length = " << this->_request._content_length << std::endl;
-		// usleep(100000);
 		if (this->_bytes_read == this->_request._content_length)
 		{
 			this->_body_file.close();
@@ -324,12 +324,15 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 
 		std::cout << "*----------------- valread = " << valread << std::endl;
 		std::cout << "------ buffer read from fd  " << this->_fd << ":" << std::endl;
-		std::cout << buffer << std::endl;
+		// std::cout << buffer << std::endl;
 		std::cout << "*----------------" << std::endl;
 		// exit(1);
 		// sleep(7);
 
-		this->_request._raw_request += buffer;
+		std::string t;
+		t.assign(buffer, valread);
+		this->_request._raw_request += t;
+		// this->_request._raw_request += buffer;
 		pos = this->_request._raw_request.find("\r\n\r\n");
 		if (pos != this->_request._raw_request.npos)
 		{
@@ -365,7 +368,8 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 	{
 		if (buffer[0] != '\0') // In case this is the first time entering this block
 		{
-			this->_request._raw_body = this->_request._raw_request.substr(pos + 4);
+			std::string temp = this->_request._raw_request.substr(pos + 4);
+			this->_request._raw_body = temp;
 		}
 		if (this->_request.header_exists("Transfer-Encoding")) // handle_chunked_body
 		{
