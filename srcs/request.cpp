@@ -45,14 +45,12 @@ void	request::is_well_formed(int client_index, config conf)
 	}
 	if (this->_method == "POST" && this->_headers.find("Transfer-Encoding") != this->_headers.end() && this->_headers.find("Content-Length") != this->_headers.end())
 	{
-		std::cout << "thiiiiiiis" << std::endl;
 		throw error(400, client_index);
 	}
 	if (this->_target.length() > 2048)
 	{
 		throw error(414, client_index); // Request Uri Too Long
 	}
-	// connection or host fields empty and check http version
 	if (this->_headers.find("Connection") == this->_headers.end()
 			|| (this->_headers["Connection"] != "keep-alive" && this->_headers["Connection"] != "closed"))
 	{
