@@ -70,6 +70,10 @@ void	client::fill_request_object()
 
 	while (getline(ss, reader))
 	{
+		if (reader == "\r")
+		{
+			break;
+		}
 		for (size_t i = 0; i < reader.size(); i++)
 		{
 			if (reader[i] == '\r')
@@ -256,6 +260,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 {
 	int		valread = 0;
 	char	buffer[BUFFER_SIZE + 1];
+		std::cout << "===============================================================>"<< std::endl;
 
 	if (this->_cgi._infile.empty())
 	{
@@ -321,6 +326,8 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 		std::cout << "------ buffer read from fd  " << this->_fd << ":" << std::endl;
 		std::cout << buffer << std::endl;
 		std::cout << "*----------------" << std::endl;
+		// exit(1);
+		// sleep(7);
 
 		this->_request._raw_request += buffer;
 		pos = this->_request._raw_request.find("\r\n\r\n");

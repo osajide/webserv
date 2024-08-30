@@ -7,7 +7,7 @@
 #include <fstream>
 // #include <sys/_types/_timeval.h>
 
-#define BUFFER_SIZE 500
+#define BUFFER_SIZE 5000
 #define CLOSE_CONNECTION 10
 
 class client
