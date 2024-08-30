@@ -64,6 +64,8 @@ void	server::run_check(const char* conf)
 		while (std::getline(myConf, content)) {
 			checkIp = 0;
 			content = trim_whitespace(content);
+			if (!content.length())
+				continue ;
 			if (content.find('\t') != std::string::npos)
 				throw std::string("Invalid config structure!");
 			if (content == "{")

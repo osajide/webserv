@@ -23,6 +23,7 @@ config::config(config const & rhs, std::string ip_port)
 			it->second.push_back(ip_port);
 		}
 	}
+
 }
 
 void	config::parse_mime_types(const char * PathToMimeTypes)
@@ -84,10 +85,9 @@ config::config(std::fstream& file)
 
 	while (getline(file, line))
 	{
-		while (line.find('\t') != std::string::npos)
-		{
-			line = strtok((char *)line.c_str(), "\t");
-		}
+		line = trim_whitespace(line);
+		if (line.empty())
+			continue ;
 
 		std::stringstream s(line);
 
@@ -108,10 +108,9 @@ config::config(std::fstream& file)
 
 			while (getline(file, line))
 			{
-				while (line.find('\t') != std::string::npos)
-				{
-					line = strtok((char *)line.c_str(), "\t");
-				}
+				line = trim_whitespace(line);
+				if (line.empty())
+					continue ;
 				if (line == "{")
 					cr_count -= 1;
 				else if (line == "}")
@@ -132,6 +131,7 @@ config::config(std::fstream& file)
 		}
 		else
 		{
+				
 			s >> key;
 			while (s >> value)
 			{

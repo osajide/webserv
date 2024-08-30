@@ -59,12 +59,14 @@ void	server::parse_config(const char *PathToConfig)
 	std::vector<std::string>	listen_directive;
 
 	server::run_check(PathToConfig);
+	std::cout << "before calling conf param" << std::endl;
 
 	file.open(PathToConfig);
 	if (file.is_open())
 	{
 		while (getline(file, reader))
 		{
+			
 			if (reader == "server")
 				server::_config.push_back(config(file));
 		}
