@@ -168,7 +168,7 @@ void	config::check_validity_of_global_directives()
 			{
 				if (it->second.size() == 1)
 				{
-					int max_body_size = std::atoi(it->second.front().c_str());
+					long max_body_size = std::atol(it->second.front().c_str());
 					if (max_body_size == -1 || max_body_size == 0 || max_body_size > INT_MAX)
 						throw std::string("client_max_body_size: Invalid size");
 				}

@@ -77,7 +77,7 @@ void	server::run_check(const char* conf)
 
 			lim = strtok(const_cast<char *>(content.c_str()), " ");
 			if (content != "server" && content != "{" && content != "}") {
-				if (std::std::strcmp(lim, "location") &&
+				if (std::strcmp(lim, "location") &&
 					(content.find(';') == std::string::npos ||
 					content.find(';') != content.length() - 1 ||
 					content.find('{') != std::string::npos ||
@@ -85,7 +85,7 @@ void	server::run_check(const char* conf)
 					throw std::string("Invalid config structure!");
 				}
 			}
-			if (!std::std::strcmp(lim, "listen"))
+			if (!std::strcmp(lim, "listen"))
 				checkIp = 1;
 			int iter = 1;
 			while (lim != NULL) {

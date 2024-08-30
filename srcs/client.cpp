@@ -54,7 +54,7 @@ void	client::convert_numeric_values()
 {
 	this->_max_body_size = std::atoi(server::_config[this->_config_index].fetch_directive_value("client_max_body_size").front().c_str());
 	if (this->_request._headers.find("Content-Length") != this->_request._headers.end())
-		this->_request._content_length = std::atoi(this->_request._headers["Content-Length"].c_str());
+		this->_request._content_length = std::atol(this->_request._headers["Content-Length"].c_str());
 }
 
 void	client::fill_request_object()
