@@ -18,7 +18,6 @@ if ($methode === 'POST') {
         $data .= $line;
     }
     $i = 5;
-    $data = urldecode($data);
     $contentType = explode(';', $contentType);
     if ($contentType[0] == "multipart/form-data") {
         $sep = "--";
@@ -28,8 +27,10 @@ if ($methode === 'POST') {
         array_shift($data);
         $data = array_map("dataRet", $data);
     }
-    else
+    else{
+        $data = urldecode($data);
         $data = explode('&', $data);
+    }
 }
 else {
     $data = urldecode($_SERVER['QUERY_STRING']);

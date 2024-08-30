@@ -7,39 +7,49 @@ import sys
 meth = os.environ['REQUEST_METHOD']
 data = ''
 disp = ''
-# contentType = os.environ['CONTENT_TYPE']
-# def formatData (elm):
-# 	if (elm.indexOf('filename') < 0):
-# 		ret = elm.split('Content-Disposition: form-data; ').join('')
-# 		ret = ret.substr(6).replace('"', ': ')
-# 		return ret
-# 	else:
-# 		return ''
+if "CONTENT_TYPE" in os.environ:
+	contentType = os.environ['CONTENT_TYPE']
+
+# def decode():
+
+
+def formatData():
+	for j, elm in enumerate(data):
+		if (elm.find('filename') < 0):
+			ret = ''.join(elm.split('Content-Disposition: form-data; '))
+			ret = ret.replace('"', ': ')
+			ret = ret.replace('name=: ', '', 1)
+			data[j] = ret
+		else:
+			data[j] = ''
+	
 
 def addH2():
     tmp = ''
     for index, elem in enumerate(data):
-        if (index > 1 and len(elem) > elem.index('=') + 1):
+        if (index > 1 and len(elem) > elem.find('=') + 1):
         	tmp = tmp + f'<h2>{elem}</h2>'
     return tmp
 
-# if (meth == 'POST'):
-# 	while True:
-# 		line = sys.stdin.readline()
-# 		if not line:
-# 			break
-# 		data += line
-# 	contentType = contentType.split(';')
-# 	if (contentType[0] == "multipart/form-data") :
-# 		data = data.split('--' + contentType[1].split('=')[1])
-# 		data.shift()
-# 		data.pop()
-# 		data = map(formatData, data)
+if (meth == 'POST'):
+	while True:
+		line = sys.stdin.readline()
+		if not line:
+			break
+		data += line
+
+	contentType = contentType.split(';')
+	if (contentType[0] == "multipart/form-data") :
+		data = data.split('--' + contentType[1].split('=')[1])
+		data.pop(0)
+		data.pop()
+		formatData()
+	else:
+		data = urllib.parse.unquote(data.replace('+', ' ')).split('&')
 	
-# else:
-data = os.environ['QUERY_STRING']
-data = urllib.parse.unquote(data.replace('+', ' ')).split('&')
-# disp = data
+else:
+	data = os.environ['QUERY_STRING']
+	data = urllib.parse.unquote(data.replace('+', ' ')).split('&')
 disp = addH2()
 
 body = f"""

@@ -2,6 +2,7 @@
 
 meth = process.env.REQUEST_METHOD
 contentType = process.env.CONTENT_TYPE
+ex_code = 200
 
 const displayRes = (formD) => {
 	body = `
@@ -28,12 +29,33 @@ const displayRes = (formD) => {
 		</html>
 	`
 
-	console.log(`HTTP/1.1 200 OK\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n\r\n${body}`)
+	console.log(`HTTP/1.1 ${ex_code} OK\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n\r\n${body}`)
 }
+
+const fs = require('fs');
+
+// Function to create and fill a file with data
+const createAndFillFile = (filePath, vals) => {
+  try {
+    // Check if the file already exists
+    if (fs.existsSync(filePath)) {
+      console.log('File already exists.');
+      return;
+    }
+
+    // Create the file and write vals to it
+    fs.writeFileSync(filePath, vals, 'utf8');
+    console.log('File created and filled successfully.');
+  } catch (err) {
+    console.error('Error creating file:', err);
+  }
+}
+
 
 if (meth == 'POST') {
 	data = ''
 	const readline = require('readline');
+	const myFile = require('fs');
 
 	const rl = readline.createInterface({
 		input: process.stdin,
@@ -47,7 +69,6 @@ if (meth == 'POST') {
 
 	rl.on('close', () => {
 		contentType = contentType.split(';')
-		test = decodeURIComponent(data?.replace('+', ' ')).split('&')
 		if (contentType[0] === "multipart/form-data") {
 			data = data.split('--' + contentType[1].split('=')[1])
 			data.shift()
@@ -58,16 +79,20 @@ if (meth == 'POST') {
 					ret = ret.substr(6).replace('"', ': ')
 					return ret
 				}
-				else
+				else {
+					createAndFillFile('./uploads/myFile.txt', data);
 					return ''
+				}
 			})
 		}
+		else
+			test = data?.replace('+', ' ').split('&').map(a => {return decodeURIComponent(a)})
 
 		displayRes(test)
 	});
 }
 else {
 	data = process.env.QUERY_STRING
-	data = decodeURIComponent(data?.replace('+', ' ')).split('&')
+	data = data?.replace('+', ' ').split('&').map(a => {return decodeURIComponent(a)})
 	displayRes(data)
 }
