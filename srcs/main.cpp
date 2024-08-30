@@ -3,18 +3,22 @@
 
 int main(int ac, char** av, char** env)
 {
-	if (ac != 2)
+	if (ac > 2)
 	{
 		std::cerr << "Invalid number of arguments" << std::endl;
 		return (0);
 	}
 
+	std::string path_to_conf;
 
 	try
 	{
-    
-    run_check(av[1]);
-		server::parse_config(av[1]);
+		if (ac == 1)
+			path_to_conf = "/home/osajide/1337/wsl_webserv/conf/server.conf";
+		else
+			path_to_conf = av[1];
+
+		server::parse_config(path_to_conf.c_str());
 		webserv::launch_server(env);
 	}
 	catch (int status)
@@ -22,17 +26,9 @@ int main(int ac, char** av, char** env)
 		std::cout << "********* status catched = " << status << std::endl;
 		return (0);
 	}
-	catch (const char* msg)
+	catch (std::string & msg)
 	{
 		std::cout << "--------- msg catched = " << msg << std::endl;
 		return (0);
-	}
-	catch (const std::string & msg)
-	{
-		std::cout << "execption : " << msg << std::endl;
-	}
-	catch(std::out_of_range & e)
-	{
-		std::cout << "catched : " << e.what() << std::endl;
 	}
 }

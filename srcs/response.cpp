@@ -185,7 +185,7 @@ int	response::remove_requested_directory(int fd, std::string uri)
 
 	while ((entry = readdir(directory)) != NULL)
 	{
-		if (strcmp(entry->d_name, ".") == 0 || strcmp(entry->d_name, "..") == 0)
+		if (std::strcmp(entry->d_name, ".") == 0 || std::strcmp(entry->d_name, "..") == 0)
 			continue;
 
 		str_entry = uri;

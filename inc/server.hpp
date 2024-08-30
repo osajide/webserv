@@ -8,7 +8,8 @@
 class server
 {
 	public:
-		static  void	parse_config(char* PathToConfig);
+		static	void	run_check(const char* conf);
+		static  void	parse_config(const char* PathToConfig);
 		static	int		if_ip_port_already_bound(std::string ip, std::string port);
 		static	int		match_server_name(int server_conf_index, std::string server_name_to_match);
 

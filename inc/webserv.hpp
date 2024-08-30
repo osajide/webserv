@@ -18,4 +18,4 @@ class   webserv
 		static void									set_status_lines();
 };
 
-void run_check(char *conf);
+std::string trim_whitespace(std::string str);

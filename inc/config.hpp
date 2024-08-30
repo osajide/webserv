@@ -24,6 +24,7 @@ class config
 		void						check_validity_of_global_directives();
 		void						check_validity_of_location_directives();
 		void						check_presence_of_mandatory_directives();
+		void						check_for_conflicts_and_set_default_values();
 
 		std::vector<std::string>	fetch_directive_value(std::string key);
 		int							directive_exists(std::string key);
@@ -36,7 +37,6 @@ class config
 		int							if_cgi_directive_exists(int location_index, std::string path);
 		std::string					error_page_well_defined(int status);
 
-	private:
 		DirectiveMap												_directives;
 		std::vector<LocationPair>									_locations;
 		static std::vector<std::pair<std::string, std::string> >	_mime_types;

@@ -1,4 +1,4 @@
-#include "../inc/webserv.hpp"
+#include "../inc/server.hpp"
 #include <algorithm>
 #include <cstdio>
 #include <cstdlib>
@@ -33,24 +33,27 @@ void	check_nums(std::string str, char set) {
 	int i = -1;
 	char *endp;
 
-	while (std::getline(stream, lim, set)) {
+	while (std::getline(stream, lim, set))
+	{
 		if (count_char(lim, '.'))
 			check_nums(lim, '.');
 		else {
 			i = std::strtod(const_cast<char *>(lim.c_str()), &endp);
 			if (i < 0 || (set != ':' && (endp[0] != 0 || i > 255)) || (set == ':' && i > 65535))
-				throw("Invalid IP address!");
+				throw std::string("Invalid IP address!");
 		}
 	}
 }
 
-void is_valid_IP(std::string ip) {
+void is_valid_IP(std::string ip)
+{
 	if (count_char(ip, '.') != 3 || count_char(ip, ':') != 1)
-		throw("Invalid IP address!");
+		throw std::string("Invalid IP address!");
 	check_nums(ip, ':');
 }
 
-void run_check(char *conf) {
+void	server::run_check(const char* conf)
+{
 	std::ifstream myConf(conf);
 	std::string content;
 	int braces = 0;
@@ -64,7 +67,7 @@ void run_check(char *conf) {
 			if (!content.length())
 				continue;
 			if (content.find('\t') != std::string::npos)
-				throw("Invalid config structure!");
+				throw std::string("Invalid config structure!");
 			if (content == "{")
 				braces++;
 			else if (content == "}")
@@ -72,7 +75,7 @@ void run_check(char *conf) {
 			if ((content == "{" || content == "}") || (!braces && !content.length()))
 				continue;
 			if ((content == "server" && braces) || (!braces && content != "server"))
-				throw("Invalid config structure!");
+				throw std::string("Invalid config structure!");
 
 			lim = strtok(const_cast<char *>(content.c_str()), " ");
 			if (content != "server" && content != "{" && content != "}") {
@@ -81,7 +84,7 @@ void run_check(char *conf) {
 					content.find(';') != content.length() - 1 ||
 					content.find('{') != std::string::npos ||
 					content.find('}') != std::string::npos)) {
-					throw("Invalid config structure!");
+					throw std::string("Invalid config structure!");
 				}
 			}
 			if (!std::strcmp(lim, "listen"))
@@ -94,11 +97,11 @@ void run_check(char *conf) {
 				iter++;
 			}
 			if (content != "server" && iter < 3)
-					throw("Missing value!");
+					throw std::string("Missing value!");
 		}
 		if (braces)
-			throw("Invalid config structure!");
+			throw std::string("Invalid config structure!");
 
 	} else
-		throw("Couldn't open the config file!");
+		throw std::string("Couldn't open the config file!");
 }

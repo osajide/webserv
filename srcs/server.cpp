@@ -52,22 +52,36 @@ void	server::close_connection(int client_index, fd_sets & set_fd)
 	this->_clients.remove_from_begin(client_index);
 }
 
-void	server::parse_config(char *PathToConfig)
+void	server::parse_config(const char *PathToConfig)
 {
 	std::fstream				file;
 	std::string					reader;
 	std::vector<std::string>	listen_directive;
+
+	server::run_check(PathToConfig);
 
 	file.open(PathToConfig);
 	if (file.is_open())
 	{
 		while (getline(file, reader))
 		{
+			
 			if (reader == "server")
 				server::_config.push_back(config(file));
 		}
 		file.close();
 	}
+
+	config::set_dictionary();
+
+	for (size_t i = 0; i < server::_config.size(); i++)
+	{
+		server::_config[i].check_validity_of_global_directives();
+		server::_config[i].check_validity_of_location_directives();
+		server::_config[i].check_for_conflicts_and_set_default_values();
+		server::_config[i].check_presence_of_mandatory_directives();
+	}
+
 	for (size_t i = 0; i < server::_config.size(); i++)
 	{
 		listen_directive = server::_config[i].fetch_directive_value("listen");
@@ -79,13 +93,6 @@ void	server::parse_config(char *PathToConfig)
 				server::_config.push_back(new_conf_block);
 			}
 		}
-	}
-	config::set_dictionary();
-	for (size_t i = 0; i < server::_config.size(); i++)
-	{
-		server::_config[i].check_validity_of_global_directives();
-		server::_config[i].check_validity_of_location_directives();
-		server::_config[i].check_presence_of_mandatory_directives();
 	}
 }
 
@@ -123,7 +130,7 @@ server::server(int conf_index) : _bound(false), _conf_index(conf_index)
 
 	this->_addr.sin_family = AF_INET;
 	this->_addr.sin_addr.s_addr = inet_addr(_ip.c_str());
-	this->_addr.sin_port = htons(atoi(_port.c_str()));
+	this->_addr.sin_port = htons(std::atoi(_port.c_str()));
 
     this->init_socket();
 }
@@ -235,10 +242,10 @@ std::string server::check_availability_of_requested_resource(int client_index, i
 
 	if (alias_check == 1)
 	{
-		// std::string	location_dir;
+		std::string location_name = server::_config[this->_clients[client_index]._config_index]._locations[location_index].first;
+		size_t pos = this->_clients[client_index]._request._target.find(location_name);
 
-		// location_dir = server::_config[this->_clients[client_index]._config_index].get_location_directory_name(location_index);
-		target = this->_clients[client_index]._request._target.substr(); // here i should substruct the location from the entire target
+		target = this->_clients[client_index]._request._target.substr(pos + location_name.length());
 	}
 	else
 		target = this->_clients[client_index]._request._target;
