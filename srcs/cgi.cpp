@@ -27,6 +27,24 @@ void	cgi::set_env_variables(request client_req, std::string full_path, char** en
 	temp.push_back("QUERY_STRING=" + client_req._query_params);
 	temp.push_back("PATH_INFO=" + full_path);
 	temp.push_back("UPLOAD_DIR=" + client_req._upload_dir);
+
+	if (client_req.header_exists("Cookie"))
+    {
+        std::string val = client_req._headers["Cookie"];
+
+        std::stringstream ss(val);
+    
+        std::string cookie_val;
+
+        while (std::getline(ss, cookie_val, ';'))
+        {
+            std::cout << cookie_val << std::endl;
+            if (cookie_val[0] == ' ')
+                cookie_val = cookie_val.substr(1);
+            temp.push_back("HTTP_COOKIE_" + cookie_val);
+        }
+    }
+
 	if (client_req.header_exists("Content-Type"))
 	{
 		temp.push_back("CONTENT_TYPE=" + client_req._headers["Content-Type"]);

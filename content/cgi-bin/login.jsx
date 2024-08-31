@@ -84,8 +84,11 @@ else {
 	Object.keys(jsonData["sessions"]).map(a => {
 		if (jsonData["sessions"][a].sessId == cookie) {
 			curr = new Date()
-			if (curr.valueOf() > jsonData["sessions"][a].expire )
-			myBodyMyChoice(jsonData["users"][a].email)
+			if (curr.valueOf() > jsonData["sessions"][a].expire  * 1000) {
+				cookies_headers = `Set-Cookie: session_id=${jsonData["sessions"][a].sessId}; Max-Age=${0}}`
+			}
+			else
+				myBodyMyChoice(jsonData["users"][a].email)
 		}
 	})
 }
