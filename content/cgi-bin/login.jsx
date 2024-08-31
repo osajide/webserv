@@ -81,7 +81,7 @@ if (meth != 'GET') {
 	});
 
 	rl.on('close', () => {
-		data = data?.replace('+', ' ').split('&').map(a => { return decodeURIComponent(a) })
+		data = data?.replace(/\+/g, ' ').split('&').map(a => { return decodeURIComponent(a) })
 		data.map((d) => {
 			const [a, b] = d.split('=')
 			user[a] = b

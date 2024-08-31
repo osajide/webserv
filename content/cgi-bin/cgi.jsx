@@ -9,7 +9,7 @@ if (!meth || !dir)
 statusCode = ["200", "OK"];
 
 const displayRes = (formD) => {
-	formD = formD?.replace('+', ' ').split('&').map(a => { return decodeURIComponent(a) })
+	formD = formD?.replace(/\+/g, ' ').split('&').map(a => { return decodeURIComponent(a) })
 	if (meth == 'DELETE') {
 		formD.map(a => {
 			tmp = a.split("=")
