@@ -107,7 +107,7 @@ std::string	cgi::get_random_file_name(int client_index, int file_type)
 		file_name = "output";
 	while (true)
 	{
-		// directory = opendir("/home/ykhayri/Desktop/webserv/");
+		// directory = opendir("/home/osajide/Desktop/webserv/");
 		// directory = opendir("/tmp");
 		directory = opendir("/tmp/post_test");
 		if (directory == NULL)
@@ -193,7 +193,7 @@ void	cgi::run_cgi(client & cl, char** environ)
 			chdir(cl._response._path_to_serve.substr(0, cl._response._path_to_serve.rfind('/')).c_str());
 
 			execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
-			// char *test[3] = {"/usr/bin/php", "/Users/ykhayri/Desktop/wsl_webserv/content/cgi-bin/cgi.php", NULL};
+			// char *test[3] = {"/usr/bin/php", "/Users/osajide/Desktop/wsl_webserv/content/cgi-bin/cgi.php", NULL};
 			// execve("/usr/bin/php", test, this->_env);
 
 			if (this->_fd[0] != -1)
