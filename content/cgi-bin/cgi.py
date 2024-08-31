@@ -10,10 +10,6 @@ if "REQUEST_METHOD" in os.environ:
 else:
 	exit (1)
 
-if "UPLOAD_DIR" in os.environ:
-	meth = os.environ['UPLOAD_DIR']
-else:
-	exit (1)
 data = ''
 disp = ''
 

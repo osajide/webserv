@@ -7,14 +7,22 @@ import re
 
 if "REQUEST_METHOD" in os.environ:
 	meth = os.environ['REQUEST_METHOD']
-else
+else:
 	exit (1)
+
+if "UPLOAD_DIR" in os.environ:
+	dir = os.environ['UPLOAD_DIR']
+else:
+	dir = 'uploads/'
+	# exit (1)
+
 data = ''
 disp = ''
+myFile = ''
 
 if "CONTENT_TYPE" in os.environ:
 	contentType = os.environ['CONTENT_TYPE']
-else
+else:
 	exit (1)
 
 def parse_filename(content):
@@ -24,18 +32,19 @@ def parse_filename(content):
 
 
 def formatData():
+	global myFile
 	for j, elm in enumerate(data):
 		header, body = elm.split(b'\r\n\r\n', 1)
 		filename = parse_filename(header.decode())
 		if not filename:
 			exit (1)
 		else:
-			with open(filename, "wb") as f:
+			myFile = filename
+			with open(f'{dir}{filename}', "wb") as f:
 				f.write(body)
 
 data = sys.stdin.buffer.read()
 
-print('==================>', contentType, file=sys.stderr)
 contentType = contentType.split(';')
 if (contentType[0] == "multipart/form-data") :
 	tmp = '--' + contentType[1].split('=')[1]
@@ -44,7 +53,7 @@ if (contentType[0] == "multipart/form-data") :
 	data.pop()
 	formatData()
 
-disp = '<h2>File Uploaded</h2>'
+disp = f'<h2>File: {myFile} uploaded</h2>'
 
 body = f"""
 	<!DOCTYPE html>
