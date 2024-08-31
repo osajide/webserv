@@ -324,7 +324,7 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 
 		std::cout << "*----------------- valread = " << valread << std::endl;
 		std::cout << "------ buffer read from fd  " << this->_fd << ":" << std::endl;
-		// std::cout << buffer << std::endl;
+		std::cout << buffer << std::endl;
 		std::cout << "*----------------" << std::endl;
 		// exit(1);
 		// sleep(7);
@@ -382,14 +382,13 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 	}
 }
 
-void	client::handle_delete_directory_request(fd_sets& set_fd)
+void	client::handle_delete_directory_request(fd_sets& set_fd, char** env)
 {
 	if (server::_config[this->_config_index].if_cgi_directive_exists(this->_location_index, this->_response._path_to_serve))
 	{
 		if (this->dir_has_index_files())
 		{
-			// run cgi on requested file with DELETE REQUESTED_METHOD
-			// this->_cgi.run_cgi(*this, env);
+			this->_cgi.run_cgi(*this, env);
 		}
 		else
 			this->_response.return_error(webserv::get_corresponding_status(403), this->_fd);

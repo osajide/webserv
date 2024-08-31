@@ -97,7 +97,7 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 					else if (servers[index]._clients[j].get_ready_for_receiving_value() == false)
 					{
 						std::cout << "handling request of client fd " << servers[index]._clients[j].get_fd() << std::endl;
-						servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index);
+						servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index, env);
 					}
 					if (servers[index]._clients[j].get_ready_for_receiving_value() == true)
 					{
@@ -197,7 +197,7 @@ void	webserv::launch_server(char** env)
 
 	while (true)
 	{
-		std::cout << "Waiting for connections...." << std::endl;
+		// std::cout << "Waiting for connections...." << std::endl;
 
 		timeout.tv_sec = TIMEOUT;
 		timeout.tv_usec = 0;

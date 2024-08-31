@@ -3,7 +3,7 @@
 }
 
 body {
-  background: url("../back.jpg") no-repeat, rgb(0, 53, 53);
+  background: url("../assets/back.jpg") no-repeat, rgb(0, 53, 53);
   background-size: cover;
   background-position: center;
   background-blend-mode: luminosity;
@@ -84,6 +84,14 @@ form textarea:focus {
   }
 }
 
+form > .select {
+  justify-content: flex-start;
+  margin-bottom: 20px;
+}
+form > .select a {
+  flex-grow: 1;
+}
+
 .inp {
   display: flex;
   flex-direction: column;
@@ -99,16 +107,18 @@ form textarea:focus {
   display: none;
 }
 
-input[type=submit], a {
+input[type=submit],
+a {
   color: #fff;
-  background-color: rgb(0, 208, 208);
+  background-color: #00d0d0;
   border: 1px solid rgb(0, 208, 208);
   width: 30%;
   margin-inline: auto;
   cursor: pointer;
   transition: all 0.15s linear;
 }
-input[type=submit]:hover, a:hover {
+input[type=submit]:hover,
+a:hover {
   background-color: rgb(1, 171, 171);
 }
 
@@ -140,4 +150,30 @@ a {
 }
 .response > * {
   margin: 0;
+}
+
+.login {
+  position: relative;
+}
+
+#dispCode:checked + label {
+  background-image: url("../assets/vis.png");
+}
+
+.check {
+  width: 26px;
+  aspect-ratio: 1/1;
+  background: url("../assets/invis.png") no-repeat;
+  background-size: cover;
+  background-position: center;
+  position: absolute;
+  bottom: 5px;
+  right: 5px;
+  z-index: 3;
+  cursor: pointer;
+  transition: all 0.15s linear;
+  opacity: 0.5;
+}
+.check:hover {
+  opacity: 1;
 }/*# sourceMappingURL=style.css.map */

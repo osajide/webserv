@@ -76,4 +76,4 @@ body = f"""
 	</html>
 """
 
-print(f"HTTP/1.1 201 OK\r\nContent-Length: {len(body)}\r\nContent-Type: text/html\r\n\r\n{body}", end="")
+print(f"HTTP/1.1 201 Created\r\nContent-Length: {len(body)}\r\nContent-Type: text/html\r\n\r\n{body}", end="")

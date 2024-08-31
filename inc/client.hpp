@@ -33,7 +33,7 @@ class client
 		int				_location_index;
 
 		int			dir_has_index_files();
-		void		handle_delete_directory_request(fd_sets&);
+		void		handle_delete_directory_request(fd_sets&, char**);
 		void		does_location_has_redirection();
 
 		void		read_body_based_on_content_length(fd_sets& set_fd);

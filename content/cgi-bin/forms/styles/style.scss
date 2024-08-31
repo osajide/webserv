@@ -5,7 +5,7 @@
 body {
 	// background: linear-gradient(45deg, #323232, #1a1a1a) no-repeat;
 	background:
-		url("../back.jpg") no-repeat,
+		url("../assets/back.jpg") no-repeat,
 		rgb(0, 53, 53);
 	background-size: cover;
 	background-position: center;
@@ -88,6 +88,15 @@ form {
 	}
 }
 
+form > .select {
+	justify-content: flex-start;
+	margin-bottom: 20px;
+
+	a {
+		flex-grow: 1;
+	}
+}
+
 .inp {
 	display: flex;
 	flex-direction: column;
@@ -103,9 +112,10 @@ form {
 	display: none;
 }
 
-input[type="submit"], a {
+input[type="submit"],
+a {
 	color: #fff;
-	background-color: rgb(0, 208, 208);
+	background-color: #00d0d0;
 	border: 1px solid rgb(0, 208, 208);
 	width: 30%;
 	margin-inline: auto;
@@ -121,7 +131,7 @@ p {
 	margin: 0;
 }
 
-a{
+a {
 	text-decoration: none;
 	padding: 10px 20px;
 	text-align: center;
@@ -145,5 +155,32 @@ a{
 
 	& > * {
 		margin: 0;
+	}
+}
+
+.login {
+	position: relative;
+}
+
+#dispCode:checked + label {
+	background-image: url("../assets/vis.png");
+}
+
+.check {
+	width: 26px;
+	aspect-ratio: 1 / 1;
+	background: url("../assets/invis.png") no-repeat;
+	background-size: cover;
+	background-position: center;
+	position: absolute;
+	bottom: 5px;
+	right: 5px;
+	z-index: 3;
+	cursor: pointer;
+	transition: all .15s linear;
+	opacity: .5;
+
+	&:hover {
+		opacity: 1;
 	}
 }
