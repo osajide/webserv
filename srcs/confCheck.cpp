@@ -78,6 +78,8 @@ void	server::run_check(const char* conf)
 				throw std::string("Invalid config structure!");
 
 			lim = strtok(const_cast<char *>(content.c_str()), " ");
+			if (content.find(';') != std::string::npos && content.find_first_not_of(' ', std::strlen(lim) + 1) == content.find(';'))
+					throw std::string("Directives must have a value!");
 			if (content != "server" && content != "{" && content != "}") {
 				if (std::strcmp(lim, "location") &&
 					(content.find(';') == std::string::npos ||
