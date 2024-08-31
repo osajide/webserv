@@ -10,8 +10,14 @@ if "REQUEST_METHOD" in os.environ:
 else:
 	exit (1)
 
+if "UPLOAD_DIR" in os.environ:
+	dir = os.environ['UPLOAD_DIR']
+else:
+	exit (1)
+
 data = ''
 disp = ''
+status = ["200", "OK"]
 
 def addH2():
 	tmp = ''
@@ -29,8 +35,31 @@ else:
 		data = data.split('&')
 	else:
 		exit (1)
+	if (meth == "DELETE"):
+		myfl = ''
+		for index, elem in enumerate(data):
+			tmp = elem.split("=")
+			if (tmp[0] == "fileName"):
+				myfl = dir + tmp[1]
+				if(not os.path.exists(myfl)):
+					exit(1)
+			else:
+				exit(1)
+		
+		for index, elem in enumerate(data):
+			tmp = elem.split("=")[1]
+			try:
+				myfl = dir + tmp
+				os.remove(myfl)
+				status = ["204", "No Content"]
+			except Exception:
+				exit(1)
 
-disp = addH2()
+
+
+disp = " ".join(status)
+if (meth != "DELETE"):
+	disp = addH2()
 
 body = f"""
 	<!DOCTYPE html>
@@ -53,4 +82,4 @@ body = f"""
 	</html>
 """
 
-print(f"HTTP/1.1 200 OK\r\nContent-Length: {len(body)}\r\nContent-Type: text/html\r\n\r\n{body}", end="")
+print(f"HTTP/1.1 {' '.join(status)}\r\nContent-Length: {len(body)}\r\nContent-Type: text/html\r\n\r\n{body}", end="")

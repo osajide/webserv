@@ -13,8 +13,7 @@ else:
 if "UPLOAD_DIR" in os.environ:
 	dir = os.environ['UPLOAD_DIR']
 else:
-	dir = 'uploads/'
-	# exit (1)
+	exit (1)
 
 data = ''
 disp = ''

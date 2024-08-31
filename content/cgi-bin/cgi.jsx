@@ -9,7 +9,6 @@ if (!meth || !dir)
 statusCode = ["200", "OK"];
 
 const displayRes = (formD) => {
-	// bodyz = ''
 	formD = formD?.replace('+', ' ').split('&').map(a => { return decodeURIComponent(a) })
 	if (meth == 'DELETE') {
 		formD.map(a => {
@@ -33,30 +32,29 @@ const displayRes = (formD) => {
 				statusCode = ["204", "No Content"]
 		})
 	}
-	// else
-		body = `
-			<!DOCTYPE html>
-			<html lang="en">
-		
-			<head>
-				<meta charset="UTF-8">
-				<meta name="viewport" content="width=device-width, initial-scale=1.0">
-				<title>CGI</title>
-				<link rel="stylesheet" href="/cgi-bin/forms/styles/style.css" />
-			</head>
-		
-			<body>
-				<div class="response">
-					<h1>Methode: ${meth}</h1>
-					${meth != 'DELETE' ? (formD.map((a, index) => {
-						if (index > 1 && a.length > a.indexOf('=') + 1)
-							return `<h2>${a?.replace('=', ': ')}</h2>`}).join('')) : statusCode.join(' ')
-					}
-				</div>
-			</body>
-		
-			</html>
-		`
+	body = `
+		<!DOCTYPE html>
+		<html lang="en">
+	
+		<head>
+			<meta charset="UTF-8">
+			<meta name="viewport" content="width=device-width, initial-scale=1.0">
+			<title>CGI</title>
+			<link rel="stylesheet" href="/cgi-bin/forms/styles/style.css" />
+		</head>
+	
+		<body>
+			<div class="response">
+				<h1>Methode: ${meth}</h1>
+				${meth != 'DELETE' ? (formD.map((a, index) => {
+					if (index > 1 && a.length > a.indexOf('=') + 1)
+						return `<h2>${a?.replace('=', ': ')}</h2>`}).join('')) : statusCode.join(' ')
+				}
+			</div>
+		</body>
+	
+		</html>
+	`
 	console.log(`HTTP/1.1 ${statusCode.join(' ')}\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n\r\n${body}`)
 }
 
