@@ -1,7 +1,6 @@
 const myCGI = document.getElementById("myForm");
 const methodes = document.getElementsByClassName("methodes")[0];
 const post = document.getElementById("post");
-const deleteBut = document.getElementById("delete");
 const nameInp = document.getElementById('name')
 const removeInp = document.getElementsByClassName('delete')
 let myInps = [];
@@ -10,25 +9,12 @@ for (child of removeInp) {
 	myInps.push(child.innerHTML)
 }
 
-const remInput = () => {
-	nameInp.setAttribute('placeholder', 'Enter file name to delete')
-	for (inp of removeInp) {
-		inp.innerHTML = ``
-		inp.classList.add('hide');
-	}
-}
-
 if (post.checked)
 	addUp();
 
-if (deleteBut.checked)
-	remInput()
 
 methodes.addEventListener("click", (e) => {
-	if (e.target.value == "DELETE") {
-		remInput()
-	}
-	else if (e.target.value) {
+	if (e.target.value) {
 		nameInp.setAttribute('placeholder', 'Enter your name')
 		for (inp in myInps) {
 			removeInp[inp].classList.remove('hide');

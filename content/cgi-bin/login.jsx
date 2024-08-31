@@ -39,11 +39,32 @@ const myBodyMyChoice = (email) => {
 			<div class="response">
 				<h1>Hello ${email}</h1>
 				<img src="/cgi-bin/forms/assets/welcome.jpg"/>
+			<a href="logout.jsx">Logout</a>
 			</div>
 		</body>
 
 		</html>
 	`
+	console.log(`HTTP/1.1 200 OK\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n${cookies_headers}\r\n\r\n${body}`)
+}
+
+const logout = (a = null) => {
+	if (a !== null) {
+		cookies_headers = `Set-Cookie: session_id=${jsonData["sessions"][a].sessId}; Max-Age=${0}}`
+		delete jsonData["sessions"][a];
+		dbData.writeFile(dbPath, JSON.stringify(jsonData, null, 4), (err) => {
+		})
+	}
+
+	body = `
+				<html>
+				<head>
+				<meta http-equiv="refresh" content="0; url=/cgi-bin/forms/login.html">
+				</head>
+				<body>
+				</body>
+				</html>
+				`
 	console.log(`HTTP/1.1 200 OK\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n${cookies_headers}\r\n\r\n${body}`)
 }
 
@@ -65,7 +86,7 @@ if (meth != 'GET') {
 			const [a, b] = d.split('=')
 			user[a] = b
 		})
-
+		curr = null
 		Object.keys(jsonData["users"]).map(a => {
 			if (jsonData["users"][a].email === user["Email"] && jsonData["users"][a].password === user["Password"]) {
 				curr = new Date()
@@ -77,18 +98,27 @@ if (meth != 'GET') {
 		})
 		dbData.writeFile(dbPath, JSON.stringify(jsonData, null, 4), (err) => {
 		})
-		myBodyMyChoice(user["Email"])
+		if (curr)
+			myBodyMyChoice(user["Email"])
+		else
+			logout()
 	});
 }
 else {
+	curr = null
 	Object.keys(jsonData["sessions"]).map(a => {
+
 		if (jsonData["sessions"][a].sessId == cookie) {
 			curr = new Date()
-			if (curr.valueOf() > jsonData["sessions"][a].expire  * 1000) {
-				cookies_headers = `Set-Cookie: session_id=${jsonData["sessions"][a].sessId}; Max-Age=${0}}`
+			if (curr.valueOf() > jsonData["sessions"][a].expire * 1000) {
+				logout(a)
+				return;
 			}
 			else
 				myBodyMyChoice(jsonData["users"][a].email)
 		}
+
 	})
+	if (!curr)
+		logout()
 }
