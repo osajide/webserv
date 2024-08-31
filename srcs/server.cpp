@@ -110,27 +110,43 @@ int	server::if_ip_port_already_bound(std::string ip, std::string port)
 
 server::server(int conf_index) : _bound(false), _conf_index(conf_index)
 {
-    int	sock = socket(AF_INET, SOCK_STREAM,0);
-	if (sock == -1)
-	{
-		perror("Error in creating a socket");
-		throw 1;
-	}
+    struct addrinfo hints;
+    struct addrinfo *res = NULL;
 
-	this->_fd = sock;
+    int    sock = socket(AF_INET, SOCK_STREAM, 0);
+    if (sock == -1)
+    {
+        perror("Error in creating a socket");
+        throw 1;
+    }
 
-	std::vector<std::string>	listenDirective;
-	size_t						pos;
+    this->_fd = sock;
 
-	listenDirective = server::_config[_conf_index].fetch_directive_value("listen");
+    std::vector<std::string>    listenDirective;
+    size_t                        pos;
 
-	pos = listenDirective.front().find(':');
-	this->_ip = listenDirective.front().substr(0, pos);
-	this->_port = listenDirective.front().substr(pos + 1, listenDirective.size() - (pos + 1));
+    listenDirective = server::_config[_conf_index].fetch_directive_value("listen");
 
-	this->_addr.sin_family = AF_INET;
-	this->_addr.sin_addr.s_addr = inet_addr(_ip.c_str());
-	this->_addr.sin_port = htons(std::atoi(_port.c_str()));
+    pos = listenDirective.front().find(':');
+    this->_ip = listenDirective.front().substr(0, pos);
+    this->_port = listenDirective.front().substr(pos + 1, listenDirective.size() - (pos + 1));
+
+    this->_addr.sin_family = AF_INET;
+    
+    memset(&hints, 0, sizeof hints); // Initialize the structure
+    hints.ai_family = AF_INET; // IPv4
+    hints.ai_socktype = SOCK_STREAM; // TCP
+
+    if (getaddrinfo(_ip.c_str(), NULL, &hints, &res) != 0)
+        throw 1;
+
+    struct sockaddr_in *sockaddr = (struct sockaddr_in *)res->ai_addr;
+    
+    this->_addr.sin_addr.s_addr = sockaddr->sin_addr.s_addr;
+    freeaddrinfo(res);
+
+    this->_addr.sin_port = htons(std::atoi(_port.c_str()));
+
 
     this->init_socket();
 }
