@@ -2,21 +2,12 @@ const myCGI = document.getElementById("myForm");
 const methodes = document.getElementsByClassName("methodes")[0];
 const post = document.getElementById("post");
 const deleteBut = document.getElementById("delete");
-const upl = document.getElementById('up')
 const nameInp = document.getElementById('name')
 const removeInp = document.getElementsByClassName('delete')
 let myInps = [];
 
 for (child of removeInp) {
 	myInps.push(child.innerHTML)
-}
-
-
-const addUp = () => {
-	upl.classList.remove("hide");
-	upl.innerHTML = `
-		<label for="upload">Upload file</label>
-		<input name="upload" id="upload" type="file" />`;
 }
 
 const remInput = () => {
@@ -34,14 +25,6 @@ if (deleteBut.checked)
 	remInput()
 
 methodes.addEventListener("click", (e) => {
-	if (e.target.value == "POST") {
-		addUp();
-	}
-	else if (e.target.value) {
-		upl.classList.add("hide");
-		upl.innerHTML = ``;
-	}
-
 	if (e.target.value == "DELETE") {
 		remInput()
 	}

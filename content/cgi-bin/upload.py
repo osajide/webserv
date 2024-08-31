@@ -5,12 +5,17 @@ import urllib.parse
 import sys
 import re
 
-meth = os.environ['REQUEST_METHOD']
+if "REQUEST_METHOD" in os.environ:
+	meth = os.environ['REQUEST_METHOD']
+else
+	exit (1)
 data = ''
 disp = ''
 
 if "CONTENT_TYPE" in os.environ:
 	contentType = os.environ['CONTENT_TYPE']
+else
+	exit (1)
 
 def parse_filename(content):
     filename_pattern = r'filename="([^"]+)"'
@@ -62,4 +67,4 @@ body = f"""
 	</html>
 """
 
-print(f"HTTP/1.1 200 OK\r\nContent-Length: {len(body)}\r\nContent-Type: text/html\r\n\r\n{body}", end="")
+print(f"HTTP/1.1 201 OK\r\nContent-Length: {len(body)}\r\nContent-Type: text/html\r\n\r\n{body}", end="")

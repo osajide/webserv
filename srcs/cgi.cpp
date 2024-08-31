@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include "../inc/error.hpp"
 #include <sys/wait.h>
-
+ #include <signal.h>
 cgi::cgi() : _pid(-1), _exit_status(-1), _cgi_processing(false), _env(NULL), _args(NULL), _first_time(true), _outfile(""),
 				_infile("")
 {

@@ -3,41 +3,23 @@
 
 $data = '';
 $methode = $_SERVER['REQUEST_METHOD'];
-$contentType = $_SERVER['CONTENT_TYPE'];
-$i = 4;
-
-function dataRet($elm) {
-    $ret = explode('Content-Disposition: form-data; ', $elm);
-    $ret = substr(join('', $ret), 8);
-    $ret = preg_replace('/\"/', ': ', $ret, 1);
-    return $ret;
-}
+if (!strlen($methode))
+    exit (1);
 
 if ($methode === 'POST') {
     while (($line = fgets(STDIN)) !== false) {
         $data .= $line;
         $data .= "\n";
     }
-    $i = 5;
-    $contentType = explode(';', $contentType);
-    if ($contentType[0] == "multipart/form-data") {
-        $sep = "--";
-        $sep .= explode('=', $contentType[1])[1];
-        $data = explode($sep, $data);
-        array_pop($data);
-        array_shift($data);
-        $data = array_map("dataRet", $data);
-    }
-    else{
-        $data = urldecode($data);
-        $data = explode('&', $data);
-    }
 }
 else {
-    $data = urldecode($_SERVER['QUERY_STRING']);
-    $data = explode('&', $data);
-    $i = 4;
+    $data = $_SERVER['QUERY_STRING'];
+    if (!strlen($data))
+        exit (1);
 }
+$data = explode('&', $data);
+foreach ($data as &$x)
+    $x = str_replace("=", ": ", urldecode($x));
 
 $body = <<<EOD
     <!DOCTYPE html>
@@ -53,7 +35,7 @@ $body = <<<EOD
             <h1>Methode: {$methode} </h1>
             <h2>{$data[2]}</h2>
             <h2>{$data[3]}</h2>
-            <h2>{$data[$i]}</h2>
+            <h2>{$data[4]}</h2>
         </div>
     </body>
     </html>

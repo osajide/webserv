@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 
 meth = process.env.REQUEST_METHOD
-contentType = process.env.CONTENT_TYPE
-ex_code = 200
+if (!meth)
+	exit(1)
 
 const displayRes = (formD) => {
+	formD = formD?.replace('+', ' ').split('&').map(a => {return decodeURIComponent(a)})
 	body = `
 		<!DOCTYPE html>
 		<html lang="en">
@@ -18,7 +19,7 @@ const displayRes = (formD) => {
 	
 		<body>
 			<div class="response">
-				<h1>Methode: ${friw}</h1>
+				<h1>Methode: ${meth}</h1>
 				${formD.map((a, index) => {
 					if (index > 1 && a.length > a.indexOf('=') + 1)	
 						return `<h2>${a?.replace('=', ': ')}</h2>`
@@ -29,11 +30,11 @@ const displayRes = (formD) => {
 		</html>
 	`
 
-	console.log(`HTTP/1.1 ${ex_code} OK\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n\r\n${body}`)
+	console.log(`HTTP/1.1 200 OK\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n\r\n${body}`)
 }
 
 const fs = require('fs');
-friw = 0
+const { exit } = require('process')
 
 if (meth == 'POST') {
 	data = ''
@@ -51,36 +52,12 @@ if (meth == 'POST') {
 	});
 
 	rl.on('close', () => {
-		contentType = contentType.split(';')
-		if (contentType[0] === "multipart/form-data") {
-			data = data.split('--' + contentType[1].split('=')[1])
-			data.shift()
-			data.pop()
-			test = data.map(elm => {
-				if (elm.indexOf('filename') < 0) {
-					ret = elm.split('\nContent-Disposition: form-data; ').join('')
-					ret = ret.substr(6).replace('"', ': ')
-					return ret
-				}
-				else {
-					fileEntries = elm.split('\n')
-					fileName = fileEntries[1].substr('Content-Disposition: form-data; name="upload"; filename="'.length)
-					fileName = fileName.substr(0, fileName.length - 1)
-					fileData = fileEntries.slice(3).join('\n')
-					friw = fileData.length
-					fs.writeFileSync(`./uploads/${fileName}`, fileData);
-					return ''
-				}
-			})
-		}
-		else
-			test = data?.replace('+', ' ').split('&').map(a => {return decodeURIComponent(a)})
-
-		displayRes(test)
+		displayRes(data)
 	});
 }
 else {
 	data = process.env.QUERY_STRING
-	data = data?.replace('+', ' ').split('&').map(a => {return decodeURIComponent(a)})
+	if (!data)
+		exit(1)
 	displayRes(data)
 }
