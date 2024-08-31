@@ -2,6 +2,7 @@
 #include "../inc/error.hpp"
 #include <sstream>
 #include <cstdlib>
+#include "../inc/webserv.hpp"
 
 
 request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _query_params(""), _http_version(""), _content_length(0),
@@ -66,7 +67,7 @@ void	request::is_well_formed(int client_index, config conf)
 	}
 	if (this->_headers.find("Content-Length") != this->_headers.end())
 	{
-		if (this->_content_length > (size_t)std::atoi(conf.fetch_directive_value("client_max_body_size").front().c_str()))
+		if (this->_content_length > (size_t)ft_atol(conf.fetch_directive_value("client_max_body_size").front().c_str()))
 			throw error(413, client_index);
 	}
 	// if (this->notAllowedChar())

@@ -65,9 +65,8 @@ void	server::parse_config(const char *PathToConfig)
 	{
 		while (getline(file, reader))
 		{
-			
 			if (reader == "server")
-				server::_config.push_back(config(file));
+				server::_config.push_back( (file));
 		}
 		file.close();
 	}
@@ -110,45 +109,45 @@ int	server::if_ip_port_already_bound(std::string ip, std::string port)
 
 server::server(int conf_index) : _bound(false), _conf_index(conf_index)
 {
-    struct addrinfo hints;
-    struct addrinfo *res = NULL;
+	struct addrinfo hints;
+	struct addrinfo *res = NULL;
 
-    int    sock = socket(AF_INET, SOCK_STREAM, 0);
-    if (sock == -1)
-    {
-        perror("Error in creating a socket");
-        throw 1;
-    }
+	int    sock = socket(AF_INET, SOCK_STREAM, 0);
+	if (sock == -1)
+	{
+		perror("Error in creating a socket");
+		throw 1;
+	}
 
-    this->_fd = sock;
+	this->_fd = sock;
 
-    std::vector<std::string>    listenDirective;
-    size_t                        pos;
+	std::vector<std::string>    listenDirective;
+	size_t                        pos;
 
-    listenDirective = server::_config[_conf_index].fetch_directive_value("listen");
+	listenDirective = server::_config[_conf_index].fetch_directive_value("listen");
 
-    pos = listenDirective.front().find(':');
-    this->_ip = listenDirective.front().substr(0, pos);
-    this->_port = listenDirective.front().substr(pos + 1, listenDirective.size() - (pos + 1));
+	pos = listenDirective.front().find(':');
+	this->_ip = listenDirective.front().substr(0, pos);
+	this->_port = listenDirective.front().substr(pos + 1, listenDirective.size() - (pos + 1));
 
-    this->_addr.sin_family = AF_INET;
-    
-    memset(&hints, 0, sizeof hints); // Initialize the structure
-    hints.ai_family = AF_INET; // IPv4
-    hints.ai_socktype = SOCK_STREAM; // TCP
+	this->_addr.sin_family = AF_INET;
+	
+	memset(&hints, 0, sizeof hints); // Initialize the structure
+	hints.ai_family = AF_INET; // IPv4
+	hints.ai_socktype = SOCK_STREAM; // TCP
 
-    if (getaddrinfo(_ip.c_str(), NULL, &hints, &res) != 0)
-        throw 1;
+	if (getaddrinfo(_ip.c_str(), NULL, &hints, &res) != 0)
+		throw 1;
 
-    struct sockaddr_in *sockaddr = (struct sockaddr_in *)res->ai_addr;
-    
-    this->_addr.sin_addr.s_addr = sockaddr->sin_addr.s_addr;
-    freeaddrinfo(res);
+	struct sockaddr_in *sockaddr = (struct sockaddr_in *)res->ai_addr;
+	
+	this->_addr.sin_addr.s_addr = sockaddr->sin_addr.s_addr;
+	freeaddrinfo(res);
 
-    this->_addr.sin_port = htons(std::atoi(_port.c_str()));
+	this->_addr.sin_port = htons(ft_atol(_port.c_str()));
 
 
-    this->init_socket();
+	this->init_socket();
 }
 
 void	server::init_socket()
@@ -279,7 +278,7 @@ std::string server::check_availability_of_requested_resource(int client_index, i
 std::string    server::check_if_method_allowed_in_location(int client_index, int location_index)
 {
 	LocationPair				location_block;
-    std::vector<std::string>    allowed_methods;
+	std::vector<std::string>    allowed_methods;
 
 	if (location_index == -1)
 	{
@@ -298,16 +297,19 @@ std::string    server::check_if_method_allowed_in_location(int client_index, int
 	}
 	else
 	{
-        allowed_methods = server::_config[this->_conf_index].fetch_location_directive_value(location_index, "allowed_methods");
+		if (!server::_config[this->_conf_index].directive_inside_location_exists(location_index, "allowed_methods"))
+			return ("GET");
 
-        for (size_t i = 0; i < allowed_methods.size(); i++)
-        {
-            if (this->_clients[client_index]._request._method == allowed_methods[i])
-            {
-                // std::cout << "ALLOWEEEEEEED!!!!!" << std::endl;
+		allowed_methods = server::_config[this->_conf_index].fetch_location_directive_value(location_index, "allowed_methods");
+
+		for (size_t i = 0; i < allowed_methods.size(); i++)
+		{
+			if (this->_clients[client_index]._request._method == allowed_methods[i])
+			{
+				// std::cout << "ALLOWEEEEEEED!!!!!" << std::endl;
 				return (allowed_methods[i]);
-            }
-        }
+			}
+		}
 	}
 	throw error(405, client_index); // 405 Method Not Allowed
 }

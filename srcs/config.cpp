@@ -131,7 +131,6 @@ config::config(std::fstream& file)
 		}
 		else
 		{
-				
 			s >> key;
 			while (s >> value)
 			{
@@ -156,7 +155,7 @@ void	config::check_validity_of_global_directives()
 			{
 				if (it->second.size() == 2)
 				{
-					int status = std::atoi(it->second.front().c_str());
+					int status = ft_atol(it->second.front().c_str());
 					if (status != 400 && status != 403 && status != 404 && status != 405 && status != 413 && status != 414
 							&& status != 500 && status != 501 && status != 504 && status != 505)
 						throw std::string("Invalid error code");
@@ -168,8 +167,8 @@ void	config::check_validity_of_global_directives()
 			{
 				if (it->second.size() == 1)
 				{
-					long max_body_size = std::atol(it->second.front().c_str());
-					if (max_body_size == -1 || max_body_size == 0 || max_body_size > INT_MAX)
+					long max_body_size = ft_atol(it->second.front().c_str());
+					if (max_body_size <= 0 || max_body_size > INT_MAX)
 						throw std::string("client_max_body_size: Invalid size");
 				}
 				else
@@ -211,9 +210,11 @@ void	config::check_validity_of_location_directives()
 						for (size_t j = 0; j < it->second.size(); j++)
 						{
 							if (it->second[j] != "GET" && it->second[j] != "POST" && it->second[j] != "DELETE")
-								throw std::string("allowed_methods: Unknown methods");
+								throw std::string("allowed_methods: Unknown method");
 						}
 					}
+					else
+						throw std::string("allowed_methods: Invalid number of args");
 				}
 				else if (it->first == "return")
 				{
@@ -239,7 +240,6 @@ void	config::check_validity_of_location_directives()
 
 void	config::check_for_conflicts_and_set_default_values()
 {
-	std::cout << "heere" << std::endl;
 	for (size_t i = 0; i < this->_locations.size(); i++)
 	{
 		if (!this->directive_inside_location_exists(i, "upload_dir"))
@@ -256,7 +256,7 @@ void	config::check_for_conflicts_and_set_default_values()
 	}
 
 	if (!this->directive_exists("root"))
-		this->_directives["root"].push_back("/home/osajide/1337/wsl_webserv/content");
+		this->_directives["root"].push_back("/Users/osajide/Desktop/wsl_webserv/content");
 	if (!this->directive_exists("index"))
 		this->_directives["index"].push_back("index.html");
 }
@@ -286,7 +286,7 @@ void	config::check_presence_of_mandatory_directives()
 			found++;
 	}
 	if (found != 2)
-		throw std::string("Few mandatory directives");
+		throw std::string("Missing mandatory directives");
 }
 
 int	config::directive_exists(std::string key)

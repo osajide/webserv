@@ -52,9 +52,9 @@ int client::get_fd()
 
 void	client::convert_numeric_values()
 {
-	this->_max_body_size = std::atoi(server::_config[this->_config_index].fetch_directive_value("client_max_body_size").front().c_str());
+	this->_max_body_size = ft_atol(server::_config[this->_config_index].fetch_directive_value("client_max_body_size").front().c_str());
 	if (this->_request._headers.find("Content-Length") != this->_request._headers.end())
-		this->_request._content_length = std::atol(this->_request._headers["Content-Length"].c_str());
+		this->_request._content_length = ft_atol(this->_request._headers["Content-Length"].c_str());
 }
 
 void	client::fill_request_object()
@@ -139,7 +139,7 @@ void	client::does_location_has_redirection()
 		return_directive = server::_config[this->_config_index].fetch_location_directive_value(this->_location_index, "return");
 		if (!return_directive.empty())
 		{
-			this->_response.redirect(this->_fd, std::atoi(return_directive.front().c_str()), return_directive.back());
+			this->_response.redirect(this->_fd, ft_atol(return_directive.front().c_str()), return_directive.back());
 			throw error(CLOSE_CONNECTION, this->_index);
 		}
 	}

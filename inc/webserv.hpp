@@ -19,3 +19,4 @@ class   webserv
 };
 
 std::string trim_whitespace(std::string str);
+long long	ft_atol(std::string str);

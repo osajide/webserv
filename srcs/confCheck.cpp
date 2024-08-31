@@ -5,6 +5,18 @@
 #include <ostream>
 #include <cstring>
 #include <sstream>
+#include <string>
+
+long long	ft_atol(std::string str)
+{
+	char *endp;
+	long long ret;
+
+	ret = std::strtod(const_cast<char *>(str.c_str()), &endp);
+	if (endp[0] != 0)
+		throw std::string("Invalid number");
+	return (ret);
+}
 
 std::string trim_whitespace(std::string str) {
 	size_t start = str.find_first_not_of(" \t\r\v\n");
@@ -59,10 +71,13 @@ void	server::run_check(const char* conf)
 	int braces = 0;
 	char *lim;
 	int checkIp;
+	int emp = 0;
 
 	if (myConf.is_open()) {
 		while (std::getline(myConf, content)) {
 			checkIp = 0;
+			if (content == "server")
+				emp = 1;
 			content = trim_whitespace(content);
 			if (!content.length())
 				continue;
@@ -106,4 +121,6 @@ void	server::run_check(const char* conf)
 
 	} else
 		throw std::string("Couldn't open the config file!");
+	if (!emp)
+		throw std::string("Incomplete file content!");
 }
