@@ -1,0 +1,20 @@
+{
+    "users": {
+        "0": {
+            "name": "test",
+            "email": "test@test",
+            "password": "test.test"
+        },
+        "1": {
+            "name": "oussama",
+            "email": "osajid@test",
+            "password": "Jareb1337"
+        }
+    },
+    "sessions": {
+        "0": {
+            "sessId": "8a7c18bf956fe76e81cc1c82576d521836c882294576dcd447c3af3eafc63ec4",
+            "expire": 1725123724249
+        }
+    }
+}

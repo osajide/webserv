@@ -9,7 +9,7 @@
 </head>
 
 <body>
-	<form id="myForm">
+	<form id="myForm" method="POST" action="../login.jsx">
 	<div class="select">
 		<a href="/cgi-bin/forms/upload.html">Test upload</a>
 		<a href="/cgi-bin/forms/cgi.html">Test methods</a>
@@ -20,13 +20,13 @@
 		</div>
 		<div class="inp login">
 			<label for="message">Message</label>
-			<input type="password" id="passCode" name="pass" placeholder="Enter your password" required>
+			<input type="password" id="passCode" name="Password" placeholder="Enter your password" required>
 			<input class="hide" type="checkbox" id="dispCode">
 			<label class="check" for="dispCode"></label>
 		</div>
 		<input id="sub" type="submit" value="OK">
 	</form>
-	<!-- <script src="/cgi-bin/forms/scripts/script.js"></script> -->
+	<script src="/cgi-bin/forms/scripts/form.js"></script>
 </body>
 
 </html>

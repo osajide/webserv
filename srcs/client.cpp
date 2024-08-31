@@ -260,7 +260,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 {
 	int		valread = 0;
 	char	buffer[BUFFER_SIZE + 1];
-		std::cout << "===============================================================>"<< std::endl;
+		// std::cout << "===============================================================>"<< std::endl;
 
 	if (this->_cgi._infile.empty())
 	{

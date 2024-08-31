@@ -263,9 +263,9 @@ void	cgi::clear_cgi()
 		this->_env = NULL;
 	}
 
-	// std::remove(this->_outfile.c_str());
+	std::remove(this->_outfile.c_str());
 	this->_outfile.clear();
-	// std::remove(this->_infile.c_str());
+	std::remove(this->_infile.c_str());
 	this->_infile.clear();
 	this->_fd[0] = -1;
 	this->_fd[1] = -1;

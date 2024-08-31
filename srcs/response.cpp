@@ -3,6 +3,7 @@
 #include "../inc/webserv.hpp"
 #include <dirent.h>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <cstring>
 #include <unistd.h>
@@ -64,7 +65,7 @@ std::string	response::get_chunk(std::ifstream& requested_file)
 
 void	response::send_reply(int target_fd)
 {
-
+	std::cout << "send_reply called" << std::endl;
 	this->_headers += this->_status_line + "\r\n";
 
 	this->_headers += "Content-Type: " + this->_content_type + "\r\n";
@@ -82,7 +83,10 @@ void	response::send_reply(int target_fd)
 	if (!this->_body.empty())
 		this->_headers += this->_body;
 
-	write(target_fd, this->_headers.c_str(), this->_headers.length());
+	int n = write(target_fd, this->_headers.c_str(), this->_headers.length());
+	std::cout << "write = " << n << std::endl;
+	std::cout << "send_reply finished" << std::endl;
+
 }
 
 void	response::return_error(std::string status_line, int target_fd)
@@ -90,9 +94,7 @@ void	response::return_error(std::string status_line, int target_fd)
 	this->_status_line = status_line;
 	this->_body = "<h1>" + status_line.substr(9) + "</h1>";
 	this->_content_length = this->_body.length();
-
 	this->send_reply(target_fd);
-	this->clear_response();
 }
 
 void	response::send_response(int fd, std::string status_line, config serverConf, time_t & client_connection_time)
