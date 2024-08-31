@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CGI upload</title>
+	<link rel="stylesheet" href="/cgi-bin/forms/styles/style.css" />
+</head>
+
+<body>
+	<form action="/cgi-bin/upload.py" method="POST" enctype="multipart/form-data">
+		<div class="select">
+			<a href="/cgi-bin/forms/cgi.html">Test methodes</a>
+			<a href="../login.jsx">Test sessions</a>
+		</div>
+		<div class="inp" id="up">
+			<label for="upload">Upload file</label>
+			<input name="upload" id="upload" type="file" />
+		</div>
+		<input id="sub" type="submit" value="OK">
+	</form>
+</body>
+
+</html>

@@ -10,7 +10,7 @@
 #include <dirent.h>
 #include "../inc/error.hpp"
 #include <sys/wait.h>
-
+ #include <signal.h>
 cgi::cgi() : _pid(-1), _exit_status(-1), _cgi_processing(false), _env(NULL), _args(NULL), _first_time(true), _outfile(""),
 				_infile("")
 {
@@ -26,6 +26,25 @@ void	cgi::set_env_variables(request client_req, std::string full_path, char** en
 	temp.push_back("REQUEST_METHOD=" + client_req._method);
 	temp.push_back("QUERY_STRING=" + client_req._query_params);
 	temp.push_back("PATH_INFO=" + full_path);
+	temp.push_back("UPLOAD_DIR=" + client_req._upload_dir);
+
+	if (client_req.header_exists("Cookie"))
+    {
+        std::string val = client_req._headers["Cookie"];
+
+        std::stringstream ss(val);
+    
+        std::string cookie_val;
+
+        while (std::getline(ss, cookie_val, ';'))
+        {
+            std::cout << cookie_val << std::endl;
+            if (cookie_val[0] == ' ')
+                cookie_val = cookie_val.substr(1);
+            temp.push_back("HTTP_COOKIE_" + cookie_val);
+        }
+    }
+
 	if (client_req.header_exists("Content-Type"))
 	{
 		temp.push_back("CONTENT_TYPE=" + client_req._headers["Content-Type"]);
@@ -174,6 +193,8 @@ void	cgi::run_cgi(client & cl, char** environ)
 			chdir(cl._response._path_to_serve.substr(0, cl._response._path_to_serve.rfind('/')).c_str());
 
 			execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
+			// char *test[3] = {"/usr/bin/php", "/Users/ykhayri/Desktop/wsl_webserv/content/cgi-bin/cgi.php", NULL};
+			// execve("/usr/bin/php", test, this->_env);
 
 			if (this->_fd[0] != -1)
 				close (this->_fd[0]);
@@ -260,9 +281,9 @@ void	cgi::clear_cgi()
 		this->_env = NULL;
 	}
 
-	// std::remove(this->_outfile.c_str());
+	std::remove(this->_outfile.c_str());
 	this->_outfile.clear();
-	// std::remove(this->_infile.c_str());
+	std::remove(this->_infile.c_str());
 	this->_infile.clear();
 	this->_fd[0] = -1;
 	this->_fd[1] = -1;

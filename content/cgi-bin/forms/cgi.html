@@ -9,7 +9,11 @@
 </head>
 
 <body>
-	<form id="myForm" enctype="multipart/form-data">
+	<form id="myForm">
+		<div class="select">
+			<a href="/cgi-bin/forms/upload.html">Test upload</a>
+			<a href="../login.jsx">Test sessions</a>
+		</div>
 		<div class="inp">
 			<p>Choose language:</p>
 			<div class="select language">
@@ -28,8 +32,6 @@
 				<label for="get">GET</label>
 				<input name="methode" type="radio" value="POST" id="post"/>
 				<label for="post">POST</label>
-				<input name="methode" type="radio" value="DELETE" id="delete" />
-				<label for="delete">DELETE</label>
 			</div>
 		</div>
 		<div class="inp">
@@ -39,8 +41,6 @@
 		<div class="inp delete">
 			<label for="email">Email</label>
 			<input required name="Email" id="email" type="email" placeholder="Enter your email" />
-		</div>
-		<div class="inp hide" id="up">
 		</div>
 		<div class="inp delete">
 			<label for="message">Message</label>

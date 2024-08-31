@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>CGI Login</title>
+	<link rel="stylesheet" href="/cgi-bin/forms/styles/style.css" />
+</head>
+
+<body>
+	<form id="myForm" method="POST" action="../login.jsx">
+	<div class="select">
+		<a href="/cgi-bin/forms/upload.html">Test upload</a>
+		<a href="/cgi-bin/forms/cgi.html">Test methods</a>
+	</div>
+		<div class="inp">
+			<label for="email">Email</label>
+			<input required name="Email" id="email" type="email" placeholder="Enter your email" />
+		</div>
+		<div class="inp login">
+			<label for="message">Message</label>
+			<input type="password" id="passCode" name="Password" placeholder="Enter your password" required>
+			<input class="hide" type="checkbox" id="dispCode">
+			<label class="check" for="dispCode"></label>
+		</div>
+		<input id="sub" type="submit" value="OK">
+	</form>
+	<script src="/cgi-bin/forms/scripts/form.js"></script>
+</body>
+
+</html>

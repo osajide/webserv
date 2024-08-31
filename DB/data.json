@@ -1,0 +1,15 @@
+{
+    "users": {
+        "0": {
+            "name": "test",
+            "email": "test@test",
+            "password": "test.test"
+        },
+        "1": {
+            "name": "oussama",
+            "email": "osajid@test",
+            "password": "Jareb1337"
+        }
+    },
+    "sessions": {}
+}

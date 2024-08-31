@@ -71,8 +71,7 @@ void	config::set_dictionary()
 	config::_location_dictionary.push_back("autoindex");
 	config::_location_dictionary.push_back("index");
 	config::_location_dictionary.push_back("cgi");
-	config::_location_dictionary.push_back("upload");
-	config::_location_dictionary.push_back("upload_path");
+	config::_location_dictionary.push_back("upload_dir");
 }
 
 config::config(std::fstream& file)
@@ -241,6 +240,13 @@ void	config::check_for_conflicts_and_set_default_values()
 {
 	for (size_t i = 0; i < this->_locations.size(); i++)
 	{
+		if (!this->directive_inside_location_exists(i, "upload_dir"))
+		{
+			std::vector<std::string> upload_dir_vec;
+
+			upload_dir_vec.push_back("/tmp/");
+			this->_locations[i].second["upload_dir"] = upload_dir_vec;
+		}
 		if (this->directive_inside_location_exists(i, "alias"))
 		{
 			if (this->directive_inside_location_exists(i, "root"))
@@ -255,10 +261,9 @@ void	config::check_for_conflicts_and_set_default_values()
 
 void	config::check_presence_of_mandatory_directives()
 {
-	int							found;
+	int	found;
 
 	found = 0;
-
 	for (DirectiveMap::iterator it = this->_directives.begin(); it != this->_directives.end(); it++)
 	{
 		if (it->first == "listen")

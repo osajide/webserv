@@ -309,7 +309,7 @@ int	server::check_resource_type(std::string path)
 	return (REG_FILE);
 }
 
-void    server::handle_request(int client_index, fd_sets& set_fd, int location_index)
+void    server::handle_request(int client_index, fd_sets& set_fd, int location_index, char** env)
 {
 	std::string	req_method;
 
@@ -337,7 +337,7 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 			{
 				if (req_method == "DELETE")
 				{
-					this->_clients[client_index].handle_delete_directory_request(set_fd);
+					this->_clients[client_index].handle_delete_directory_request(set_fd, env);
 					return ;
 				}
 				if (this->_clients[client_index].dir_has_index_files()) // this method modifies on path_to_serve attribute

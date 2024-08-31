@@ -21,6 +21,8 @@ void	fd_sets::clear_sets()
 void	webserv::set_status_lines()
 {
 	status_lines["200"] = "HTTP/1.1 200 OK";
+	status_lines["201"] = "HTTP/1.1 201 Created";
+	status_lines["204"] = "HTTP/1.1 204 No Content";
 	status_lines["400"] = "HTTP/1.1 400 Bad Request";
 	status_lines["403"] = "HTTP/1.1 403 Forbidden";
 	status_lines["404"] = "HTTP/1.1 404 Not Found";
@@ -84,7 +86,7 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 
 					if (servers[index]._clients[j]._cgi._cgi_processing == true)
 					{
-						std::cout << "dkhel l cgi" << std::endl;
+						// std::cout << "dkhel l cgi" << std::endl;
 						servers[index]._clients[j]._cgi.run_cgi(servers[index]._clients[j], env);
 						if (servers[index]._clients[j]._cgi._cgi_processing == false)
 						{
@@ -97,7 +99,7 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 					else if (servers[index]._clients[j].get_ready_for_receiving_value() == false)
 					{
 						std::cout << "handling request of client fd " << servers[index]._clients[j].get_fd() << std::endl;
-						servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index);
+						servers[index].handle_request(j, set_fd, servers[index]._clients[j]._location_index, env);
 					}
 					if (servers[index]._clients[j].get_ready_for_receiving_value() == true)
 					{
@@ -197,7 +199,7 @@ void	webserv::launch_server(char** env)
 
 	while (true)
 	{
-		std::cout << "Waiting for connections...." << std::endl;
+		// std::cout << "Waiting for connections...." << std::endl;
 
 		timeout.tv_sec = TIMEOUT;
 		timeout.tv_usec = 0;

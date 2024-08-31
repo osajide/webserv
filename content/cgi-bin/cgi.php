@@ -2,41 +2,59 @@
 <?php
 
 $data = '';
-$methode = $_SERVER['REQUEST_METHOD'];
-$contentType = $_SERVER['CONTENT_TYPE'];
-$i = 4;
+$status = ["200", "OK"];
 
-function dataRet($elm) {
-    $ret = explode('Content-Disposition: form-data; ', $elm);
-    $ret = substr(join('', $ret), 8);
-    $ret = preg_replace('/\"/', ': ', $ret, 1);
-    return $ret;
-}
+$methode = $_SERVER['REQUEST_METHOD'];
+$dir = $_SERVER['UPLOAD_DIR'];
+
+if (!strlen($dir) || !strlen($methode))
+    exit (1);
 
 if ($methode === 'POST') {
     while (($line = fgets(STDIN)) !== false) {
         $data .= $line;
+        $data .= "\n";
     }
-    $i = 5;
-    $data = urldecode($data);
-    $contentType = explode(';', $contentType);
-    if ($contentType[0] == "multipart/form-data") {
-        $sep = "--";
-        $sep .= explode('=', $contentType[1])[1];
-        $data = explode($sep, $data);
-        array_pop($data);
-        array_shift($data);
-        $data = array_map("dataRet", $data);
-    }
-    else
-        $data = explode('&', $data);
 }
 else {
-    $data = urldecode($_SERVER['QUERY_STRING']);
-    $data = explode('&', $data);
-    $i = 4;
+    $data = $_SERVER['QUERY_STRING'];
+    if (!strlen($data))
+        exit (1);
 }
 
+
+$data = explode('&', $data);
+$disp = "";
+foreach ($data as $key=>&$x) {
+    $x = str_replace("=", ": ", urldecode($x));
+    if ($methode == 'DELETE') {
+        $tmp = explode(": ", $x);
+        if ($tmp[0] == 'fileName') {
+            $rem = $dir . $tmp[1];
+            if (!file_exists($rem))
+                exit(1);
+        }
+        else
+            exit(1);
+    }
+    if ($key > 1)
+        $disp .= "<h2>{$x}</h2>";
+}
+if ($methode == 'DELETE') {
+    foreach ($data as $key=>&$x) {
+        $x = str_replace("=", ": ", urldecode($x));
+        $tmp = explode(": ", $x);
+        if ($tmp[0] == 'fileName') {
+            $rem = $dir . $tmp[1];
+            if (!unlink($rem))
+                exit(1);
+            $status = ["204", "No Content"];
+        }
+    }
+}
+
+if ($status[0] == 204)
+    $disp = join(" ", $status);
 $body = <<<EOD
     <!DOCTYPE html>
     <html lang="en">
@@ -49,14 +67,11 @@ $body = <<<EOD
     <body>
         <div class="response">
             <h1>Methode: {$methode} </h1>
-            <h2>{$data[2]}</h2>
-            <h2>{$data[3]}</h2>
-            <h2>{$data[$i]}</h2>
+            {$disp}
         </div>
     </body>
     </html>
 EOD;
-
-echo "HTTP/1.1 200 OK\r\nContent-Length: " . strlen($body) . "\r\nContent-Type: text/html\r\n\r\n" . $body;
+echo "HTTP/1.1 " . $status[0] . " " . $status[1] . "\r\nContent-Length: " . strlen($body) . "\r\nContent-Type: text/html\r\n\r\n" . $body;
 
 ?>

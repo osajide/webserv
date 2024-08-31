@@ -70,6 +70,10 @@ void	client::fill_request_object()
 
 	while (getline(ss, reader))
 	{
+		if (reader == "\r")
+		{
+			break;
+		}
 		for (size_t i = 0; i < reader.size(); i++)
 		{
 			if (reader[i] == '\r')
@@ -189,7 +193,7 @@ void	client::unchunk_body_file(fd_sets& set_fd)
 		std::memset(buffer, 0, chunk_size + 1);
 
 		this->_body_file.read(buffer, chunk_size);
-		std::cout << buffer << std::endl;
+		// std::cout << buffer << std::endl;
 
 		this->_request._content_length += chunk_size;
 
@@ -256,6 +260,7 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 {
 	int		valread = 0;
 	char	buffer[BUFFER_SIZE + 1];
+		// std::cout << "===============================================================>"<< std::endl;
 
 	if (this->_cgi._infile.empty())
 	{
@@ -273,20 +278,27 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 			{
 				std::memset(buffer, 0, BUFFER_SIZE + 1);
 				valread = read(this->_fd, buffer, BUFFER_SIZE);
+				std::cout << "valread ===>>> " << valread << std::endl;
 				if (valread == 0 || valread == -1)
 					throw error(-1, this->_index);
 
-				this->_body_file << buffer;
+				std::string str_buffer;
+
+				str_buffer.assign(buffer, valread);
+				this->_body_file << str_buffer;
 				this->_bytes_read += valread;
+
 			}
 			else
 			{
 				this->_body_file << this->_request._raw_body;
 				std::cout << "raw body size = " << this->_request._raw_body.length() << std::endl;
+				// exit(1);
 				this->_bytes_read += this->_request._raw_body.length();
 				this->_request._raw_body.clear();
 			}
 		}
+		std::cout << "bytes read = " << this->_bytes_read << " | content length = " << this->_request._content_length << std::endl;
 		if (this->_bytes_read == this->_request._content_length)
 		{
 			this->_body_file.close();
@@ -314,8 +326,13 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 		std::cout << "------ buffer read from fd  " << this->_fd << ":" << std::endl;
 		std::cout << buffer << std::endl;
 		std::cout << "*----------------" << std::endl;
+		// exit(1);
+		// sleep(7);
 
-		this->_request._raw_request += buffer;
+		std::string t;
+		t.assign(buffer, valread);
+		this->_request._raw_request += t;
+		// this->_request._raw_request += buffer;
 		pos = this->_request._raw_request.find("\r\n\r\n");
 		if (pos != this->_request._raw_request.npos)
 		{
@@ -323,7 +340,7 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 			this->_request.is_well_formed(this->_index, server::_config[conf_index]);
 			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
 			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request._target);
-
+			this->_request._upload_dir = server::_config[this->_config_index]._locations[this->_location_index].second["upload_dir"].front();
 			this->does_location_has_redirection();
 
 			if (this->_request.header_exists("Transfer-Encoding") || this->_request.header_exists("Content-Length"))
@@ -351,7 +368,8 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 	{
 		if (buffer[0] != '\0') // In case this is the first time entering this block
 		{
-			this->_request._raw_body = this->_request._raw_request.substr(pos + 4);
+			std::string temp = this->_request._raw_request.substr(pos + 4);
+			this->_request._raw_body = temp;
 		}
 		if (this->_request.header_exists("Transfer-Encoding")) // handle_chunked_body
 		{
@@ -364,14 +382,13 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 	}
 }
 
-void	client::handle_delete_directory_request(fd_sets& set_fd)
+void	client::handle_delete_directory_request(fd_sets& set_fd, char** env)
 {
 	if (server::_config[this->_config_index].if_cgi_directive_exists(this->_location_index, this->_response._path_to_serve))
 	{
 		if (this->dir_has_index_files())
 		{
-			// run cgi on requested file with DELETE REQUESTED_METHOD
-			// this->_cgi.run_cgi(*this, env);
+			this->_cgi.run_cgi(*this, env);
 		}
 		else
 			this->_response.return_error(webserv::get_corresponding_status(403), this->_fd);

@@ -5,7 +5,7 @@
 
 
 request::request() : _raw_request(""), _raw_body(""), _method(""), _target(""), _query_params(""), _http_version(""), _content_length(0),
-						_chunked_body(false)
+						_chunked_body(false), _upload_dir("")
 {}
 
 void    request::set_request_line(std::string request_line, int client_index)

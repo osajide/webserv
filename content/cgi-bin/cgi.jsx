@@ -1,9 +1,37 @@
 #!/usr/bin/env node
 
+const fileChecker = require('fs');
+
 meth = process.env.REQUEST_METHOD
-contentType = process.env.CONTENT_TYPE
+dir = process.env.UPLOAD_DIR
+if (!meth || !dir)
+	process.exit(1)
+statusCode = ["200", "OK"];
 
 const displayRes = (formD) => {
+	formD = formD?.replace('+', ' ').split('&').map(a => { return decodeURIComponent(a) })
+	if (meth == 'DELETE') {
+		formD.map(a => {
+			tmp = a.split("=")
+			if (tmp[0] === 'fileName') {
+				rm = dir + tmp[1];
+				if (!fileChecker.existsSync(rm))
+					process.exit(1);
+			}
+			else
+				process.exit(1);
+		})
+		formD.map(a => {
+			filePath = dir + a.split("=")[1]
+			ret = fileChecker.unlink(filePath, (err) => {
+				if (err) {
+					process.exit(1)
+				}
+			});
+			if (!ret)
+				statusCode = ["204", "No Content"]
+		})
+	}
 	body = `
 		<!DOCTYPE html>
 		<html lang="en">
@@ -18,18 +46,18 @@ const displayRes = (formD) => {
 		<body>
 			<div class="response">
 				<h1>Methode: ${meth}</h1>
-				${formD.map((a, index) => {
-					if (index > 1 && a.length > a.indexOf('=') + 1)	
-						return `<h2>${a?.replace('=', ': ')}</h2>`
-				}).join('')}
+				${meth != 'DELETE' ? (formD.map((a, index) => {
+					if (index > 1 && a.length > a.indexOf('=') + 1)
+						return `<h2>${a?.replace('=', ': ')}</h2>`}).join('')) : statusCode.join(' ')
+				}
 			</div>
 		</body>
 	
 		</html>
 	`
-
-	console.log(`HTTP/1.1 200 OK\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n\r\n${body}`)
+	console.log(`HTTP/1.1 ${statusCode.join(' ')}\r\nContent-Length: ${body.length}\r\nContent-Type: text/html\r\n\r\n${body}`)
 }
+
 
 if (meth == 'POST') {
 	data = ''
@@ -42,32 +70,16 @@ if (meth == 'POST') {
 
 	rl.on('line', (line) => {
 		if (line)
-			data += line
+			data += line + '\n'
 	});
 
 	rl.on('close', () => {
-		contentType = contentType.split(';')
-		test = decodeURIComponent(data?.replace('+', ' ')).split('&')
-		if (contentType[0] === "multipart/form-data") {
-			data = data.split('--' + contentType[1].split('=')[1])
-			data.shift()
-			data.pop()
-			test = data.map(elm => {
-				if (elm.indexOf('filename') < 0) {
-					ret = elm.split('Content-Disposition: form-data; ').join('')
-					ret = ret.substr(6).replace('"', ': ')
-					return ret
-				}
-				else
-					return ''
-			})
-		}
-
-		displayRes(test)
+		displayRes(data)
 	});
 }
 else {
 	data = process.env.QUERY_STRING
-	data = decodeURIComponent(data?.replace('+', ' ')).split('&')
+	if (!data)
+		process.exit(1)
 	displayRes(data)
 }

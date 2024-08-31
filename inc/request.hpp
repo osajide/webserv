@@ -33,5 +33,6 @@ class request
         std::map<std::string, std::string>  _headers;
         size_t                              _content_length;
         bool                                _chunked_body;
+        std::string                         _upload_dir;
 
 };
