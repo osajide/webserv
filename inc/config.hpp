@@ -25,6 +25,7 @@ class config
 		void						check_validity_of_location_directives();
 		void						check_presence_of_mandatory_directives();
 		void						check_for_conflicts_and_set_default_values();
+		std::string					get_upload_dir(int location_index);
 
 		std::vector<std::string>	fetch_directive_value(std::string key);
 		int							directive_exists(std::string key);

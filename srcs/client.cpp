@@ -326,21 +326,18 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 		std::cout << "------ buffer read from fd  " << this->_fd << ":" << std::endl;
 		std::cout << buffer << std::endl;
 		std::cout << "*----------------" << std::endl;
-		// exit(1);
-		// sleep(7);
 
 		std::string t;
 		t.assign(buffer, valread);
 		this->_request._raw_request += t;
-		// this->_request._raw_request += buffer;
 		pos = this->_request._raw_request.find("\r\n\r\n");
 		if (pos != this->_request._raw_request.npos)
 		{
 			this->fill_request_object();
 			this->_request.is_well_formed(this->_index, server::_config[conf_index]);
-			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
-			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request._target);
-			this->_request._upload_dir = server::_config[this->_config_index]._locations[this->_location_index].second["upload_dir"].front();
+			this->_config_index = server::match_server_name(conf_index, this->_request.fetch_header_value("Host"));
+			this->_location_index = this->_request.does_uri_match_location(server::_config[this->_config_index].get_locations(), this->_request._target);
+			this->_request._upload_dir = server::_config[this->_config_index].get_upload_dir(this->_location_index);
 			this->does_location_has_redirection();
 
 			if (this->_request.header_exists("Transfer-Encoding") || this->_request.header_exists("Content-Length"))

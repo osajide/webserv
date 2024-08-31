@@ -199,7 +199,7 @@ void	webserv::launch_server(char** env)
 
 	while (true)
 	{
-		// std::cout << "Waiting for connections...." << std::endl;
+		std::cout << "Waiting for connections...." << std::endl;
 
 		timeout.tv_sec = TIMEOUT;
 		timeout.tv_usec = 0;

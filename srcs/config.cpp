@@ -4,6 +4,7 @@
 #include <cstddef>
 #include <sstream>
 #include <cstring>
+#include <string>
 #include "../inc/webserv.hpp"
 
 std::vector<std::pair<std::string, std::string> >	config::_mime_types;
@@ -238,12 +239,12 @@ void	config::check_validity_of_location_directives()
 
 void	config::check_for_conflicts_and_set_default_values()
 {
+	std::cout << "heere" << std::endl;
 	for (size_t i = 0; i < this->_locations.size(); i++)
 	{
 		if (!this->directive_inside_location_exists(i, "upload_dir"))
 		{
 			std::vector<std::string> upload_dir_vec;
-
 			upload_dir_vec.push_back("/tmp/");
 			this->_locations[i].second["upload_dir"] = upload_dir_vec;
 		}
@@ -253,10 +254,23 @@ void	config::check_for_conflicts_and_set_default_values()
 				throw std::string("Conflicts: can't have alias and root in same location");
 		}
 	}
+
 	if (!this->directive_exists("root"))
 		this->_directives["root"].push_back("/home/osajide/1337/wsl_webserv/content");
 	if (!this->directive_exists("index"))
 		this->_directives["index"].push_back("index.html");
+}
+
+std::string	config::get_upload_dir(int location_index)
+{
+	std::string	default_path;
+
+	default_path = "/tmp/";
+
+	if (location_index == -1)
+		return (default_path);
+
+	return (this->_locations[location_index].second["upload_dir"].front());
 }
 
 void	config::check_presence_of_mandatory_directives()
