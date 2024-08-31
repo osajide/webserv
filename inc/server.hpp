@@ -4,6 +4,7 @@
 #include <string>
 #include <vector>
 #include "types.hpp"
+#include <netdb.h>
 
 class server
 {

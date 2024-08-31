@@ -2,14 +2,12 @@
 <?php
 
 $data = '';
-$status = 200;
+$status = ["200", "OK"];
 
 $methode = $_SERVER['REQUEST_METHOD'];
-if (!strlen($methode))
-    exit (1);
-
 $dir = $_SERVER['UPLOAD_DIR'];
-if (!strlen($dir))
+
+if (!strlen($dir) || !strlen($methode))
     exit (1);
 
 if ($methode === 'POST') {
@@ -50,12 +48,13 @@ if ($methode == 'DELETE') {
             $rem = $dir . $tmp[1];
             if (!unlink($rem))
                 exit(1);
-            $status = 204;
+            $status = ["204", "No Content"];
         }
     }
 }
 
-$disp .= "<h2>{$s}</h2>";
+if ($status[0] == 204)
+    $disp = join(" ", $status);
 $body = <<<EOD
     <!DOCTYPE html>
     <html lang="en">
@@ -73,8 +72,6 @@ $body = <<<EOD
     </body>
     </html>
 EOD;
-if ($status == 204)
-    $body = '';
-echo "HTTP/1.1 " . $status . " OK\r\nContent-Length: " . strlen($body) . "\r\nContent-Type: text/html\r\n\r\n" . $body;
+echo "HTTP/1.1 " . $status[0] . " " . $status[1] . "\r\nContent-Length: " . strlen($body) . "\r\nContent-Type: text/html\r\n\r\n" . $body;
 
 ?>
