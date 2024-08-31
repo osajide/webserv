@@ -340,7 +340,7 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 			this->_request.is_well_formed(this->_index, server::_config[conf_index]);
 			this->_config_index = server::match_server_name(this->_config_index, this->_request.fetch_header_value("host"));
 			this->_location_index = this->_request.does_uri_match_location(server::_config[conf_index].get_locations(), this->_request._target);
-
+			this->_request._upload_dir = server::_config[this->_config_index]._locations[this->_location_index].second["upload_dir"].front();
 			this->does_location_has_redirection();
 
 			if (this->_request.header_exists("Transfer-Encoding") || this->_request.header_exists("Content-Length"))

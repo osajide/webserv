@@ -3,14 +3,14 @@
 
 $data = '';
 $status = 200;
+
 $methode = $_SERVER['REQUEST_METHOD'];
 if (!strlen($methode))
     exit (1);
+
 $dir = $_SERVER['UPLOAD_DIR'];
 if (!strlen($dir))
-    // exit (1);
-    $dir = "/Users/ykhayri/Desktop/wsl_webserv/content/cgi-bin/uploads/";
-
+    exit (1);
 
 if ($methode === 'POST') {
     while (($line = fgets(STDIN)) !== false) {
@@ -33,10 +33,8 @@ foreach ($data as $key=>&$x) {
         $tmp = explode(": ", $x);
         if ($tmp[0] == 'fileName') {
             $rem = $dir . $tmp[1];
-            if (!file_exists($rem)){
-            // fwrite(STDERR, "====================================> This is an error message\n" . $rem);
+            if (!file_exists($rem))
                 exit(1);
-            }
         }
         else
             exit(1);
