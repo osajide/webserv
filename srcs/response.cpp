@@ -65,7 +65,6 @@ std::string	response::get_chunk(std::ifstream& requested_file)
 
 void	response::send_reply(int target_fd)
 {
-	std::cout << "send_reply called" << std::endl;
 	this->_headers += this->_status_line + "\r\n";
 
 	this->_headers += "Content-Type: " + this->_content_type + "\r\n";
@@ -83,10 +82,7 @@ void	response::send_reply(int target_fd)
 	if (!this->_body.empty())
 		this->_headers += this->_body;
 
-	int n = write(target_fd, this->_headers.c_str(), this->_headers.length());
-	std::cout << "write = " << n << std::endl;
-	std::cout << "send_reply finished" << std::endl;
-
+	write(target_fd, this->_headers.c_str(), this->_headers.length());
 }
 
 void	response::return_error(std::string status_line, int target_fd)
@@ -94,6 +90,7 @@ void	response::return_error(std::string status_line, int target_fd)
 	this->_status_line = status_line;
 	this->_body = "<h1>" + status_line.substr(9) + "</h1>";
 	this->_content_length = this->_body.length();
+	this->_content_type = "text/html";
 	this->send_reply(target_fd);
 }
 
@@ -177,22 +174,22 @@ int	response::remove_requested_directory(int fd, std::string uri)
 	std::string		str_entry;
 	struct stat 	entry_type;
 
-
+	std::cout << "dire = " << uri << std::endl;
 	directory = opendir(uri.c_str());
 	if (directory == NULL)
 	{
 		this->return_error(webserv::get_corresponding_status(403), fd);
 		return (-1);
 	}
-
 	while ((entry = readdir(directory)) != NULL)
 	{
 		if (std::strcmp(entry->d_name, ".") == 0 || std::strcmp(entry->d_name, "..") == 0)
 			continue;
 
 		str_entry = uri;
+		str_entry += '/';
 		str_entry += entry->d_name;
-
+		std::cout << "entry = " << str_entry << std::endl;
 		stat(str_entry.c_str(), &entry_type);
 
 		if (S_ISREG(entry_type.st_mode))

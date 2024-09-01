@@ -71,6 +71,7 @@ void	server::parse_config(const char *PathToConfig)
 		file.close();
 	}
 
+	webserv::set_status_lines();
 	config::set_dictionary();
 
 	for (size_t i = 0; i < server::_config.size(); i++)
@@ -351,13 +352,13 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 	{
 		if (this->check_resource_type(this->_clients[client_index]._response._path_to_serve) == DIRECTORY)
 		{
+			if (req_method == "DELETE")
+			{
+				this->_clients[client_index].handle_delete_directory_request(set_fd, env);
+				return ;
+			}
 			if (this->_clients[client_index]._request._target[this->_clients[client_index]._request._target.length() - 1] == '/')
 			{
-				if (req_method == "DELETE")
-				{
-					this->_clients[client_index].handle_delete_directory_request(set_fd, env);
-					return ;
-				}
 				if (this->_clients[client_index].dir_has_index_files()) // this method modifies on path_to_serve attribute
 				{
 					if (server::_config[this->_clients[client_index]._config_index].if_cgi_directive_exists(this->_clients[client_index]._location_index, this->_clients[client_index]._response._path_to_serve))
@@ -447,3 +448,18 @@ void    server::handle_request(int client_index, fd_sets& set_fd, int location_i
 		}
 	}
 }
+
+
+
+
+/*
+
+
+HTTP/1.1 413 Request Entity Too Large
+Content-Type: 
+Content-Length: 37
+
+<h1>413 Request Entity Too Large</h1>
+
+
+*/

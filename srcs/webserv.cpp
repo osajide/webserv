@@ -23,10 +23,12 @@ void	webserv::set_status_lines()
 	status_lines["200"] = "HTTP/1.1 200 OK";
 	status_lines["201"] = "HTTP/1.1 201 Created";
 	status_lines["204"] = "HTTP/1.1 204 No Content";
+	status_lines["301"] = "HTTP/1.1 301 Moved Permanently";
 	status_lines["400"] = "HTTP/1.1 400 Bad Request";
 	status_lines["403"] = "HTTP/1.1 403 Forbidden";
 	status_lines["404"] = "HTTP/1.1 404 Not Found";
 	status_lines["405"] = "HTTP/1.1 405 Method Not Allowed";
+	status_lines["409"] = "HTTP/1.1 409 Conflict";
 	status_lines["413"] = "HTTP/1.1 413 Request Entity Too Large";
 	status_lines["414"] = "HTTP/1.1 414 Request Uri Too Long";
 	status_lines["500"] = "HTTP/1.1 500 Internal Server Error";
@@ -154,16 +156,15 @@ void	webserv::serve_clients(fd_sets & set_fd, char** env)
 
 void	webserv::launch_server(char** env)
 {
-	socklen_t											client_addr_len;
-	struct sockaddr_in									client_addr;
-	int													client_sock;
-	struct timeval										timeout;
-	fd_sets												set_fd;
-	int													nfds;
-	int													select_rval;
+	socklen_t			client_addr_len;
+	struct sockaddr_in	client_addr;
+	int					client_sock;
+	struct timeval		timeout;
+	fd_sets				set_fd;
+	int					nfds;
+	int					select_rval;
 
 	config::parse_mime_types("conf/mime.types");
-	webserv::set_status_lines();
 
 	for (size_t i = 0; i < server::_config.size(); i++)
 	{
@@ -195,7 +196,6 @@ void	webserv::launch_server(char** env)
 
 	std::cout << "server size() = " << servers.size() << std::endl;
 	std::cout << "number of bound addresses = " << server::_bound_addresses.size() << std::endl;
-
 
 	while (true)
 	{
@@ -232,27 +232,21 @@ void	webserv::launch_server(char** env)
 			{
 				for (int iteration = 0; (client_sock = accept(servers[i].get_fd(), (struct sockaddr *)&client_addr, &client_addr_len)) != -1; iteration++)
 				{
-					if (client_sock == -1)
-						perror("Error accepting connection");
+					std::cout << "Connection accepted !!!\nClient number " << client_sock << std::endl;
+					servers[i]._clients.push_back(client(client_sock, servers[i].get_config_index(), iteration));
+					if (fcntl(servers[i]._clients.back().get_fd(), F_SETFL, O_NONBLOCK) == -1)
+					{
+						perror("fcntl F_SETFL");
+						close(servers[i]._clients.back().get_fd());
+						servers[i]._clients.remove_from_end(1);
+					}
 					else
 					{
-						std::cout << "Connection accepted !!!\nClient number " << client_sock << std::endl;
-
-						servers[i]._clients.push_back(client(client_sock, servers[i].get_config_index(), iteration));
-						if (fcntl(servers[i]._clients.back().get_fd(), F_SETFL, O_NONBLOCK) == -1)
+						if (client_sock > nfds)
 						{
-							perror("fcntl F_SETFL");
-							close(servers[i]._clients.back().get_fd());
-							servers[i]._clients.remove_from_end(1);
+							nfds = client_sock;
 						}
-						else
-						{
-							if (client_sock > nfds)
-							{
-								nfds = client_sock;
-							}
-							FD_SET(servers[i]._clients.back().get_fd(), &set_fd.read_fds);
-						}
+						FD_SET(servers[i]._clients.back().get_fd(), &set_fd.read_fds);
 					}
 				}
 			}

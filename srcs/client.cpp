@@ -233,10 +233,6 @@ void	client::read_chunked_body(fd_sets& set_fd)
 
 			valread = read(this->_fd, buffer, BUFFER_SIZE);
 
-			// std::cout << "========== buffer read -------_____---:" << std::endl;
-			// std::cout << buffer << std::endl;
-			// std::cout << "-----============" << std::endl;
-
 			if (valread == 0 || valread == -1)
 				throw error(-1, this->_index);
 
@@ -246,8 +242,11 @@ void	client::read_chunked_body(fd_sets& set_fd)
 
 			if (str_buffer.rfind("0\r\n\r\n") != str_buffer.npos) // temp
 			{
-				std::cout << "fouuuuund" << std::endl;
-				// sleep(5);
+				if (this->_request._headers.find("Content-Length") != this->_request._headers.end())
+				{
+					if (this->_request._content_length > (size_t)ft_atol(server::_config[this->_config_index].fetch_directive_value("client_max_body_size").front().c_str()))
+						throw error(413, this->_index);
+				}
 				this->_body_file.seekg(0, std::ios::beg);
 				this->_request._chunked_body = true;
 				FD_SET(this->_fd, &set_fd.write_fds);
@@ -303,6 +302,11 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 		{
 			this->_body_file.close();
 			FD_SET(this->_fd, & set_fd.write_fds);
+			if (this->_request._headers.find("Content-Length") != this->_request._headers.end())
+			{
+				if (this->_request._content_length > (size_t)ft_atol(server::_config[this->_config_index].fetch_directive_value("client_max_body_size").front().c_str()))
+					throw error(413, this->_index);
+			}
 		}
 	}
 }
@@ -322,11 +326,6 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 		if (valread == 0 || valread == -1)
 			throw error(-1, this->_index);
 
-		std::cout << "*----------------- valread = " << valread << std::endl;
-		std::cout << "------ buffer read from fd  " << this->_fd << ":" << std::endl;
-		std::cout << buffer << std::endl;
-		std::cout << "*----------------" << std::endl;
-
 		std::string t;
 		t.assign(buffer, valread);
 		this->_request._raw_request += t;
@@ -334,7 +333,7 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 		if (pos != this->_request._raw_request.npos)
 		{
 			this->fill_request_object();
-			this->_request.is_well_formed(this->_index, server::_config[conf_index]);
+			this->_request.is_well_formed(this->_index);
 			this->_config_index = server::match_server_name(conf_index, this->_request.fetch_header_value("Host"));
 			this->_location_index = this->_request.does_uri_match_location(server::_config[this->_config_index].get_locations(), this->_request._target);
 			this->_request._upload_dir = server::_config[this->_config_index].get_upload_dir(this->_location_index);
@@ -342,12 +341,9 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 
 			if (this->_request.header_exists("Transfer-Encoding") || this->_request.header_exists("Content-Length"))
 			{
-				std::cout << "max body size = " << this->_max_body_size << std::endl;
 				this->_read_body = true;
 				if (this->_request.header_exists("Content-Length"))
 				{
-					std::stringstream	s(this->_request._headers["Content-Length"]);
-					s >> this->_request._content_length;
 					if (this->_request._content_length == 0)
 					{
 						FD_SET(this->_fd, &set_fd.write_fds);
@@ -381,26 +377,31 @@ void	client::read_request(int conf_index, fd_sets & set_fd)
 
 void	client::handle_delete_directory_request(fd_sets& set_fd, char** env)
 {
-	if (server::_config[this->_config_index].if_cgi_directive_exists(this->_location_index, this->_response._path_to_serve))
+	if (this->_request._target[this->_request._target.length() - 1] == '/')
 	{
-		if (this->dir_has_index_files())
+		if (server::_config[this->_config_index].if_cgi_directive_exists(this->_location_index, this->_response._path_to_serve))
 		{
-			this->_cgi.run_cgi(*this, env);
+			if (this->dir_has_index_files())
+			{
+				this->_cgi.run_cgi(*this, env);
+			}
+			else
+				this->_response.return_error(webserv::get_corresponding_status(403), this->_fd);
 		}
 		else
-			this->_response.return_error(webserv::get_corresponding_status(403), this->_fd);
+		{
+			this->_response.remove_requested_directory(this->_fd, this->_response._path_to_serve);
+		}
+
+		FD_CLR(this->_fd, &set_fd.write_fds);
+
+		if (this->_request._headers["Connection"] == "closed")
+			throw error(CLOSE_CONNECTION, this->_index);
+
+		this->clear_client();
 	}
 	else
-	{
-		this->_response.remove_requested_directory(this->_fd, this->_response._path_to_serve);
-	}
-
-	FD_CLR(this->_fd, &set_fd.write_fds);
-
-	if (this->_request._headers["Connection"] == "closed")
-		throw error(CLOSE_CONNECTION, this->_index);
-
-	this->clear_client();
+		throw error(409, this->_index);
 }
 
 void	client::set_ready_for_receiving_value(bool value)

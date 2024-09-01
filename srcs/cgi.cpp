@@ -193,8 +193,6 @@ void	cgi::run_cgi(client & cl, char** environ)
 			chdir(cl._response._path_to_serve.substr(0, cl._response._path_to_serve.rfind('/')).c_str());
 
 			execve(cl._response._path_to_serve.c_str(), this->_args, this->_env);
-			// char *test[3] = {"/usr/bin/php", "/Users/osajide/Desktop/wsl_webserv/content/cgi-bin/cgi.php", NULL};
-			// execve("/usr/bin/php", test, this->_env);
 
 			if (this->_fd[0] != -1)
 				close (this->_fd[0]);
