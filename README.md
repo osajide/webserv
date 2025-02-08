@@ -1,0 +1,38 @@
+# 🖥️ C++ Http server
+
+## 🌟 Overview
+
+This project is a lightweight web server written in C++ that efficiently handles HTTP requests without using threads. Instead, it utilizes multiplexing to manage multiple connections simultaneously. The server also supports Common Gateway Interface (CGI) for executing scripts and generating dynamic content.
+
+## ✨ Features
+
+- 🚀 Efficient handling of HTTP requests using multiplexing.
+- 📄 Support for GET, POST and DELETE methods.
+- ⚙️ CGI support for dynamic content generation.
+
+## 📋 Requirements
+
+- POSIX-compliant operating system (e.g., Linux, macOS)
+- GNU Make
+
+## 📦 Installation
+
+   ```bash
+   git clone https://github.com/osajide/wsl_webserv.git
+   cd webserv
+   ```
+## 🔧 Configuration
+
+You can configure the server by making your own configuration file inside the `conf` directory. There is also a file `conf/conf_sample.conf` that contains an example to start with. The format of the configuration file is inspired by Nginx (not all directives).
+The `mime.types` file is used to define the MIME types supported by the server. To add a new MIME type, simply add it to this file `conf/mime.types`. For example:
+```nginx
+# mime.types
+
+text/html                            html;
+text/css                             css;
+image/png                            png;
+...
+# Add new MIME types here
+video/mp4                            mp4;
+image/webp                           webp;
+```
