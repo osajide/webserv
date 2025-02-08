@@ -40,10 +40,12 @@ image/webp                           webp;
 ## 🚀 Launch the server
 
 1. Build the project using the `make` command:
+
    ```bash
    make
    ```
-2. Run the server with the executable and path to the configuration file:
+3. Run the server with the executable and path to the configuration file:
+
    ```bash
    ./webserv conf/configfile
    ```
