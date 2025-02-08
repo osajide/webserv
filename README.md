@@ -36,3 +36,15 @@ image/png                            png;
 video/mp4                            mp4;
 image/webp                           webp;
 ```
+
+## 🚀 Launch the server
+
+1. Build the project using the `make` command:
+   ```bash
+   make
+   ```
+2. Run the server with the executable and path to the configuration file:
+   ```bash
+   ./webserv conf/configfile
+   ```
+   The server will start listening on the port specified in the configuration file.
