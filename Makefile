@@ -1,3 +1,5 @@
+export REPO_ROOT=$(shell pwd)
+
 NAME		=	webserv
 CC			=	c++
 # CFLAGS		=	-Wall -Wextra -Werror -fsanitize=address -std=c++11

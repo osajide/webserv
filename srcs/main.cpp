@@ -14,7 +14,7 @@ int main(int ac, char** av, char** env)
 	try
 	{
 		if (ac == 1)
-			path_to_conf = "/Users/osajide/Desktop/wsl_webserv/conf/server.conf";
+			path_to_conf = "../conf/sample.conf";
 		else
 			path_to_conf = av[1];
 
