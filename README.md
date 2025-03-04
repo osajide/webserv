@@ -18,7 +18,7 @@ This project is a lightweight web server written in C++ that efficiently handles
 ## 📦 Installation
 
    ```bash
-   git clone https://github.com/osajide/wsl_webserv.git
+   https://github.com/osajide/webserv.git
    cd webserv
    ```
 ## 🔧 Configuration
