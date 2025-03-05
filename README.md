@@ -103,7 +103,7 @@ image/webp                           webp;
    ```
    You will be able to see this page:
    
-   ![Screenshot of webserv test](content/screenshot)
+   <img width="2560" alt="Image" src="https://github.com/user-attachments/assets/de433fd0-ed49-4ae5-a218-236e3308779b" />
 
    Or if you're using your own configuration file, do this instead:
    
