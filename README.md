@@ -23,7 +23,7 @@ This project is a lightweight web server written in C++ that efficiently handles
    ```
 ## 🔧 Configuration
 
-You can configure the server by making your own configuration file inside the `conf` directory. There is also a file `conf/default.conf` that contains an example to start with. The format of the configuration file is inspired by Nginx (not all directives).
+You can configure the server by making your own configuration file. There is also a file `conf/default.conf` that contains an example to start with. The format of the configuration file is inspired by Nginx (not all directives).
 
 ```nginx
 server
