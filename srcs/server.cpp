@@ -42,7 +42,6 @@ int	server::match_server_name(int server_conf_index, std::string server_name_to_
 
 void	server::close_connection(int client_index, fd_sets & set_fd)
 {
-	std::cout << "closing fd " << this->_clients[client_index].get_fd() << std::endl;
 
 	FD_CLR(this->_clients[client_index].get_fd(), &set_fd.read_fds);
 	FD_CLR(this->_clients[client_index].get_fd(), &set_fd.write_fds);

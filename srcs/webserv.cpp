@@ -185,7 +185,6 @@ void	webserv::launch_server(char** env)
 	{
 		if (servers[i]._bound == true)
 		{
-			std::cout << "index of bound server = " << i << std::endl;
 			nfds = servers[i].get_fd();
 			FD_SET(servers[i].get_fd(), &set_fd.read_fds);
 		}
@@ -194,7 +193,6 @@ void	webserv::launch_server(char** env)
 	client_addr_len = sizeof(struct sockaddr_in);
 	std::memset(&client_addr, 0, client_addr_len);
 
-	std::cout << "server size() = " << servers.size() << std::endl;
 	std::cout << "number of bound addresses = " << server::_bound_addresses.size() << std::endl;
 
 	while (true)

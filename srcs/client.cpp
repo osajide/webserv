@@ -115,7 +115,6 @@ int	client::dir_has_index_files()
 	for (size_t i = 0; i < index_files.size(); i++)
 	{
 		access_path = this->_response._path_to_serve + index_files[i];
-		std::cout << "access path = '" << access_path << "'" << std::endl;
 		if (access(access_path.c_str(), F_OK) == 0) // Default index
 		{
 			this->_response._path_to_serve = access_path;
@@ -156,11 +155,9 @@ size_t	hex_to_decimal(std::string hex)
 	{
 		hex.erase(pos, 1);
 	}
-	std::cout << "hex = " << hex << std::endl;
 	ss << std::hex << hex;
 	ss >> decimal_val;
 
-	std::cout << "decimal value = " << decimal_val << std::endl;
 	return (decimal_val);
 }
 
@@ -264,20 +261,16 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 	if (this->_cgi._infile.empty())
 	{
 		this->_cgi._infile = this->_cgi.get_random_file_name(this->_index, INPUT_FILE);
-		std::cout << "infile = " << this->_cgi._infile << std::endl;
 		this->_body_file.open(this->_cgi._infile.c_str(), std::ios::app);
 	}
 	if (this->_body_file.is_open())
 	{
-		std::cout << "bytes read = " << this->_bytes_read << std::endl;
-		std::cout << "content le = " << this->_request._content_length << std::endl;
 		if (this->_bytes_read < this->_request._content_length)
 		{
 			if (this->_request._raw_body.empty())
 			{
 				std::memset(buffer, 0, BUFFER_SIZE + 1);
 				valread = read(this->_fd, buffer, BUFFER_SIZE);
-				std::cout << "valread ===>>> " << valread << std::endl;
 				if (valread == 0 || valread == -1)
 					throw error(-1, this->_index);
 
@@ -291,13 +284,10 @@ void	client::read_body_based_on_content_length(fd_sets& set_fd)
 			else
 			{
 				this->_body_file << this->_request._raw_body;
-				std::cout << "raw body size = " << this->_request._raw_body.length() << std::endl;
-				// exit(1);
 				this->_bytes_read += this->_request._raw_body.length();
 				this->_request._raw_body.clear();
 			}
 		}
-		std::cout << "bytes read = " << this->_bytes_read << " | content length = " << this->_request._content_length << std::endl;
 		if (this->_bytes_read == this->_request._content_length)
 		{
 			this->_body_file.close();

@@ -38,7 +38,6 @@ void	cgi::set_env_variables(request client_req, std::string full_path, char** en
 
         while (std::getline(ss, cookie_val, ';'))
         {
-            std::cout << cookie_val << std::endl;
             if (cookie_val[0] == ' ')
                 cookie_val = cookie_val.substr(1);
             temp.push_back("HTTP_COOKIE_" + cookie_val);
@@ -48,13 +47,10 @@ void	cgi::set_env_variables(request client_req, std::string full_path, char** en
 	if (client_req.header_exists("Content-Type"))
 	{
 		temp.push_back("CONTENT_TYPE=" + client_req._headers["Content-Type"]);
-		std::cout << "temp.back() = " << temp.back() << std::endl;
-		// exit(0);
 	}
 	
 	helper << client_req._content_length;
 	temp.push_back("CONTENT_LENGTH=" + helper.str());
-	std::cout << "temp.content length = " << temp.back() << std::endl;
 	
 
 	size_t	index;

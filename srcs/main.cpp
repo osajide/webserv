@@ -14,7 +14,7 @@ int main(int ac, char** av, char** env)
 	try
 	{
 		if (ac == 1)
-			path_to_conf = "../conf/sample.conf";
+			path_to_conf = "conf/default.conf";
 		else
 			path_to_conf = av[1];
 

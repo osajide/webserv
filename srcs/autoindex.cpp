@@ -74,13 +74,10 @@ std::string	 AutoIndex::serve_autoindex(const std::string& uri, const std::strin
 
     struct stat fileInfo;
 
-    std::cout << "response path : " << full_path << std::endl;
-
     stat(full_path.c_str(), &fileInfo);
 
     if (S_ISREG(fileInfo.st_mode))
     {
-        std::cout << "IS FILE" << std::endl;
         content_page = readFile(full_path);
     }
     else 

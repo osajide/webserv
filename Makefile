@@ -2,8 +2,8 @@ export REPO_ROOT=$(shell pwd)
 
 NAME		=	webserv
 CC			=	c++
-# CFLAGS		=	-Wall -Wextra -Werror -fsanitize=address -std=c++11
-CFLAGS		=	-Wall -Wextra -Werror -std=c++98 -fsanitize=address
+CFLAGS		=	-Wall -Wextra -Werror -fsanitize=address -std=c++17
+# CFLAGS		=	-Wall -Wextra -Werror -std=c++98 -fsanitize=address
 
 INC_DIR		=	inc
 INC_FILES	=	webserv.hpp client.hpp server.hpp request.hpp config.hpp response.hpp \

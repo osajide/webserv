@@ -122,7 +122,6 @@ void	response::send_response(int fd, std::string status_line, config serverConf,
 			else if ((size_t)this->_bytes_written < this->_chunk.length())
 			{
 				long local_write = 0;
-				std::cout << "not entirely sent" << std::endl;
 
 				this->_unsent_part = this->_chunk.substr(this->_bytes_written);
 
@@ -137,7 +136,6 @@ void	response::send_response(int fd, std::string status_line, config serverConf,
 				this->_bytes_written = 0;
 				this->_chunk.clear();
 				this->_unsent_part.clear();
-				std::cout << "chunk sent to fd " << fd << std::endl;
 			}
 		}
 	}
@@ -174,7 +172,6 @@ int	response::remove_requested_directory(int fd, std::string uri)
 	std::string		str_entry;
 	struct stat 	entry_type;
 
-	std::cout << "dire = " << uri << std::endl;
 	directory = opendir(uri.c_str());
 	if (directory == NULL)
 	{
@@ -189,7 +186,6 @@ int	response::remove_requested_directory(int fd, std::string uri)
 		str_entry = uri;
 		str_entry += '/';
 		str_entry += entry->d_name;
-		std::cout << "entry = " << str_entry << std::endl;
 		stat(str_entry.c_str(), &entry_type);
 
 		if (S_ISREG(entry_type.st_mode))
@@ -230,18 +226,15 @@ int	response::remove_requested_directory(int fd, std::string uri)
 
 void	response::remove_requested_file(int fd)
 {
-	std::cout << "uri.c_str() = '" << this->_path_to_serve.c_str() << "'" << std::endl;
 
 	if (std::remove(this->_path_to_serve.c_str()) != 0)
 	{
 		if (access(this->_path_to_serve.c_str(), R_OK) == 0)
 		{
-			std::cout << "File not removed due to internal error" << std::endl;
 			this->return_error(webserv::get_corresponding_status(500), fd);
 		}
 		else
 		{
-			std::cout << "Doesn't have write permission" << std::endl;
 			this->return_error(webserv::get_corresponding_status(403), fd);
 		}
 	}
@@ -263,12 +256,10 @@ void	response::send_cgi_headers(int fd, std::ifstream& requested_file)
 
 	while (getline(requested_file, reader))
 	{
-		std::cout << "reader = " << reader << std::endl;
 		reader += '\n';
 		headers += reader;
 		if (reader == "\r\n")
 		{
-			std::cout << "dkhel" << std::endl;
 			break;
 		}
 	}
@@ -277,17 +268,12 @@ void	response::send_cgi_headers(int fd, std::ifstream& requested_file)
 
 	requested_file.seekg(pos + 4, std::ios::beg);
 	std::streamsize curr = requested_file.tellg();
-	std::cout << "curr = " << curr << std::endl;
-	std::cout << "pos = " << pos << std::endl;
 	getline(this->_requested_file, reader);
-	std::cout << "r=========>>>>  '" << reader << "'" << std::endl;
 	requested_file.seekg(0, std::ios::end);
 	std::streamsize endofstream = requested_file.tellg();
-	std::cout << "end = " << endofstream << std::endl;
 
 	this->_content_length = endofstream - curr;
 	requested_file.seekg(pos + 4, std::ios::beg);
-	std::cout << "length ===> " << this->_content_length << std::endl;
 }
 
 void	response::clear_response()
