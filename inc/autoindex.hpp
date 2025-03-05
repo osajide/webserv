@@ -9,7 +9,6 @@
 #include <filesystem>
 #include <fstream>
 
-
 typedef std::vector<std::string> list;
 
 class  AutoIndex
