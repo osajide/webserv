@@ -102,7 +102,8 @@ image/webp                           webp;
    http://localhost:8183
    ```
    You will be able to see this page:
-   <img source="content/screenshot" alt="screenshot_index_file"></img>
+   
+   ![Screenshot of webserv test](content/screenshot)
 
    Or if you're using your own configuration file, do this instead:
    
